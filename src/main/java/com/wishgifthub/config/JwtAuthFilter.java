@@ -1,21 +1,23 @@
 package com.wishgifthub.config;
 
-import com.wishgifthub.service.JwtService;
-import com.wishgifthub.repository.UserRepository;
 import com.wishgifthub.entity.User;
+import com.wishgifthub.repository.UserRepository;
+import com.wishgifthub.service.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -40,8 +42,14 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 Optional<User> userOpt = userRepository.findById(userId);
                 if (userOpt.isPresent()) {
                     User user = userOpt.get();
+
+                    // Ajoute les authorities basées sur isAdmin
+                    List<SimpleGrantedAuthority> authorities = user.isAdmin()
+                        ? Collections.singletonList(new SimpleGrantedAuthority("ROLE_ADMIN"))
+                        : Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"));
+
                     UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                            user, null, null);
+                            user, null, authorities);
                     authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authentication);
                 }

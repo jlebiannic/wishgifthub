@@ -11,6 +11,7 @@ import com.wishgifthub.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -26,7 +27,14 @@ public class GroupService {
 
     @Transactional
     public GroupResponse createGroup(GroupRequest request, UUID adminId) {
-        User admin = userRepository.findById(adminId).orElseThrow();
+        User admin = userRepository.findById(adminId)
+                .orElseThrow(() -> new IllegalArgumentException("Utilisateur non trouvé"));
+
+        // Vérification que l'utilisateur est bien un administrateur
+        if (!admin.isAdmin()) {
+            throw new SecurityException("Seuls les administrateurs peuvent créer des groupes");
+        }
+
         Group group = new Group();
         group.setName(request.name);
         group.setType(request.type);

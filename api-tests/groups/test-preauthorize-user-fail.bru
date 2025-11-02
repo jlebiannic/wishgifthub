@@ -1,0 +1,99 @@
+meta {
+  name: Test @PreAuthorize - User FAIL
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{base_url}}/api/groups
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{user_token}}
+}
+
+body:json {
+  {
+    "name": "Tentative par User",
+    "type": "noël"
+  }
+}
+
+tests {
+  test("Status 403 Forbidden", function() {
+    expect(res.getStatus()).to.equal(403);
+  });
+
+  test("Error about access denied", function() {
+    // Spring Security retourne généralement "Access Denied" ou "Forbidden"
+    const body = JSON.stringify(res.body).toLowerCase();
+    const hasForbidden = body.includes('forbidden') ||
+                         body.includes('access') ||
+                         body.includes('denied');
+    expect(hasForbidden).to.be.true;
+  });
+}
+
+docs {
+  🔒 Test de sécurité @PreAuthorize avec un USER
+
+  Ce test vérifie que :
+  1. JwtAuthFilter ajoute ROLE_USER aux authorities
+  2. @PreAuthorize("hasRole('ADMIN')") évalue à false
+  3. AccessDeniedException est lancée
+  4. Spring Security retourne HTTP 403
+
+  Résultat attendu : ❌ 403 Forbidden
+
+  ⚠️ Ce test DOIT échouer pour prouver que la sécurité fonctionne !
+}
+meta {
+  name: Test @PreAuthorize - Admin OK
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{base_url}}/api/groups
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{admin_token}}
+}
+
+body:json {
+  {
+    "name": "Test @PreAuthorize Admin",
+    "type": "noël"
+  }
+}
+
+tests {
+  test("Status 200 OK", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("Has group id", function() {
+    expect(res.body.id).to.be.a('string');
+  });
+
+  test("Group name correct", function() {
+    expect(res.body.name).to.equal("Test @PreAuthorize Admin");
+  });
+}
+
+docs {
+  ✅ Test de @PreAuthorize avec un ADMIN
+
+  Ce test vérifie que :
+  1. JwtAuthFilter ajoute ROLE_ADMIN aux authorities
+  2. @PreAuthorize("hasRole('ADMIN')") évalue à true
+  3. Le groupe est créé avec succès
+
+  Résultat attendu : ✅ 200 OK - Groupe créé
+}
+

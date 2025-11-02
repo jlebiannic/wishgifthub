@@ -1,0 +1,50 @@
+meta {
+  name: Test Security - User tries to create group
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{base_url}}/api/groups
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{user_token}}
+}
+
+body:json {
+  {
+    "name": "Tentative groupe par user",
+    "type": "noël"
+  }
+}
+
+tests {
+  test("Status 403 Forbidden", function() {
+    expect(res.getStatus()).to.equal(403);
+  });
+
+  test("Error message about admin rights", function() {
+    const errorMsg = res.body.message || res.body.error || JSON.stringify(res.body);
+    const hasAdminError = errorMsg.toLowerCase().includes('admin') ||
+                          errorMsg.toLowerCase().includes('accès refusé');
+    expect(hasAdminError).to.be.true;
+  });
+}
+
+docs {
+  🔒 Test de sécurité : Vérifie qu'un utilisateur simple (non-admin) ne peut PAS créer de groupe.
+
+  Pré-requis :
+  1. Avoir accepté une invitation (pour avoir un user_token)
+  2. Le user doit avoir isAdmin = false (cas normal)
+
+  Résultat attendu :
+  ❌ HTTP 403 Forbidden
+  ❌ Message : "Accès refusé : droits administrateur requis"
+
+  ✅ Si ce test échoue (200 OK), il y a un problème de sécurité !
+}
+
