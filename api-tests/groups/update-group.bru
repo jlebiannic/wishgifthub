@@ -1,0 +1,33 @@
+meta {
+  name: Update Group
+  type: http
+  seq: 3
+}
+
+put {
+  url: {{base_url}}/api/groups/{{group_id}}
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{admin_token}}
+}
+
+body:json {
+  {
+    "name": "Noël 2025 - Famille",
+    "type": "noël"
+  }
+}
+
+tests {
+  test("Status 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("Name updated", function() {
+    expect(res.body.name).to.equal("Noël 2025 - Famille");
+  });
+}
+

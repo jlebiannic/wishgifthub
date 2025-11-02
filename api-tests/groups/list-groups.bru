@@ -1,0 +1,30 @@
+meta {
+  name: List My Groups
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{base_url}}/api/groups
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{admin_token}}
+}
+
+tests {
+  test("Status 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("Returns array", function() {
+    expect(res.body).to.be.an('array');
+  });
+
+  test("Has at least one group", function() {
+    expect(res.body.length).to.be.greaterThan(0);
+  });
+}
+

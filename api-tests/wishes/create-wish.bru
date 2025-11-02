@@ -1,0 +1,55 @@
+meta {
+  name: Create Wish
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{base_url}}/api/groups/{{group_id}}/wishes
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{user_token}}
+}
+
+body:json {
+  {
+    "giftName": "Livre de cuisine",
+    "description": "Un livre de recettes végétariennes",
+    "url": "https://example.com/livre"
+  }
+}
+
+tests {
+  test("Status 200 ou 201", function() {
+    const status = res.getStatus();
+    expect(status === 200 || status === 201).to.be.true;
+  });
+
+  test("Has wish id", function() {
+    expect(res.body.id).to.be.a('string');
+  });
+
+  test("Has gift name", function() {
+    expect(res.body.giftName).to.equal("Livre de cuisine");
+  });
+
+  test("Not reserved initially", function() {
+    expect(res.body.reservedBy).to.be.null;
+  });
+}
+
+script:post-response {
+  if (res.body.id) {
+    bru.setEnvVar("wish_id", res.body.id);
+  }
+}
+
+docs {
+  Crée un souhait pour l'utilisateur dans le groupe spécifié.
+
+  L'utilisateur doit appartenir au groupe pour créer un souhait.
+}
+

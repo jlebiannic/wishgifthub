@@ -1,0 +1,38 @@
+meta {
+  name: List All Wishes in Group
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{base_url}}/api/groups/{{group_id}}/wishes
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{admin_token}}
+}
+
+tests {
+  test("Status 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("Returns array", function() {
+    expect(res.body).to.be.an('array');
+  });
+}
+
+docs {
+  Liste tous les souhaits du groupe.
+
+  Tous les membres du groupe peuvent voir :
+  - Le nom du cadeau
+  - La description
+  - L'URL
+  - Qui a réservé le cadeau (reservedBy)
+
+  L'utilisateur doit appartenir au groupe.
+}
+

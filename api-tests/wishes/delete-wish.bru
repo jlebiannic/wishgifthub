@@ -1,0 +1,33 @@
+meta {
+  name: Delete Wish
+  type: http
+  seq: 5
+}
+
+delete {
+  url: {{base_url}}/api/groups/{{group_id}}/wishes/{{wish_id}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{user_token}}
+}
+
+tests {
+  test("Status 204 ou 200", function() {
+    const status = res.getStatus();
+    expect(status === 200 || status === 204).to.be.true;
+  });
+}
+
+docs {
+  Supprime un souhait.
+
+  Règles :
+  - Seul le créateur du souhait peut le supprimer
+  - L'utilisateur doit appartenir au groupe
+
+  ⚠️ Utilisez le même token que celui utilisé pour créer le souhait.
+}
+

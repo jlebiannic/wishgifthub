@@ -1,0 +1,37 @@
+meta {
+  name: Reserve Wish
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{base_url}}/api/groups/{{group_id}}/wishes/{{wish_id}}/reserve
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{admin_token}}
+}
+
+tests {
+  test("Status 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("Wish is reserved", function() {
+    expect(res.body.reservedBy).to.be.a('string');
+  });
+}
+
+docs {
+  Réserve un souhait pour un autre utilisateur.
+
+  Règles :
+  - L'utilisateur doit appartenir au groupe
+  - L'utilisateur ne peut PAS réserver ses propres souhaits
+  - Le souhait ne doit pas être déjà réservé
+
+  💡 Utilisez 'admin_token' pour réserver un souhait créé avec 'user_token'.
+}
+

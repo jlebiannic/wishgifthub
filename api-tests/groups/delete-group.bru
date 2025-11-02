@@ -1,0 +1,29 @@
+meta {
+  name: Delete Group
+  type: http
+  seq: 5
+}
+
+delete {
+  url: {{base_url}}/api/groups/{{group_id}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{admin_token}}
+}
+
+tests {
+  test("Status 204 ou 200", function() {
+    const status = res.getStatus();
+    expect(status === 200 || status === 204).to.be.true;
+  });
+}
+
+docs {
+  ⚠️ ATTENTION : Ce endpoint supprime définitivement le groupe et toutes les données associées (invitations, souhaits, membres).
+
+  À exécuter en dernier pour nettoyer les données de test.
+}
+

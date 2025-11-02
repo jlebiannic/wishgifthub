@@ -1,0 +1,39 @@
+meta {
+  name: Login Admin
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{base_url}}/api/auth/login
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "email": "admin@example.com",
+    "password": "Password123!"
+  }
+}
+
+tests {
+  test("Status 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("Has token", function() {
+    expect(res.body.token).to.be.a('string');
+  });
+
+  test("Has userId", function() {
+    expect(res.body.userId).to.be.a('string');
+  });
+}
+
+script:post-response {
+  if (res.body.token) {
+    bru.setEnvVar("admin_token", res.body.token);
+  }
+}
+

@@ -1,0 +1,44 @@
+meta {
+  name: Accept Invitation
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{base_url}}/api/invite/{{invitation_token}}
+  body: none
+  auth: none
+}
+
+tests {
+  test("Status 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("Has user token", function() {
+    expect(res.body.token).to.be.a('string');
+  });
+
+  test("Has group info", function() {
+    expect(res.body.groupId).to.be.a('string');
+  });
+}
+
+script:post-response {
+  if (res.body.token) {
+    bru.setEnvVar("user_token", res.body.token);
+  }
+}
+
+docs {
+  Accepte une invitation avec le token UUID.
+
+  Cette requête :
+  - Crée automatiquement un user avec l'email de l'invitation
+  - Génère un token JWT pour le user
+  - Ajoute le user au groupe
+  - Marque l'invitation comme acceptée
+
+  Le token JWT est automatiquement sauvegardé dans 'user_token'.
+}
+
