@@ -1,11 +1,17 @@
 package com.wishgifthub.entity;
 
 import jakarta.persistence.*;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 import java.time.OffsetDateTime;
 import java.util.*;
 
 @Entity
 @Table(name = "invitations")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class Invitation {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -30,7 +36,5 @@ public class Invitation {
 
     @Column(name = "created_at", nullable = false)
     private OffsetDateTime createdAt = OffsetDateTime.now();
-
-    // Getters, setters, equals, hashCode
 }
 

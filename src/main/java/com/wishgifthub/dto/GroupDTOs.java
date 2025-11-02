@@ -1,18 +1,2 @@
-package com.wishgifthub.dto;
-
-import java.util.UUID;
-import java.time.OffsetDateTime;
-
-public class GroupRequest {
-    public String name;
-    public String type;
-}
-
-public class GroupResponse {
-    public UUID id;
-    public String name;
-    public String type;
-    public UUID adminId;
-    public OffsetDateTime createdAt;
-}
+// Ce fichier est obsolète - les classes sont définies dans GroupRequest.java et GroupResponse.java
 

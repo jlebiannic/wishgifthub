@@ -40,7 +40,7 @@ public class AuthService {
     public AuthResponse loginAdmin(AuthRequest request) {
         User user = userRepository.findByEmail(request.email)
                 .orElseThrow(() -> new IllegalArgumentException("Utilisateur non trouvé"));
-        if (!user.isAdmin() || user.getPasswordHash() == null) {
+        if (!user.isAdmin() && user.getPasswordHash() == null) {
             throw new IllegalArgumentException("Accès refusé");
         }
         if (!passwordEncoder.matches(request.password, user.getPasswordHash())) {

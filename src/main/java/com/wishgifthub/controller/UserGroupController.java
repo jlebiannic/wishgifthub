@@ -1,29 +1,29 @@
-package com.wishgifthub.service;
+package com.wishgifthub.controller;
 
-import com.wishgifthub.entity.UserGroup;
 import com.wishgifthub.entity.User;
-import com.wishgifthub.repository.UserGroupRepository;
+import com.wishgifthub.service.UserGroupService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
-@Service
-public class UserGroupService {
+@RestController
+@RequestMapping("/api/groups")
+public class UserGroupController {
     @Autowired
-    private UserGroupRepository userGroupRepository;
+    private UserGroupService userGroupService;
 
-    public List<User> getUsersByGroup(UUID groupId, UUID userId) {
-        // Vérifie que l'utilisateur appartient au groupe
-        if (!userGroupRepository.existsByUserIdAndGroupId(userId, groupId)) {
-            throw new SecurityException("L'utilisateur n'appartient pas à ce groupe");
-        }
-        return userGroupRepository.findByGroupId(groupId).stream().map(UserGroup::getUser).collect(Collectors.toList());
+    @GetMapping("/{groupId}/users")
+    public ResponseEntity<List<User>> getUsersByGroup(@PathVariable UUID groupId, @AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(userGroupService.getUsersByGroup(groupId, user.getId()));
     }
 
-    public List<UUID> getGroupsByUser(UUID userId) {
-        return userGroupRepository.findByUserId(userId).stream().map(ug -> ug.getGroup().getId()).collect(Collectors.toList());
+    @GetMapping("/user/groups")
+    public ResponseEntity<List<UUID>> getUserGroups(@AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(userGroupService.getGroupsByUser(user.getId()));
     }
 }
 

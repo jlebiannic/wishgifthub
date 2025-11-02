@@ -61,6 +61,7 @@ public class InvitationService {
             User u = new User();
             u.setEmail(invitation.getEmail());
             u.setAdmin(false);
+            u.setCreatedAt(java.time.OffsetDateTime.now());
             return userRepository.save(u);
         });
         // Ajout dans user_groups

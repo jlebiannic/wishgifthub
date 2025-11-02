@@ -20,37 +20,27 @@ public class WishController {
 
     @PostMapping
     public ResponseEntity<WishResponse> addWish(@PathVariable UUID groupId, @RequestBody WishRequest request, @AuthenticationPrincipal User user) {
-        return ResponseEntity.ok(wishService.addWish(groupId, request, user));
-    }
-
-    @GetMapping("/me")
-    public ResponseEntity<List<WishResponse>> getMyWishes(@PathVariable UUID groupId, @AuthenticationPrincipal User user) {
-        return ResponseEntity.ok(wishService.getMyWishes(groupId, user));
+        return ResponseEntity.ok(wishService.createWish(groupId, request, user.getId()));
     }
 
     @GetMapping
     public ResponseEntity<List<WishResponse>> getGroupWishes(@PathVariable UUID groupId, @AuthenticationPrincipal User user) {
-        return ResponseEntity.ok(wishService.getGroupWishes(groupId, user));
-    }
-
-    @PutMapping("/{wishId}")
-    public ResponseEntity<WishResponse> updateWish(@PathVariable UUID groupId, @PathVariable UUID wishId, @RequestBody WishRequest request, @AuthenticationPrincipal User user) {
-        return ResponseEntity.ok(wishService.updateWish(groupId, wishId, request, user));
+        return ResponseEntity.ok(wishService.getWishesByGroup(groupId, user.getId()));
     }
 
     @DeleteMapping("/{wishId}")
     public ResponseEntity<Void> deleteWish(@PathVariable UUID groupId, @PathVariable UUID wishId, @AuthenticationPrincipal User user) {
-        wishService.deleteWish(groupId, wishId, user);
+        wishService.deleteWish(groupId, wishId, user.getId());
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/{wishId}/reserve")
     public ResponseEntity<WishResponse> reserveWish(@PathVariable UUID groupId, @PathVariable UUID wishId, @AuthenticationPrincipal User user) {
-        return ResponseEntity.ok(wishService.reserveWish(groupId, wishId, user));
+        return ResponseEntity.ok(wishService.reserveWish(groupId, wishId, user.getId()));
     }
 
     @DeleteMapping("/{wishId}/reserve")
     public ResponseEntity<WishResponse> unreserveWish(@PathVariable UUID groupId, @PathVariable UUID wishId, @AuthenticationPrincipal User user) {
-        return ResponseEntity.ok(wishService.unreserveWish(groupId, wishId, user));
+        return ResponseEntity.ok(wishService.unreserveWish(groupId, wishId, user.getId()));
     }
 }
