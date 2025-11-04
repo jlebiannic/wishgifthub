@@ -1,0 +1,4 @@
+- /api/groups/user/groups => ne pas renvoyer seulement le uuid du groupe mais aussi son nom
+- Lors de l'acceptation d'une invitation, ne pas stoker le jwt dans invitationLink
+- Manque une api pour récupérer les souhaits du user courant dans un groupe (GET /api/groups/{id}/wishes/me)
+- Manque une api pour voir les souhaits d'un user dans un groupe (GET /api/groups/{id}/wishes/users/{userId})
