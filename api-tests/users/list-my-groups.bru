@@ -22,11 +22,27 @@ tests {
   test("Returns array", function() {
     expect(res.body).to.be.an('array');
   });
+
+  test("Returns group objects with id and name", function() {
+    if (res.body.length > 0) {
+      expect(res.body[0]).to.have.property('id');
+      expect(res.body[0]).to.have.property('name');
+      expect(res.body[0]).to.have.property('type');
+      expect(res.body[0]).to.have.property('adminId');
+    }
+  });
 }
 
 docs {
   Liste tous les groupes auxquels l'utilisateur appartient.
   
+  Retourne un tableau d'objets GroupResponse contenant:
+  - id: UUID du groupe
+  - name: nom du groupe
+  - type: type d'événement
+  - adminId: UUID de l'administrateur
+  - createdAt: date de création
+
   Utilisez le token 'user_token' pour tester avec un utilisateur invité,
   ou 'admin_token' pour tester avec un administrateur.
 }

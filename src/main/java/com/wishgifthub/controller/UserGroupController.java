@@ -1,5 +1,6 @@
 package com.wishgifthub.controller;
 
+import com.wishgifthub.dto.GroupResponse;
 import com.wishgifthub.entity.User;
 import com.wishgifthub.service.UserGroupService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +26,7 @@ public class UserGroupController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<List<UUID>> getUserGroups(@AuthenticationPrincipal User user) {
+    public ResponseEntity<List<GroupResponse>> getUserGroups(@AuthenticationPrincipal User user) {
         return ResponseEntity.ok(userGroupService.getGroupsByUser(user.getId()));
     }
 }
