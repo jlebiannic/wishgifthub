@@ -1,7 +1,7 @@
 package com.wishgifthub.dto;
 
-import java.util.UUID;
 import java.time.OffsetDateTime;
+import java.util.UUID;
 
 public class InvitationResponse {
     public UUID id;
@@ -11,5 +11,6 @@ public class InvitationResponse {
     public boolean accepted;
     public OffsetDateTime createdAt;
     public String invitationLink;
+    public String jwtToken;
 }
 

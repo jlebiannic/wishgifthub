@@ -83,8 +83,7 @@ public class InvitationService {
         resp.token = invitation.getToken();
         resp.accepted = true;
         resp.createdAt = invitation.getCreatedAt();
-        // Ajout du JWT dans le champ invitationLink pour retour API (adaptation)
-        resp.invitationLink = jwt;
+        resp.jwtToken = jwt;
         return resp;
     }
 }
