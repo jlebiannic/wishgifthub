@@ -1,0 +1,42 @@
+meta {
+  name: 5. User ajoute un souhait
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{base_url}}/api/groups/{{cascade_group_id}}/wishes
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{cascade_user_token}}
+}
+
+body:json {
+  {
+    "giftName": "Souhait pour test cascade",
+    "description": "Ce souhait doit être supprimé avec le groupe",
+    "url": "https://example.com/cascade-test"
+  }
+}
+
+script:post-response {
+  if (res.status === 200 && res.body.id) {
+    bru.setEnvVar("cascade_wish_id", res.body.id);
+    console.log("✅ TEST CASCADE - Étape 5: Souhait créé - ID: " + res.body.id);
+  }
+}
+
+tests {
+  test("Étape 5: Création souhait - Status 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("Souhait lié au groupe", function() {
+    const groupId = bru.getEnvVar("cascade_group_id");
+    expect(res.body.groupId).to.equal(groupId);
+  });
+}
+

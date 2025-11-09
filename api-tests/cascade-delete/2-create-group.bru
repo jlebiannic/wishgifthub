@@ -1,0 +1,39 @@
+meta {
+  name: 2. Créer un groupe pour test cascade
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{base_url}}/api/groups
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{cascade_admin_token}}
+}
+
+body:json {
+  {
+    "name": "Groupe Test Cascade",
+    "type": "noël"
+  }
+}
+
+script:post-response {
+  if (res.status === 200 && res.body.id) {
+    bru.setEnvVar("cascade_group_id", res.body.id);
+    if (res.body.jwtToken) {
+      bru.setEnvVar("cascade_admin_token", res.body.jwtToken);
+    }
+    console.log("✅ TEST CASCADE - Étape 2: Groupe créé - ID: " + res.body.id);
+  }
+}
+
+tests {
+  test("Étape 2: Création groupe - Status 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+}
+

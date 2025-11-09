@@ -1,0 +1,29 @@
+meta {
+  name: 4. Accepter l'invitation pour créer un user_group
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{base_url}}/api/invite/{{cascade_invitation_token}}
+  body: none
+  auth: none
+}
+
+script:post-response {
+  if (res.status === 200 && res.body.jwtToken) {
+    bru.setEnvVar("cascade_user_token", res.body.jwtToken);
+    console.log("✅ TEST CASCADE - Étape 4: Invitation acceptée - User créé et ajouté au groupe");
+  }
+}
+
+tests {
+  test("Étape 4: Acceptation invitation - Status 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("Invitation acceptée", function() {
+    expect(res.body.accepted).to.equal(true);
+  });
+}
+

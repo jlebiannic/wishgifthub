@@ -50,6 +50,9 @@ public class WishService {
     }
 
     public List<WishResponse> getWishesByGroup(UUID groupId, UUID userId) {
+        // Vérifier que le groupe existe
+        groupRepository.findById(groupId)
+                .orElseThrow(() -> new IllegalArgumentException("Groupe non trouvé"));
 
         return wishRepository.findByGroupId(groupId).stream()
                 .map(this::toResponse)

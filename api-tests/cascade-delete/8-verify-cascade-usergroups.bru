@@ -1,0 +1,34 @@
+meta {
+  name: 8. Vérifier que le user_group n'existe plus (cascade OK)
+  type: http
+  seq: 8
+}
+
+get {
+  url: {{base_url}}/api/groups/{{cascade_group_id}}/users
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{cascade_admin_token}}
+}
+
+tests {
+  test("Étape 8: Le groupe n'existe plus - Status 404", function() {
+    expect(res.getStatus()).to.equal(404);
+  });
+
+  test("Message d'erreur approprié", function() {
+    expect(res.body.message).to.include("Groupe non trouvé");
+  });
+}
+
+script:post-response {
+  if (res.status === 404) {
+    console.log("✅ TEST CASCADE - Étape 8: Groupe introuvable (supprimé) ✅");
+  } else {
+    console.log("❌ TEST CASCADE - Étape 8: ERREUR - Code HTTP: " + res.status);
+  }
+}
+

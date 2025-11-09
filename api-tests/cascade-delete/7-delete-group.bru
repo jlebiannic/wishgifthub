@@ -1,0 +1,29 @@
+meta {
+  name: 7. SUPPRIMER le groupe (test cascade)
+  type: http
+  seq: 7
+}
+
+delete {
+  url: {{base_url}}/api/groups/{{cascade_group_id}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{cascade_admin_token}}
+}
+
+tests {
+  test("Étape 7: Suppression groupe - Status 204", function() {
+    expect(res.getStatus()).to.equal(204);
+  });
+}
+
+script:post-response {
+  if (res.status === 204) {
+    console.log("✅ TEST CASCADE - Étape 7: Groupe supprimé");
+    console.log("   ⏳ Vérification de la cascade en cours...");
+  }
+}
+

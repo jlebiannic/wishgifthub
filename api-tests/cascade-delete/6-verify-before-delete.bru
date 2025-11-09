@@ -1,0 +1,32 @@
+meta {
+  name: 6. Vérifier les données avant suppression
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{base_url}}/api/groups/{{cascade_group_id}}/users
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{cascade_admin_token}}
+}
+
+tests {
+  test("Étape 6: Le groupe a des membres - Status 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("Au moins 2 membres (admin + user invité)", function() {
+    expect(res.body).to.be.an('array');
+    expect(res.body.length).to.be.greaterThanOrEqual(2);
+  });
+}
+
+script:post-response {
+  console.log("✅ TEST CASCADE - Étape 6: Vérification avant suppression");
+  console.log("   Membres du groupe: " + res.body.length);
+}
+

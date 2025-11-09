@@ -1,0 +1,41 @@
+meta {
+  name: 3. Créer une invitation pour test cascade
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{base_url}}/api/groups/{{cascade_group_id}}/invite
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{cascade_admin_token}}
+}
+
+body:json {
+  {
+    "email": "user.cascade.test@example.com"
+  }
+}
+
+script:post-response {
+  if (res.status === 200 && res.body.id) {
+    bru.setEnvVar("cascade_invitation_id", res.body.id);
+    bru.setEnvVar("cascade_invitation_token", res.body.token);
+    console.log("✅ TEST CASCADE - Étape 3: Invitation créée - ID: " + res.body.id);
+  }
+}
+
+tests {
+  test("Étape 3: Création invitation - Status 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("Invitation liée au groupe", function() {
+    const groupId = bru.getEnvVar("cascade_group_id");
+    expect(res.body.groupId).to.equal(groupId);
+  });
+}
+

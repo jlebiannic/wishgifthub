@@ -4,6 +4,7 @@ import com.wishgifthub.dto.GroupResponse;
 import com.wishgifthub.entity.Group;
 import com.wishgifthub.entity.User;
 import com.wishgifthub.entity.UserGroup;
+import com.wishgifthub.repository.GroupRepository;
 import com.wishgifthub.repository.UserGroupRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,8 +18,17 @@ public class UserGroupService {
     @Autowired
     private UserGroupRepository userGroupRepository;
 
+    @Autowired
+    private GroupRepository groupRepository;
+
     public List<User> getUsersByGroup(UUID groupId, UUID userId) {
-        return userGroupRepository.findByGroupId(groupId).stream().map(UserGroup::getUser).collect(Collectors.toList());
+        // Vérifier que le groupe existe
+        groupRepository.findById(groupId)
+                .orElseThrow(() -> new IllegalArgumentException("Groupe non trouvé"));
+
+        return userGroupRepository.findByGroupId(groupId).stream()
+                .map(UserGroup::getUser)
+                .collect(Collectors.toList());
     }
 
     public List<GroupResponse> getGroupsByUser(UUID userId) {

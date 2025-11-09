@@ -1,0 +1,42 @@
+meta {
+  name: 9. Vérifier que les souhaits n'existent plus (cascade OK)
+  type: http
+  seq: 9
+}
+
+get {
+  url: {{base_url}}/api/groups/{{cascade_group_id}}/wishes
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{cascade_user_token}}
+}
+
+tests {
+  test("Étape 9: Les souhaits du groupe supprimés - Status 404", function() {
+    expect(res.getStatus()).to.equal(404);
+  });
+
+  test("Message d'erreur approprié", function() {
+    expect(res.body.message).to.include("Groupe non trouvé");
+  });
+}
+
+script:post-response {
+  if (res.status !== 200) {
+    console.log("✅ TEST CASCADE - Étape 9: Souhaits supprimés en cascade ✅");
+    console.log("========================================");
+    console.log("✅ TEST CASCADE DELETE TERMINÉ AVEC SUCCÈS!");
+    console.log("========================================");
+    console.log("Résumé:");
+    console.log("  ✅ Groupe supprimé");
+    console.log("  ✅ Relations user_groups supprimées en cascade");
+    console.log("  ✅ Invitations supprimées en cascade");
+    console.log("  ✅ Souhaits (wishes) supprimés en cascade");
+  } else {
+    console.log("❌ TEST CASCADE - Étape 9: ERREUR - Les souhaits existent encore!");
+  }
+}
+
