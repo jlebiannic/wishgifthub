@@ -35,25 +35,24 @@ tests {
   test("Étape 8: Création souhait - Status 200", function() {
     expect(res.getStatus()).to.equal(200);
   });
-
+  
   test("Étape 8: Souhait créé avec ID", function() {
     expect(res.body.id).to.be.a('string');
   });
-
+  
   test("Étape 8: Nom du cadeau correct", function() {
     expect(res.body.giftName).to.equal("Console PlayStation 5");
   });
-
+  
   test("Étape 8: Description correcte", function() {
     expect(res.body.description).to.equal("Edition standard, avec deux manettes");
   });
-
+  
   test("Étape 8: URL correcte", function() {
     expect(res.body.url).to.equal("https://www.exemple.com/ps5");
   });
-
+  
   test("Étape 8: Souhait non réservé", function() {
-    expect(res.body.reservedBy).to.be.null;
+    expect(res.body.reservedBy).to.be.undefined;
   });
 }
-

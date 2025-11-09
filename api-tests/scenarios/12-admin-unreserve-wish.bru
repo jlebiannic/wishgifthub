@@ -14,20 +14,6 @@ auth:bearer {
   token: {{admin_token}}
 }
 
-tests {
-  test("Étape 12: Annulation réservation - Status 200", function() {
-    expect(res.getStatus()).to.equal(200);
-  });
-
-  test("Étape 12: Souhait marqué comme non réservé", function() {
-    expect(res.body.reservedBy).to.be.null;
-  });
-
-  test("Étape 12: Nom du cadeau inchangé", function() {
-    expect(res.body.giftName).to.equal("Console PlayStation 5");
-  });
-}
-
 script:post-response {
   if (res.status === 200) {
     console.log("✅ ÉTAPE 12: Admin a annulé la réservation");
@@ -36,3 +22,16 @@ script:post-response {
   }
 }
 
+tests {
+  test("Étape 12: Annulation réservation - Status 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+  
+  test("Étape 12: Souhait marqué comme non réservé", function() {
+    expect(res.body.reservedBy).to.be.undefined;
+  });
+  
+  test("Étape 12: Nom du cadeau inchangé", function() {
+    expect(res.body.giftName).to.equal("Console PlayStation 5");
+  });
+}
