@@ -13,6 +13,7 @@ get {
 script:post-response {
   if (res.body.jwtToken) {
     bru.setEnvVar("user_token", res.body.jwtToken);
+    bru.setEnvVar("user_id", res.body.id)
   }
 }
 
@@ -24,7 +25,7 @@ tests {
   test("Has JWT token", function() {
     expect(res.body.jwtToken).to.be.a('string');
   });
-
+  
   test("Has invitation token", function() {
     expect(res.body.token).to.be.a('string');
   });
@@ -32,7 +33,7 @@ tests {
   test("Has group info", function() {
     expect(res.body.groupId).to.be.a('string');
   });
-
+  
   test("Is accepted", function() {
     expect(res.body.accepted).to.equal(true);
   });
@@ -48,7 +49,7 @@ docs {
   - Marque l'invitation comme acceptée
   
   Le token JWT est automatiquement sauvegardé dans 'user_token'.
-
+  
   Réponse contient :
   - jwtToken: le token JWT pour authentifier l'utilisateur
   - token: le token UUID de l'invitation

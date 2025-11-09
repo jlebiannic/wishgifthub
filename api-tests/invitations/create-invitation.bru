@@ -16,27 +16,8 @@ auth:bearer {
 
 body:json {
   {
-    "email": "user@example.com"
+    "email": "user2@example.com"
   }
-}
-
-tests {
-  test("Status 200 ou 201", function() {
-    const status = res.getStatus();
-    expect(status === 200 || status === 201).to.be.true;
-  });
-
-  test("Has invitation link", function() {
-    expect(res.body.invitationLink).to.be.a('string');
-  });
-
-  test("Has token", function() {
-    expect(res.body.token).to.be.a('string');
-  });
-
-  test("Has email", function() {
-    expect(res.body.email).to.equal("user@example.com");
-  });
 }
 
 script:post-response {
@@ -45,10 +26,28 @@ script:post-response {
   }
 }
 
+tests {
+  test("Status 200 ou 201", function() {
+    const status = res.getStatus();
+    expect(status === 200 || status === 201).to.be.true;
+  });
+  
+  test("Has invitation link", function() {
+    expect(res.body.invitationLink).to.be.a('string');
+  });
+  
+  test("Has token", function() {
+    expect(res.body.token).to.be.a('string');
+  });
+  
+  test("Has email", function() {
+    expect(res.body.email).to.equal("user@example.com");
+  });
+}
+
 docs {
   Crée une invitation pour un utilisateur.
   Le lien d'invitation sera de la forme: https://app.com/join/{token}
-
+  
   Le token est automatiquement sauvegardé dans la variable d'environnement 'invitation_token'.
 }
-

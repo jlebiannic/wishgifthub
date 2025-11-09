@@ -138,6 +138,22 @@ public class WishService {
         wishRepository.delete(wish);
     }
 
+    public List<WishResponse> getWishesByUserInGroup(UUID groupId, UUID targetUserId, UUID requestingUserId) {
+        // Vérifier que l'utilisateur qui fait la requête appartient au groupe
+        if (!userGroupRepository.existsByUserIdAndGroupId(requestingUserId, groupId)) {
+            throw new SecurityException("L'utilisateur n'appartient pas à ce groupe");
+        }
+
+        // Vérifier que l'utilisateur cible appartient au groupe
+        if (!userGroupRepository.existsByUserIdAndGroupId(targetUserId, groupId)) {
+            throw new IllegalArgumentException("L'utilisateur cible n'appartient pas à ce groupe");
+        }
+
+        return wishRepository.findByGroupIdAndUserId(groupId, targetUserId).stream()
+                .map(this::toResponse)
+                .collect(Collectors.toList());
+    }
+
     private WishResponse toResponse(Wish wish) {
         WishResponse resp = new WishResponse();
         resp.id = wish.getId();

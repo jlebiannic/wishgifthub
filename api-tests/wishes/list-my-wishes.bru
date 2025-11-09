@@ -1,0 +1,33 @@
+meta {
+  name: List My Wishes in Group
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{base_url}}/api/groups/{{group_id}}/wishes/me
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{user_token}}
+}
+
+tests {
+  test("Status 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("Returns array", function() {
+    expect(res.body).to.be.an('array');
+  });
+}
+
+docs {
+  Liste tous mes souhaits dans le groupe spécifié.
+
+  L'utilisateur doit appartenir au groupe.
+  Retourne uniquement les souhaits créés par l'utilisateur connecté.
+}
+

@@ -1,0 +1,34 @@
+meta {
+  name: List User Wishes in Group
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{base_url}}/api/groups/{{group_id}}/wishes/users/{{user_id}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{user_token}}
+}
+
+tests {
+  test("Status 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+  
+  test("Returns array", function() {
+    expect(res.body).to.be.an('array');
+  });
+}
+
+docs {
+  Liste tous les souhaits d'un utilisateur spécifique dans le groupe.
+  
+  L'utilisateur qui fait la requête doit appartenir au groupe.
+  L'utilisateur cible doit également appartenir au groupe.
+  
+  Permet de voir les souhaits d'un autre membre du groupe pour pouvoir les réserver.
+}

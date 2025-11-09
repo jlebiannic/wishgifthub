@@ -55,7 +55,7 @@ public class InvitationService {
     @Transactional
     public InvitationResponse acceptInvitation(UUID token) {
         Invitation invitation = invitationRepository.findByToken(token).orElseThrow();
-        if (invitation.isAccepted()) throw new IllegalStateException("Invitation déjà acceptée");
+        // NON: if (invitation.isAccepted()) throw new IllegalStateException("Invitation déjà acceptée");
         // Création user invité si inexistant
         User user = userRepository.findByEmail(invitation.getEmail()).orElseGet(() -> {
             User u = new User();

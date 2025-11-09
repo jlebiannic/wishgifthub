@@ -1,2 +1,2 @@
-- Manque une api pour récupérer les souhaits du user courant dans un groupe (GET /api/groups/{id}/wishes/me)
-- Manque une api pour voir les souhaits d'un user dans un groupe (GET /api/groups/{id}/wishes/users/{userId})
+- Certains contrôles sont faits sur l'existence du groupe ID et du user et on pourrait tester le groupe ID qui est dans le JWT directement et l'utiliser à pré-authorize. (cf. getWishesByUserInGroup)
+- documentation swagger
