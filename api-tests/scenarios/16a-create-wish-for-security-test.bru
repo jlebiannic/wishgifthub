@@ -1,0 +1,37 @@
+meta {
+  name: 16. Test de sécurité - User ne peut pas réserver son propre souhait
+  type: http
+  seq: 16
+}
+
+post {
+  url: {{base_url}}/api/groups/{{group_id}}/wishes
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{user_token}}
+}
+
+body:json {
+  {
+    "giftName": "Livre de cuisine",
+    "description": "Pour tester la réservation",
+    "url": "https://www.exemple.com/livre"
+  }
+}
+
+script:post-response {
+  if (res.status === 200 && res.body.id) {
+    bru.setEnvVar("wish_id_for_security_test", res.body.id);
+    console.log("✅ ÉTAPE 16a: Souhait créé pour test de sécurité");
+  }
+}
+
+tests {
+  test("Étape 16a: Création souhait - Status 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+}
+

@@ -11,20 +11,19 @@ get {
 }
 
 auth:bearer {
-  token: {{admin_token}}
+  token: {{user_token}}
 }
 
 tests {
   test("Status 200", function() {
     expect(res.getStatus()).to.equal(200);
   });
-
+  
   test("Returns array", function() {
     expect(res.body).to.be.an('array');
   });
-
+  
   test("Has at least admin", function() {
     expect(res.body.length).to.be.greaterThan(0);
   });
 }
-

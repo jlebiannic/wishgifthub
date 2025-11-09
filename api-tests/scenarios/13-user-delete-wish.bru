@@ -1,0 +1,30 @@
+meta {
+  name: 13. User supprime son souhait
+  type: http
+  seq: 13
+}
+
+delete {
+  url: {{base_url}}/api/groups/{{group_id}}/wishes/{{wish_id}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{user_token}}
+}
+
+tests {
+  test("Étape 13: Suppression souhait - Status 204", function() {
+    expect(res.getStatus()).to.equal(204);
+  });
+}
+
+script:post-response {
+  if (res.status === 204) {
+    console.log("✅ ÉTAPE 13: User a supprimé son souhait");
+  } else {
+    console.log("❌ ÉTAPE 13 ÉCHOUÉE: Suppression souhait");
+  }
+}
+

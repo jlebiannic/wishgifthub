@@ -38,11 +38,19 @@ tests {
   test("Has group type", function() {
     expect(res.body.type).to.equal("noël");
   });
+
+  test("Has JWT token", function() {
+    expect(res.body.jwtToken).to.be.a('string');
+  });
 }
 
 script:post-response {
   if (res.body.id) {
     bru.setEnvVar("group_id", res.body.id);
+  }
+  if (res.body.jwtToken) {
+    bru.setEnvVar("admin_token", res.body.jwtToken);
+    console.log("✅ JWT admin mis à jour avec le nouveau groupe");
   }
 }
 

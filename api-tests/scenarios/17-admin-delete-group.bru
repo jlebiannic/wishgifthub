@@ -1,0 +1,33 @@
+meta {
+  name: 17. Admin supprime le groupe (test final)
+  type: http
+  seq: 18
+}
+
+delete {
+  url: {{base_url}}/api/groups/{{group_id}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{admin_token}}
+}
+
+tests {
+  test("Étape 17: Suppression groupe - Status 204", function() {
+    expect(res.getStatus()).to.equal(204);
+  });
+}
+
+script:post-response {
+  if (res.status === 204) {
+    console.log("✅ ÉTAPE 17: Admin a supprimé le groupe");
+    console.log("====================================");
+    console.log("✅ SCÉNARIO DE NON-RÉGRESSION TERMINÉ AVEC SUCCÈS!");
+    console.log("====================================");
+  } else {
+    console.log("❌ ÉTAPE 17 ÉCHOUÉE: Suppression groupe");
+  }
+}
+

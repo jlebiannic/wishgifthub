@@ -14,6 +14,8 @@ script:post-response {
   if (res.body.jwtToken) {
     bru.setEnvVar("user_token", res.body.jwtToken);
     bru.setEnvVar("user_id", res.body.id)
+    bru.setEnvVar("group_id", res.body.groupId)
+    bru.setEnvVar("user_token", res.body.jwtToken)
   }
 }
 
@@ -33,14 +35,13 @@ tests {
   test("Invitation accepted", function() {
     expect(res.body.accepted).to.equal(true);
   });
-
+  
   test("JWT contains user and group info (decode to verify)", function() {
     // Le JWT devrait contenir userId, isAdmin et groupIds
     expect(res.body.jwtToken).to.be.a('string');
     expect(res.body.jwtToken.split('.')).to.have.lengthOf(3);
   });
-}
-
+  
   test("Has group info", function() {
     expect(res.body.groupId).to.be.a('string');
   });

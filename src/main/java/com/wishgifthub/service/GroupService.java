@@ -24,6 +24,8 @@ public class GroupService {
     private UserRepository userRepository;
     @Autowired
     private UserGroupRepository userGroupRepository;
+    @Autowired
+    private JwtService jwtService;
 
     @Transactional
     public GroupResponse createGroup(GroupRequest request, UUID adminId) {
@@ -45,12 +47,23 @@ public class GroupService {
         ug.setUser(admin);
         ug.setGroup(group);
         userGroupRepository.save(ug);
+
+        // Récupération de tous les groupes de l'admin (incluant le nouveau)
+        List<UUID> groupIds = userGroupRepository.findByUserId(adminId)
+                .stream()
+                .map(userGroup -> userGroup.getGroup().getId())
+                .collect(Collectors.toList());
+
+        // Génération du nouveau JWT avec tous les groupes
+        String jwt = jwtService.generateToken(admin, groupIds);
+
         GroupResponse resp = new GroupResponse();
         resp.id = group.getId();
         resp.name = group.getName();
         resp.type = group.getType();
         resp.adminId = admin.getId();
         resp.createdAt = group.getCreatedAt();
+        resp.jwtToken = jwt;
         return resp;
     }
 

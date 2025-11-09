@@ -1,0 +1,42 @@
+meta {
+  name: 11. Admin liste tous les souhaits du groupe
+  type: http
+  seq: 11
+}
+
+get {
+  url: {{base_url}}/api/groups/{{group_id}}/wishes
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{admin_token}}
+}
+
+tests {
+  test("Étape 11: Liste tous les souhaits - Status 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("Étape 11: Au moins un souhait retourné", function() {
+    expect(res.body).to.be.an('array');
+    expect(res.body.length).to.be.greaterThan(0);
+  });
+
+  test("Étape 11: Le souhait est marqué comme réservé", function() {
+    const wishId = bru.getEnvVar("wish_id");
+    const foundWish = res.body.find(w => w.id === wishId);
+    expect(foundWish).to.not.be.undefined;
+    expect(foundWish.reservedBy).to.not.be.null;
+  });
+}
+
+script:post-response {
+  if (res.status === 200) {
+    console.log("✅ ÉTAPE 11: Admin liste tous les souhaits - " + res.body.length + " souhait(s)");
+  } else {
+    console.log("❌ ÉTAPE 11 ÉCHOUÉE: Liste tous souhaits");
+  }
+}
+

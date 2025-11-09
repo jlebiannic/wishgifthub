@@ -1,0 +1,42 @@
+meta {
+  name: 3. Lister les groupes de l'admin
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{base_url}}/api/groups
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{admin_token}}
+}
+
+tests {
+  test("Étape 3: Liste groupes admin - Status 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("Étape 3: Au moins un groupe retourné", function() {
+    expect(res.body).to.be.an('array');
+    expect(res.body.length).to.be.greaterThan(0);
+  });
+
+  test("Étape 3: Le groupe créé est dans la liste", function() {
+    const groupId = bru.getEnvVar("group_id");
+    const foundGroup = res.body.find(g => g.id === groupId);
+    expect(foundGroup).to.not.be.undefined;
+    expect(foundGroup.name).to.equal("Noël en famille 2025");
+  });
+}
+
+script:post-response {
+  if (res.status === 200) {
+    console.log("✅ ÉTAPE 3: Liste des groupes récupérée - " + res.body.length + " groupe(s)");
+  } else {
+    console.log("❌ ÉTAPE 3 ÉCHOUÉE: Liste des groupes");
+  }
+}
+

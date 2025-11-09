@@ -1,0 +1,39 @@
+meta {
+  name: 10. Admin réserve le souhait du user
+  type: http
+  seq: 10
+}
+
+post {
+  url: {{base_url}}/api/groups/{{group_id}}/wishes/{{wish_id}}/reserve
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{admin_token}}
+}
+
+tests {
+  test("Étape 10: Réservation souhait - Status 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("Étape 10: Souhait marqué comme réservé", function() {
+    expect(res.body.reservedBy).to.be.a('string');
+    expect(res.body.reservedBy).to.not.be.null;
+  });
+
+  test("Étape 10: Nom du cadeau inchangé", function() {
+    expect(res.body.giftName).to.equal("Console PlayStation 5");
+  });
+}
+
+script:post-response {
+  if (res.status === 200) {
+    console.log("✅ ÉTAPE 10: Admin a réservé le souhait");
+  } else {
+    console.log("❌ ÉTAPE 10 ÉCHOUÉE: Réservation souhait");
+  }
+}
+

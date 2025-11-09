@@ -1,0 +1,37 @@
+meta {
+  name: 15. Test de sécurité - User ne peut pas modifier le groupe
+  type: http
+  seq: 15
+}
+
+put {
+  url: {{base_url}}/api/groups/{{group_id}}
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{user_token}}
+}
+
+body:json {
+  {
+    "name": "Tentative de modification par user",
+    "type": "noël"
+  }
+}
+
+tests {
+  test("Étape 15 (Sécurité): User ne peut pas modifier - Status 403", function() {
+    expect(res.getStatus()).to.equal(403);
+  });
+}
+
+script:post-response {
+  if (res.status === 403) {
+    console.log("✅ ÉTAPE 15: Sécurité OK - User ne peut pas modifier le groupe");
+  } else {
+    console.log("❌ ÉTAPE 15 ÉCHOUÉE: Sécurité - User peut modifier le groupe!");
+  }
+}
+

@@ -1,2 +1,1 @@
-- Certains contrôles sont faits sur l'existence du groupe ID et du user et on pourrait tester le groupe ID qui est dans le JWT directement et l'utiliser à pré-authorize. (cf. getWishesByUserInGroup)
 - documentation swagger

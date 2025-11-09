@@ -1,7 +1,7 @@
 package com.wishgifthub.dto;
 
-import java.util.UUID;
 import java.time.OffsetDateTime;
+import java.util.UUID;
 
 public class GroupResponse {
     public UUID id;
@@ -9,5 +9,6 @@ public class GroupResponse {
     public String type;
     public UUID adminId;
     public OffsetDateTime createdAt;
+    public String jwtToken;
 }
 

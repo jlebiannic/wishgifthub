@@ -1,0 +1,50 @@
+meta {
+  name: 14. Admin modifie le groupe
+  type: http
+  seq: 14
+}
+
+put {
+  url: {{base_url}}/api/groups/{{group_id}}
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{admin_token}}
+}
+
+body:json {
+  {
+    "name": "Noël en famille 2025 - Modifié",
+    "type": "noël"
+  }
+}
+
+tests {
+  test("Étape 14: Modification groupe - Status 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("Étape 14: Nom du groupe modifié", function() {
+    expect(res.body.name).to.equal("Noël en famille 2025 - Modifié");
+  });
+
+  test("Étape 14: Type du groupe inchangé", function() {
+    expect(res.body.type).to.equal("noël");
+  });
+
+  test("Étape 14: ID du groupe inchangé", function() {
+    const groupId = bru.getEnvVar("group_id");
+    expect(res.body.id).to.equal(groupId);
+  });
+}
+
+script:post-response {
+  if (res.status === 200) {
+    console.log("✅ ÉTAPE 14: Admin a modifié le groupe");
+  } else {
+    console.log("❌ ÉTAPE 14 ÉCHOUÉE: Modification groupe");
+  }
+}
+

@@ -1,0 +1,46 @@
+meta {
+  name: 7. User consulte les membres du groupe
+  type: http
+  seq: 7
+}
+
+get {
+  url: {{base_url}}/api/groups/{{group_id}}/users
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{user_token}}
+}
+
+script:post-response {
+  if (res.status === 200) {
+    console.log("✅ ÉTAPE 7: Liste membres du groupe - " + res.body.length + " membre(s)");
+  } else {
+    console.log("❌ ÉTAPE 7 ÉCHOUÉE: Liste membres groupe");
+  }
+}
+
+tests {
+  test("Étape 7: Liste membres groupe - Status 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+  
+  test("Étape 7: Au moins 2 membres (admin + user)", function() {
+    expect(res.body).to.be.an('array');
+    expect(res.body.length).to.be.greaterThanOrEqual(2);
+  });
+  
+  test("Étape 7: User invité dans la liste", function() {
+    const userFound = res.body.find(u => u.email === "user.invite@example.com");
+    expect(userFound).to.not.be.undefined;
+    expect(userFound.isAdmin).to.equal(false);
+  });
+  
+  test("Étape 7: Admin dans la liste", function() {
+    const adminFound = res.body.find(u => u.email === "admin.test@example.com");
+    expect(adminFound).to.not.be.undefined;
+    expect(adminFound.isAdmin).to.equal(true);
+  });
+}
