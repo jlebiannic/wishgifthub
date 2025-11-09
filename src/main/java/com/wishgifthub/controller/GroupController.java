@@ -40,13 +40,13 @@ public class GroupController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
-    public ResponseEntity<GroupResponse> updateGroup(@PathVariable UUID id, @RequestBody GroupRequest request, @AuthenticationPrincipal User admin) {
+    public ResponseEntity<GroupResponse> updateGroup(@PathVariable("id") UUID id, @RequestBody GroupRequest request, @AuthenticationPrincipal User admin) {
         return ResponseEntity.ok(groupService.updateGroup(id, request, admin.getId()));
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteGroup(@PathVariable UUID id, @AuthenticationPrincipal User admin) {
+    public ResponseEntity<Void> deleteGroup(@PathVariable("id") UUID id, @AuthenticationPrincipal User admin) {
         groupService.deleteGroup(id, admin.getId());
         return ResponseEntity.noContent().build();
     }

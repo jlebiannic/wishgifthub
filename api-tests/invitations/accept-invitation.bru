@@ -30,6 +30,17 @@ tests {
     expect(res.body.token).to.be.a('string');
   });
   
+  test("Invitation accepted", function() {
+    expect(res.body.accepted).to.equal(true);
+  });
+
+  test("JWT contains user and group info (decode to verify)", function() {
+    // Le JWT devrait contenir userId, isAdmin et groupIds
+    expect(res.body.jwtToken).to.be.a('string');
+    expect(res.body.jwtToken.split('.')).to.have.lengthOf(3);
+  });
+}
+
   test("Has group info", function() {
     expect(res.body.groupId).to.be.a('string');
   });

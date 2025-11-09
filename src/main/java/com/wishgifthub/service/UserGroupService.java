@@ -18,10 +18,6 @@ public class UserGroupService {
     private UserGroupRepository userGroupRepository;
 
     public List<User> getUsersByGroup(UUID groupId, UUID userId) {
-        // Vérifie que l'utilisateur appartient au groupe
-        if (!userGroupRepository.existsByUserIdAndGroupId(userId, groupId)) {
-            throw new SecurityException("L'utilisateur n'appartient pas à ce groupe");
-        }
         return userGroupRepository.findByGroupId(groupId).stream().map(UserGroup::getUser).collect(Collectors.toList());
     }
 

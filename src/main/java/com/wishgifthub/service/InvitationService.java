@@ -33,8 +33,9 @@ public class InvitationService {
     private String invitationBaseUrl;
 
     @Transactional
-    public InvitationResponse createInvitation(UUID groupId, InvitationRequest request) {
-        Group group = groupRepository.findById(groupId).orElseThrow();
+    public InvitationResponse createInvitation(UUID groupId, InvitationRequest request, UUID adminId) {
+        Group group = groupRepository.findByIdAndAdminId(groupId, adminId)
+                .orElseThrow(() -> new SecurityException("Groupe non trouvé ou vous n'êtes pas le propriétaire"));
         Invitation invitation = new Invitation();
         invitation.setGroup(group);
         invitation.setEmail(request.email);
@@ -74,8 +75,13 @@ public class InvitationService {
         invitation.setUser(user);
         invitation.setAccepted(true);
         invitationRepository.save(invitation);
-        // Génération JWT
-        String jwt = jwtService.generateToken(user);
+        // Récupération de tous les groupes du user
+        java.util.List<UUID> groupIds = userGroupRepository.findByUserId(user.getId())
+                .stream()
+                .map(ug -> ug.getGroup().getId())
+                .collect(java.util.stream.Collectors.toList());
+        // Génération JWT avec les groupes
+        String jwt = jwtService.generateToken(user, groupIds);
         InvitationResponse resp = new InvitationResponse();
         resp.id = invitation.getId();
         resp.email = invitation.getEmail();

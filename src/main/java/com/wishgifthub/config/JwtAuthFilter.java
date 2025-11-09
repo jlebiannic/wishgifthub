@@ -16,7 +16,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -43,10 +42,21 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 if (userOpt.isPresent()) {
                     User user = userOpt.get();
 
-                    // Ajoute les authorities basées sur isAdmin
-                    List<SimpleGrantedAuthority> authorities = user.isAdmin()
-                        ? Collections.singletonList(new SimpleGrantedAuthority("ROLE_ADMIN"))
-                        : Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"));
+                    // Ajoute les authorities basées sur isAdmin et les groupes
+                    List<SimpleGrantedAuthority> authorities = new java.util.ArrayList<>();
+
+                    // Ajout du rôle ADMIN ou USER
+                    if (user.isAdmin()) {
+                        authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+                    } else {
+                        authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
+                    }
+
+                    // Ajout des groupes comme authorities
+                    List<UUID> groupIds = jwtService.getGroupIdsFromToken(token);
+                    for (UUID groupId : groupIds) {
+                        authorities.add(new SimpleGrantedAuthority("GROUP_" + groupId.toString()));
+                    }
 
                     UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                             user, null, authorities);

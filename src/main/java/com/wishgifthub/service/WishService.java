@@ -31,10 +31,6 @@ public class WishService {
     private UserRepository userRepository;
 
     public WishResponse createWish(UUID groupId, WishRequest request, UUID userId) {
-        // Vérifier que l'utilisateur appartient au groupe
-        if (!userGroupRepository.existsByUserIdAndGroupId(userId, groupId)) {
-            throw new SecurityException("L'utilisateur n'appartient pas à ce groupe");
-        }
 
         Group group = groupRepository.findById(groupId)
                 .orElseThrow(() -> new IllegalArgumentException("Groupe non trouvé"));
@@ -54,10 +50,6 @@ public class WishService {
     }
 
     public List<WishResponse> getWishesByGroup(UUID groupId, UUID userId) {
-        // Vérifier que l'utilisateur appartient au groupe
-        if (!userGroupRepository.existsByUserIdAndGroupId(userId, groupId)) {
-            throw new SecurityException("L'utilisateur n'appartient pas à ce groupe");
-        }
 
         return wishRepository.findByGroupId(groupId).stream()
                 .map(this::toResponse)
@@ -65,10 +57,6 @@ public class WishService {
     }
 
     public WishResponse reserveWish(UUID groupId, UUID wishId, UUID userId) {
-        // Vérifier que l'utilisateur appartient au groupe
-        if (!userGroupRepository.existsByUserIdAndGroupId(userId, groupId)) {
-            throw new SecurityException("L'utilisateur n'appartient pas à ce groupe");
-        }
 
         Wish wish = wishRepository.findById(wishId)
                 .orElseThrow(() -> new IllegalArgumentException("Souhait non trouvé"));
@@ -97,10 +85,6 @@ public class WishService {
     }
 
     public WishResponse unreserveWish(UUID groupId, UUID wishId, UUID userId) {
-        // Vérifier que l'utilisateur appartient au groupe
-        if (!userGroupRepository.existsByUserIdAndGroupId(userId, groupId)) {
-            throw new SecurityException("L'utilisateur n'appartient pas à ce groupe");
-        }
 
         Wish wish = wishRepository.findById(wishId)
                 .orElseThrow(() -> new IllegalArgumentException("Souhait non trouvé"));
@@ -139,10 +123,6 @@ public class WishService {
     }
 
     public List<WishResponse> getWishesByUserInGroup(UUID groupId, UUID targetUserId, UUID requestingUserId) {
-        // Vérifier que l'utilisateur qui fait la requête appartient au groupe
-        if (!userGroupRepository.existsByUserIdAndGroupId(requestingUserId, groupId)) {
-            throw new SecurityException("L'utilisateur n'appartient pas à ce groupe");
-        }
 
         // Vérifier que l'utilisateur cible appartient au groupe
         if (!userGroupRepository.existsByUserIdAndGroupId(targetUserId, groupId)) {

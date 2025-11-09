@@ -26,7 +26,7 @@ public class InvitationController {
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/groups/{groupId}/invite")
     public ResponseEntity<InvitationResponse> invite(@PathVariable UUID groupId, @RequestBody InvitationRequest request, @AuthenticationPrincipal User admin) {
-        return ResponseEntity.ok(invitationService.createInvitation(groupId, request));
+        return ResponseEntity.ok(invitationService.createInvitation(groupId, request, admin.getId()));
     }
 
     @GetMapping("/invite/{token}")
