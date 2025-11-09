@@ -4,6 +4,7 @@ import com.wishgifthub.dto.GroupResponse;
 import com.wishgifthub.entity.Group;
 import com.wishgifthub.entity.User;
 import com.wishgifthub.entity.UserGroup;
+import com.wishgifthub.exception.ResourceNotFoundException;
 import com.wishgifthub.repository.GroupRepository;
 import com.wishgifthub.repository.UserGroupRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +25,7 @@ public class UserGroupService {
     public List<User> getUsersByGroup(UUID groupId, UUID userId) {
         // Vérifier que le groupe existe
         groupRepository.findById(groupId)
-                .orElseThrow(() -> new IllegalArgumentException("Groupe non trouvé"));
+                .orElseThrow(() -> new ResourceNotFoundException("Groupe", groupId));
 
         return userGroupRepository.findByGroupId(groupId).stream()
                 .map(UserGroup::getUser)

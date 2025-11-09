@@ -14,16 +14,6 @@ auth:bearer {
   token: {{cascade_user_token}}
 }
 
-tests {
-  test("Étape 9: Les souhaits du groupe supprimés - Status 404", function() {
-    expect(res.getStatus()).to.equal(404);
-  });
-
-  test("Message d'erreur approprié", function() {
-    expect(res.body.message).to.include("Groupe non trouvé");
-  });
-}
-
 script:post-response {
   if (res.status !== 200) {
     console.log("✅ TEST CASCADE - Étape 9: Souhaits supprimés en cascade ✅");
@@ -40,3 +30,12 @@ script:post-response {
   }
 }
 
+tests {
+  test("Étape 9: Les souhaits du groupe supprimés - Status 404", function() {
+    expect(res.getStatus()).to.equal(404);
+  });
+  
+  test("Message d'erreur approprié", function() {
+    expect(res.body.message).to.include("non trouvé");
+  });
+}

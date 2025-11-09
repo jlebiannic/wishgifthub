@@ -5,6 +5,8 @@ import com.wishgifthub.dto.GroupResponse;
 import com.wishgifthub.entity.Group;
 import com.wishgifthub.entity.User;
 import com.wishgifthub.entity.UserGroup;
+import com.wishgifthub.exception.AccessDeniedException;
+import com.wishgifthub.exception.ResourceNotFoundException;
 import com.wishgifthub.repository.GroupRepository;
 import com.wishgifthub.repository.UserGroupRepository;
 import com.wishgifthub.repository.UserRepository;
@@ -30,11 +32,11 @@ public class GroupService {
     @Transactional
     public GroupResponse createGroup(GroupRequest request, UUID adminId) {
         User admin = userRepository.findById(adminId)
-                .orElseThrow(() -> new IllegalArgumentException("Utilisateur non trouvé"));
+                .orElseThrow(() -> new ResourceNotFoundException("Utilisateur", adminId));
 
         // Vérification que l'utilisateur est bien un administrateur
         if (!admin.isAdmin()) {
-            throw new SecurityException("Seuls les administrateurs peuvent créer des groupes");
+            throw new AccessDeniedException("Seuls les administrateurs peuvent créer des groupes");
         }
 
         Group group = new Group();
@@ -42,6 +44,7 @@ public class GroupService {
         group.setType(request.type);
         group.setAdmin(admin);
         groupRepository.save(group);
+
         // Ajout admin dans user_groups
         UserGroup ug = new UserGroup();
         ug.setUser(admin);
@@ -81,11 +84,17 @@ public class GroupService {
 
     @Transactional
     public GroupResponse updateGroup(UUID groupId, GroupRequest request, UUID adminId) {
-        Group group = groupRepository.findById(groupId).orElseThrow();
-        if (!group.getAdmin().getId().equals(adminId)) throw new SecurityException();
+        Group group = groupRepository.findById(groupId)
+                .orElseThrow(() -> new ResourceNotFoundException("Groupe", groupId));
+
+        if (!group.getAdmin().getId().equals(adminId)) {
+            throw new AccessDeniedException("Seul le propriétaire du groupe peut le modifier");
+        }
+
         group.setName(request.name);
         group.setType(request.type);
         groupRepository.save(group);
+
         GroupResponse resp = new GroupResponse();
         resp.id = group.getId();
         resp.name = group.getName();
@@ -97,8 +106,13 @@ public class GroupService {
 
     @Transactional
     public void deleteGroup(UUID groupId, UUID adminId) {
-        Group group = groupRepository.findById(groupId).orElseThrow();
-        if (!group.getAdmin().getId().equals(adminId)) throw new SecurityException();
+        Group group = groupRepository.findById(groupId)
+                .orElseThrow(() -> new ResourceNotFoundException("Groupe", groupId));
+
+        if (!group.getAdmin().getId().equals(adminId)) {
+            throw new AccessDeniedException("Seul le propriétaire du groupe peut le supprimer");
+        }
+
         groupRepository.delete(group);
     }
 }

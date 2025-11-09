@@ -6,6 +6,8 @@ import com.wishgifthub.entity.Group;
 import com.wishgifthub.entity.Invitation;
 import com.wishgifthub.entity.User;
 import com.wishgifthub.entity.UserGroup;
+import com.wishgifthub.exception.AccessDeniedException;
+import com.wishgifthub.exception.ResourceNotFoundException;
 import com.wishgifthub.repository.GroupRepository;
 import com.wishgifthub.repository.InvitationRepository;
 import com.wishgifthub.repository.UserGroupRepository;
@@ -35,7 +37,7 @@ public class InvitationService {
     @Transactional
     public InvitationResponse createInvitation(UUID groupId, InvitationRequest request, UUID adminId) {
         Group group = groupRepository.findByIdAndAdminId(groupId, adminId)
-                .orElseThrow(() -> new SecurityException("Groupe non trouvé ou vous n'êtes pas le propriétaire"));
+                .orElseThrow(() -> new AccessDeniedException("Groupe non trouvé ou vous n'êtes pas le propriétaire"));
         Invitation invitation = new Invitation();
         invitation.setGroup(group);
         invitation.setEmail(request.email);
@@ -55,7 +57,8 @@ public class InvitationService {
 
     @Transactional
     public InvitationResponse acceptInvitation(UUID token) {
-        Invitation invitation = invitationRepository.findByToken(token).orElseThrow();
+        Invitation invitation = invitationRepository.findByToken(token)
+                .orElseThrow(() -> new ResourceNotFoundException("Invitation avec le token spécifié non trouvée"));
         // NON: if (invitation.isAccepted()) throw new IllegalStateException("Invitation déjà acceptée");
         // Création user invité si inexistant
         User user = userRepository.findByEmail(invitation.getEmail()).orElseGet(() -> {
