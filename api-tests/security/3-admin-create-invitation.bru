@@ -1,0 +1,35 @@
+meta {
+  name: 3. Admin crée invitation pour User
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{base_url}}/api/groups/{{security_group_id}}/invite
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{security_admin_token}}
+}
+
+body:json {
+  {
+    "email": "user.security@example.com"
+  }
+}
+
+script:post-response {
+  if (res.status === 200 && res.body.token) {
+    bru.setEnvVar("security_invitation_token", res.body.token);
+    console.log("✅ SÉCURITÉ - Étape 3: Invitation créée");
+  }
+}
+
+tests {
+  test("Invitation créée - Status 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+}
+

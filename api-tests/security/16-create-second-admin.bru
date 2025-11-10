@@ -1,0 +1,32 @@
+meta {
+  name: 16. Créer un second admin avec second groupe
+  type: http
+  seq: 16
+}
+
+post {
+  url: {{base_url}}/api/auth/register
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "email": "admin2.security@example.com",
+    "password": "Admin2Secure123!"
+  }
+}
+
+script:post-response {
+  if (res.status === 200 && res.body.token) {
+    bru.setEnvVar("security_admin2_token", res.body.token);
+    console.log("✅ SÉCURITÉ - Étape 16: Second admin créé");
+  }
+}
+
+tests {
+  test("Second admin créé - Status 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+}
+

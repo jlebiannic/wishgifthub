@@ -1,0 +1,34 @@
+meta {
+  name: 7. TEST - User ne peut PAS supprimer le groupe
+  type: http
+  seq: 7
+}
+
+delete {
+  url: {{base_url}}/api/groups/{{security_group_id}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{security_user_token}}
+}
+
+tests {
+  test("SÉCURITÉ: User ne peut pas supprimer le groupe - Status 403", function() {
+    expect(res.getStatus()).to.equal(403);
+  });
+
+  test("Message d'erreur approprié", function() {
+    expect(res.body.message).to.exist;
+  });
+}
+
+script:post-response {
+  if (res.status === 403) {
+    console.log("✅ SÉCURITÉ - Étape 7: User ne peut PAS supprimer le groupe ✓");
+  } else {
+    console.log("❌ SÉCURITÉ - Étape 7 ÉCHOUÉE: User peut supprimer le groupe!");
+  }
+}
+

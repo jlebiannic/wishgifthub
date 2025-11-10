@@ -1,0 +1,41 @@
+meta {
+  name: 8. User crée un souhait dans le groupe
+  type: http
+  seq: 8
+}
+
+post {
+  url: {{base_url}}/api/groups/{{security_group_id}}/wishes
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{security_user_token}}
+}
+
+body:json {
+  {
+    "giftName": "Souhait du user",
+    "description": "Pour test de sécurité",
+    "url": "https://example.com/wish"
+  }
+}
+
+script:post-response {
+  if (res.status === 200 && res.body.id) {
+    bru.setEnvVar("security_user_wish_id", res.body.id);
+    console.log("✅ SÉCURITÉ - Étape 8: User a créé un souhait");
+  }
+}
+
+tests {
+  test("User peut créer un souhait - Status 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("Souhait créé avec bon userId", function() {
+    expect(res.body.userId).to.be.a('string');
+  });
+}
+

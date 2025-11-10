@@ -1,0 +1,34 @@
+meta {
+  name: 22. TEST - User ne peut PAS voir membres du groupe Admin2
+  type: http
+  seq: 22
+}
+
+get {
+  url: {{base_url}}/api/groups/{{security_admin2_group_id}}/users
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{security_user_token}}
+}
+
+tests {
+  test("SÉCURITÉ: User ne peut pas voir membres groupe hors appartenance - Status 403", function() {
+    expect(res.getStatus()).to.equal(403);
+  });
+
+  test("Message d'erreur approprié", function() {
+    expect(res.body.message).to.exist;
+  });
+}
+
+script:post-response {
+  if (res.status === 403) {
+    console.log("✅ SÉCURITÉ - Étape 22: User ne peut PAS voir membres d'un groupe auquel il n'appartient pas ✓");
+  } else {
+    console.log("❌ SÉCURITÉ - Étape 22 ÉCHOUÉE: User peut voir membres d'un groupe hors appartenance!");
+  }
+}
+

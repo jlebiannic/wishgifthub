@@ -1,0 +1,31 @@
+meta {
+  name: 13. User annule sa propre réservation
+  type: http
+  seq: 13
+}
+
+delete {
+  url: {{base_url}}/api/groups/{{security_group_id}}/wishes/{{security_admin_wish_id}}/reserve
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{security_user_token}}
+}
+
+script:post-response {
+  if (res.status === 200) {
+    console.log("✅ SÉCURITÉ - Étape 13: User peut annuler sa propre réservation ✓");
+  }
+}
+
+tests {
+  test("User peut annuler sa propre réservation - Status 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+  
+  test("Souhait n'est plus réservé", function() {
+    expect(res.body.reservedBy).to.be.undefined;
+  });
+}

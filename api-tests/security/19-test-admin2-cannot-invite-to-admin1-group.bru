@@ -1,0 +1,41 @@
+meta {
+  name: 19. TEST - Admin2 ne peut PAS créer invitation pour groupe d'Admin1
+  type: http
+  seq: 19
+}
+
+post {
+  url: {{base_url}}/api/groups/{{security_group_id}}/invite
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{security_admin2_token}}
+}
+
+body:json {
+  {
+    "email": "hacker@example.com"
+  }
+}
+
+tests {
+  test("SÉCURITÉ: Admin2 ne peut pas inviter dans groupe d'Admin1 - Status 403", function() {
+    expect(res.getStatus()).to.equal(403);
+  });
+
+  test("Message d'erreur approprié", function() {
+    expect(res.body.message).to.exist;
+    expect(res.body.code).to.equal("ACCESS_DENIED");
+  });
+}
+
+script:post-response {
+  if (res.status === 403) {
+    console.log("✅ SÉCURITÉ - Étape 19: Admin2 ne peut PAS inviter dans groupe d'Admin1 ✓");
+  } else {
+    console.log("❌ SÉCURITÉ - Étape 19 ÉCHOUÉE: Admin2 peut inviter dans groupe d'Admin1!");
+  }
+}
+

@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CopilotDiffPersistence">
+    <option name="pendingDiffs">
+      <map>
+        <entry key="$PROJECT_DIR$/api-tests/security/1-create-admin-and-user.bru">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/api-tests/security/1-create-admin-and-user.bru" />
+              <option name="updatedContent" value="meta {&#10;  name: 1. Créer Admin et User&#10;  type: http&#10;  seq: 1&#10;}&#10;&#10;post {&#10;  url: {{base_url}}/api/auth/register&#10;  body: json&#10;  auth: none&#10;}&#10;&#10;body:json {&#10;  {&#10;    &quot;email&quot;: &quot;admin.security@example.com&quot;,&#10;    &quot;password&quot;: &quot;AdminSecure123!&quot;&#10;  }&#10;}&#10;&#10;script:post-response {&#10;  if (res.status === 200 &amp;&amp; res.body.token) {&#10;    bru.setEnvVar(&quot;security_admin_token&quot;, res.body.token);&#10;    bru.setEnvVar(&quot;security_admin_id&quot;, res.body.id);&#10;    console.log(&quot;✅ SÉCURITÉ - Étape 1: Admin créé&quot;);&#10;  }&#10;}&#10;&#10;tests {&#10;  test(&quot;Admin créé - Status 200&quot;, function() {&#10;    expect(res.getStatus()).to.equal(200);&#10;  });&#10;  &#10;  test(&quot;Admin a le rôle admin&quot;, function() {&#10;    expect(res.body.isAdmin).to.equal(true);&#10;  });&#10;}&#10;" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/api-tests/security/10-test-user-cannot-reserve-own-wish.bru">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/api-tests/security/10-test-user-cannot-reserve-own-wish.bru" />
+              <option name="updatedContent" value="meta {&#10;  name: 10. TEST - User ne peut PAS réserver son propre souhait&#10;  type: http&#10;  seq: 10&#10;}&#10;&#10;post {&#10;  url: {{base_url}}/api/groups/{{security_group_id}}/wishes/{{security_user_wish_id}}/reserve&#10;  body: none&#10;  auth: bearer&#10;}&#10;&#10;auth:bearer {&#10;  token: {{security_user_token}}&#10;}&#10;&#10;tests {&#10;  test(&quot;SÉCURITÉ: User ne peut pas réserver son propre souhait - Status 400&quot;, function() {&#10;    expect(res.getStatus()).to.equal(400);&#10;  });&#10;  &#10;  test(&quot;Message d'erreur approprié&quot;, function() {&#10;    expect(res.body.message).to.include(&quot;propre souhait&quot;);&#10;    expect(res.body.code).to.equal(&quot;BUSINESS_RULE_VIOLATION&quot;);&#10;  });&#10;}&#10;&#10;script:post-response {&#10;  if (res.status === 400) {&#10;    console.log(&quot;✅ SÉCURITÉ - Étape 10: User ne peut PAS réserver son propre souhait ✓&quot;);&#10;  } else {&#10;    console.log(&quot;❌ SÉCURITÉ - Étape 10 ÉCHOUÉE: User peut réserver son propre souhait!&quot;);&#10;  }&#10;}&#10;" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/api-tests/security/11-user-reserve-admin-wish.bru">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/api-tests/security/11-user-reserve-admin-wish.bru" />
+              <option name="updatedContent" value="meta {&#10;  name: 11. User peut réserver le souhait de l'admin&#10;  type: http&#10;  seq: 11&#10;}&#10;&#10;post {&#10;  url: {{base_url}}/api/groups/{{security_group_id}}/wishes/{{security_admin_wish_id}}/reserve&#10;  body: none&#10;  auth: bearer&#10;}&#10;&#10;auth:bearer {&#10;  token: {{security_user_token}}&#10;}&#10;&#10;tests {&#10;  test(&quot;User peut réserver le souhait d'un autre - Status 200&quot;, function() {&#10;    expect(res.getStatus()).to.equal(200);&#10;  });&#10;  &#10;  test(&quot;Souhait réservé par le user&quot;, function() {&#10;    expect(res.body.reservedBy).to.be.a('string');&#10;  });&#10;}&#10;&#10;script:post-response {&#10;  if (res.status === 200) {&#10;    console.log(&quot;✅ SÉCURITÉ - Étape 11: User peut réserver le souhait de l'admin ✓&quot;);&#10;  }&#10;}&#10;" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/api-tests/security/12-test-admin-cannot-unreserve-others.bru">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/api-tests/security/12-test-admin-cannot-unreserve-others.bru" />
+              <option name="updatedContent" value="meta {&#10;  name: 12. TEST - Admin ne peut PAS annuler réservation du user&#10;  type: http&#10;  seq: 12&#10;}&#10;&#10;delete {&#10;  url: {{base_url}}/api/groups/{{security_group_id}}/wishes/{{security_admin_wish_id}}/reserve&#10;  body: none&#10;  auth: bearer&#10;}&#10;&#10;auth:bearer {&#10;  token: {{security_admin_token}}&#10;}&#10;&#10;tests {&#10;  test(&quot;SÉCURITÉ: Admin ne peut pas annuler réservation d'un autre - Status 400&quot;, function() {&#10;    expect(res.getStatus()).to.equal(400);&#10;  });&#10;  &#10;  test(&quot;Message d'erreur approprié&quot;, function() {&#10;    expect(res.body.message).to.include(&quot;pas réservé&quot;);&#10;    expect(res.body.code).to.equal(&quot;BUSINESS_RULE_VIOLATION&quot;);&#10;  });&#10;}&#10;&#10;script:post-response {&#10;  if (res.status === 400) {&#10;    console.log(&quot;✅ SÉCURITÉ - Étape 12: Admin ne peut PAS annuler la réservation du user ✓&quot;);&#10;  } else {&#10;    console.log(&quot;❌ SÉCURITÉ - Étape 12 ÉCHOUÉE: Admin peut annuler réservation d'un autre!&quot;);&#10;  }&#10;}&#10;" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/api-tests/security/13-user-unreserve-own.bru">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/api-tests/security/13-user-unreserve-own.bru" />
+              <option name="updatedContent" value="meta {&#10;  name: 13. User annule sa propre réservation&#10;  type: http&#10;  seq: 13&#10;}&#10;&#10;delete {&#10;  url: {{base_url}}/api/groups/{{security_group_id}}/wishes/{{security_admin_wish_id}}/reserve&#10;  body: none&#10;  auth: bearer&#10;}&#10;&#10;auth:bearer {&#10;  token: {{security_user_token}}&#10;}&#10;&#10;tests {&#10;  test(&quot;User peut annuler sa propre réservation - Status 200&quot;, function() {&#10;    expect(res.getStatus()).to.equal(200);&#10;  });&#10;  &#10;  test(&quot;Souhait n'est plus réservé&quot;, function() {&#10;    expect(res.body.reservedBy).to.be.null;&#10;  });&#10;}&#10;&#10;script:post-response {&#10;  if (res.status === 200) {&#10;    console.log(&quot;✅ SÉCURITÉ - Étape 13: User peut annuler sa propre réservation ✓&quot;);&#10;  }&#10;}&#10;" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/api-tests/security/14-test-admin-cannot-delete-user-wish.bru">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/api-tests/security/14-test-admin-cannot-delete-user-wish.bru" />
+              <option name="updatedContent" value="meta {&#10;  name: 14. TEST - Admin ne peut PAS supprimer le souhait du user&#10;  type: http&#10;  seq: 14&#10;}&#10;&#10;delete {&#10;  url: {{base_url}}/api/groups/{{security_group_id}}/wishes/{{security_user_wish_id}}&#10;  body: none&#10;  auth: bearer&#10;}&#10;&#10;auth:bearer {&#10;  token: {{security_admin_token}}&#10;}&#10;&#10;tests {&#10;  test(&quot;SÉCURITÉ: Admin ne peut pas supprimer souhait d'un autre - Status 403&quot;, function() {&#10;    expect(res.getStatus()).to.equal(403);&#10;  });&#10;  &#10;  test(&quot;Message d'erreur approprié&quot;, function() {&#10;    expect(res.body.message).to.include(&quot;propres souhaits&quot;);&#10;    expect(res.body.code).to.equal(&quot;ACCESS_DENIED&quot;);&#10;  });&#10;}&#10;&#10;script:post-response {&#10;  if (res.status === 403) {&#10;    console.log(&quot;✅ SÉCURITÉ - Étape 14: Admin ne peut PAS supprimer souhait d'un autre ✓&quot;);&#10;  } else {&#10;    console.log(&quot;❌ SÉCURITÉ - Étape 14 ÉCHOUÉE: Admin peut supprimer souhait d'un autre!&quot;);&#10;  }&#10;}&#10;" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/api-tests/security/15-user-delete-own-wish.bru">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/api-tests/security/15-user-delete-own-wish.bru" />
+              <option name="updatedContent" value="meta {&#10;  name: 15. User peut supprimer son propre souhait&#10;  type: http&#10;  seq: 15&#10;}&#10;&#10;delete {&#10;  url: {{base_url}}/api/groups/{{security_group_id}}/wishes/{{security_user_wish_id}}&#10;  body: none&#10;  auth: bearer&#10;}&#10;&#10;auth:bearer {&#10;  token: {{security_user_token}}&#10;}&#10;&#10;tests {&#10;  test(&quot;User peut supprimer son propre souhait - Status 204&quot;, function() {&#10;    expect(res.getStatus()).to.equal(204);&#10;  });&#10;}&#10;&#10;script:post-response {&#10;  if (res.status === 204) {&#10;    console.log(&quot;✅ SÉCURITÉ - Étape 15: User peut supprimer son propre souhait ✓&quot;);&#10;  }&#10;}&#10;" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/api-tests/security/16-create-second-admin.bru">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/api-tests/security/16-create-second-admin.bru" />
+              <option name="updatedContent" value="meta {&#10;  name: 16. Créer un second admin avec second groupe&#10;  type: http&#10;  seq: 16&#10;}&#10;&#10;post {&#10;  url: {{base_url}}/api/auth/register&#10;  body: json&#10;  auth: none&#10;}&#10;&#10;body:json {&#10;  {&#10;    &quot;email&quot;: &quot;admin2.security@example.com&quot;,&#10;    &quot;password&quot;: &quot;Admin2Secure123!&quot;&#10;  }&#10;}&#10;&#10;script:post-response {&#10;  if (res.status === 200 &amp;&amp; res.body.token) {&#10;    bru.setEnvVar(&quot;security_admin2_token&quot;, res.body.token);&#10;    console.log(&quot;✅ SÉCURITÉ - Étape 16: Second admin créé&quot;);&#10;  }&#10;}&#10;&#10;tests {&#10;  test(&quot;Second admin créé - Status 200&quot;, function() {&#10;    expect(res.getStatus()).to.equal(200);&#10;  });&#10;}&#10;" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/api-tests/security/17-test-admin2-cannot-update-admin1-group.bru">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/api-tests/security/17-test-admin2-cannot-update-admin1-group.bru" />
+              <option name="updatedContent" value="meta {&#10;  name: 17. TEST - Admin2 ne peut PAS modifier groupe d'Admin1&#10;  type: http&#10;  seq: 17&#10;}&#10;&#10;put {&#10;  url: {{base_url}}/api/groups/{{security_group_id}}&#10;  body: json&#10;  auth: bearer&#10;}&#10;&#10;auth:bearer {&#10;  token: {{security_admin2_token}}&#10;}&#10;&#10;body:json {&#10;  {&#10;    &quot;name&quot;: &quot;Tentative modification par admin2&quot;,&#10;    &quot;type&quot;: &quot;noël&quot;&#10;  }&#10;}&#10;&#10;tests {&#10;  test(&quot;SÉCURITÉ: Admin2 ne peut pas modifier groupe d'Admin1 - Status 403&quot;, function() {&#10;    expect(res.getStatus()).to.equal(403);&#10;  });&#10;  &#10;  test(&quot;Message d'erreur approprié&quot;, function() {&#10;    expect(res.body.message).to.exist;&#10;    expect(res.body.code).to.equal(&quot;ACCESS_DENIED&quot;);&#10;  });&#10;}&#10;&#10;script:post-response {&#10;  if (res.status === 403) {&#10;    console.log(&quot;✅ SÉCURITÉ - Étape 17: Admin2 ne peut PAS modifier groupe d'Admin1 ✓&quot;);&#10;  } else {&#10;    console.log(&quot;❌ SÉCURITÉ - Étape 17 ÉCHOUÉE: Admin2 peut modifier groupe d'Admin1!&quot;);&#10;  }&#10;}&#10;" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/api-tests/security/18-test-admin2-cannot-delete-admin1-group.bru">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/api-tests/security/18-test-admin2-cannot-delete-admin1-group.bru" />
+              <option name="updatedContent" value="meta {&#10;  name: 18. TEST - Admin2 ne peut PAS supprimer groupe d'Admin1&#10;  type: http&#10;  seq: 18&#10;}&#10;&#10;delete {&#10;  url: {{base_url}}/api/groups/{{security_group_id}}&#10;  body: none&#10;  auth: bearer&#10;}&#10;&#10;auth:bearer {&#10;  token: {{security_admin2_token}}&#10;}&#10;&#10;tests {&#10;  test(&quot;SÉCURITÉ: Admin2 ne peut pas supprimer groupe d'Admin1 - Status 403&quot;, function() {&#10;    expect(res.getStatus()).to.equal(403);&#10;  });&#10;  &#10;  test(&quot;Message d'erreur approprié&quot;, function() {&#10;    expect(res.body.message).to.exist;&#10;    expect(res.body.code).to.equal(&quot;ACCESS_DENIED&quot;);&#10;  });&#10;}&#10;&#10;script:post-response {&#10;  if (res.status === 403) {&#10;    console.log(&quot;✅ SÉCURITÉ - Étape 18: Admin2 ne peut PAS supprimer groupe d'Admin1 ✓&quot;);&#10;  } else {&#10;    console.log(&quot;❌ SÉCURITÉ - Étape 18 ÉCHOUÉE: Admin2 peut supprimer groupe d'Admin1!&quot;);&#10;  }&#10;}&#10;" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/api-tests/security/19-test-admin2-cannot-invite-to-admin1-group.bru">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/api-tests/security/19-test-admin2-cannot-invite-to-admin1-group.bru" />
+              <option name="updatedContent" value="meta {&#10;  name: 19. TEST - Admin2 ne peut PAS créer invitation pour groupe d'Admin1&#10;  type: http&#10;  seq: 19&#10;}&#10;&#10;post {&#10;  url: {{base_url}}/api/groups/{{security_group_id}}/invite&#10;  body: json&#10;  auth: bearer&#10;}&#10;&#10;auth:bearer {&#10;  token: {{security_admin2_token}}&#10;}&#10;&#10;body:json {&#10;  {&#10;    &quot;email&quot;: &quot;hacker@example.com&quot;&#10;  }&#10;}&#10;&#10;tests {&#10;  test(&quot;SÉCURITÉ: Admin2 ne peut pas inviter dans groupe d'Admin1 - Status 403&quot;, function() {&#10;    expect(res.getStatus()).to.equal(403);&#10;  });&#10;  &#10;  test(&quot;Message d'erreur approprié&quot;, function() {&#10;    expect(res.body.message).to.exist;&#10;    expect(res.body.code).to.equal(&quot;ACCESS_DENIED&quot;);&#10;  });&#10;}&#10;&#10;script:post-response {&#10;  if (res.status === 403) {&#10;    console.log(&quot;✅ SÉCURITÉ - Étape 19: Admin2 ne peut PAS inviter dans groupe d'Admin1 ✓&quot;);&#10;  } else {&#10;    console.log(&quot;❌ SÉCURITÉ - Étape 19 ÉCHOUÉE: Admin2 peut inviter dans groupe d'Admin1!&quot;);&#10;  }&#10;}&#10;" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/api-tests/security/2-admin-create-group.bru">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/api-tests/security/2-admin-create-group.bru" />
+              <option name="updatedContent" value="meta {&#10;  name: 2. Admin crée un groupe&#10;  type: http&#10;  seq: 2&#10;}&#10;&#10;post {&#10;  url: {{base_url}}/api/groups&#10;  body: json&#10;  auth: bearer&#10;}&#10;&#10;auth:bearer {&#10;  token: {{security_admin_token}}&#10;}&#10;&#10;body:json {&#10;  {&#10;    &quot;name&quot;: &quot;Groupe Test Sécurité&quot;,&#10;    &quot;type&quot;: &quot;noël&quot;&#10;  }&#10;}&#10;&#10;script:post-response {&#10;  if (res.status === 200 &amp;&amp; res.body.id) {&#10;    bru.setEnvVar(&quot;security_group_id&quot;, res.body.id);&#10;    if (res.body.jwtToken) {&#10;      bru.setEnvVar(&quot;security_admin_token&quot;, res.body.jwtToken);&#10;    }&#10;    console.log(&quot;✅ SÉCURITÉ - Étape 2: Groupe créé par admin&quot;);&#10;  }&#10;}&#10;&#10;tests {&#10;  test(&quot;Groupe créé - Status 200&quot;, function() {&#10;    expect(res.getStatus()).to.equal(200);&#10;  });&#10;}&#10;" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/api-tests/security/20-admin1-delete-own-group.bru">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/api-tests/security/20-admin1-delete-own-group.bru" />
+              <option name="originalContent" value="&#10;" />
+              <option name="updatedContent" value="meta {&#10;  name: 26. FINAL - Admin1 peut supprimer son propre groupe&#10;  type: http&#10;  seq: 26&#10;}&#10;&#10;delete {&#10;  url: {{base_url}}/api/groups/{{security_group_id}}&#10;  body: none&#10;  auth: bearer&#10;}&#10;&#10;auth:bearer {&#10;  token: {{security_admin_token}}&#10;}&#10;&#10;tests {&#10;  test(&quot;Admin1 peut supprimer son propre groupe - Status 204&quot;, function() {&#10;    expect(res.getStatus()).to.equal(204);&#10;  });&#10;}&#10;&#10;script:post-response {&#10;  if (res.status === 204) {&#10;    console.log(&quot;✅ SÉCURITÉ - Étape 26: Admin1 peut supprimer son propre groupe ✓&quot;);&#10;    console.log(&quot;========================================&quot;);&#10;    console.log(&quot;✅✅✅ TEST DE SÉCURITÉ TERMINÉ AVEC SUCCÈS! ✅✅✅&quot;);&#10;    console.log(&quot;========================================&quot;);&#10;    console.log(&quot;Résumé des tests de sécurité:&quot;);&#10;    console.log(&quot;  ✅ User ne peut PAS créer de groupe&quot;);&#10;    console.log(&quot;  ✅ User ne peut PAS modifier/supprimer un groupe&quot;);&#10;    console.log(&quot;  ✅ User ne peut PAS réserver son propre souhait&quot;);&#10;    console.log(&quot;  ✅ User ne peut PAS annuler réservation d'un autre&quot;);&#10;    console.log(&quot;  ✅ User ne peut PAS supprimer souhait d'un autre&quot;);&#10;    console.log(&quot;  ✅ Admin2 ne peut PAS modifier/supprimer groupe d'Admin1&quot;);&#10;    console.log(&quot;  ✅ Admin2 ne peut PAS inviter dans groupe d'Admin1&quot;);&#10;    console.log(&quot;  ✅ User ne peut PAS voir membres d'un groupe hors appartenance&quot;);&#10;    console.log(&quot;  ✅ User ne peut PAS réserver dans un groupe hors appartenance&quot;);&#10;    console.log(&quot;  ✅ User ne peut PAS voir souhaits dans groupe hors appartenance&quot;);&#10;    console.log(&quot;  ✅ Propriétaire peut gérer son propre groupe&quot;);&#10;    console.log(&quot;========================================&quot;);&#10;  }&#10;}&#10;&#10;" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/api-tests/security/21-admin2-create-own-group.bru">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/api-tests/security/21-admin2-create-own-group.bru" />
+              <option name="updatedContent" value="meta {&#10;  name: 21. Admin2 crée son propre groupe&#10;  type: http&#10;  seq: 21&#10;}&#10;&#10;post {&#10;  url: {{base_url}}/api/groups&#10;  body: json&#10;  auth: bearer&#10;}&#10;&#10;auth:bearer {&#10;  token: {{security_admin2_token}}&#10;}&#10;&#10;body:json {&#10;  {&#10;    &quot;name&quot;: &quot;Groupe Admin2&quot;,&#10;    &quot;type&quot;: &quot;noël&quot;&#10;  }&#10;}&#10;&#10;script:post-response {&#10;  if (res.status === 200 &amp;&amp; res.body.id) {&#10;    bru.setEnvVar(&quot;security_admin2_group_id&quot;, res.body.id);&#10;    if (res.body.jwtToken) {&#10;      bru.setEnvVar(&quot;security_admin2_token&quot;, res.body.jwtToken);&#10;    }&#10;    console.log(&quot;✅ SÉCURITÉ - Étape 21: Admin2 crée son propre groupe&quot;);&#10;  }&#10;}&#10;&#10;tests {&#10;  test(&quot;Admin2 crée son groupe - Status 200&quot;, function() {&#10;    expect(res.getStatus()).to.equal(200);&#10;  });&#10;}&#10;" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/api-tests/security/22-test-user-cannot-see-other-group-members.bru">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/api-tests/security/22-test-user-cannot-see-other-group-members.bru" />
+              <option name="updatedContent" value="meta {&#10;  name: 22. TEST - User ne peut PAS voir membres du groupe Admin2&#10;  type: http&#10;  seq: 22&#10;}&#10;&#10;get {&#10;  url: {{base_url}}/api/groups/{{security_admin2_group_id}}/users&#10;  body: none&#10;  auth: bearer&#10;}&#10;&#10;auth:bearer {&#10;  token: {{security_user_token}}&#10;}&#10;&#10;tests {&#10;  test(&quot;SÉCURITÉ: User ne peut pas voir membres groupe hors appartenance - Status 403&quot;, function() {&#10;    expect(res.getStatus()).to.equal(403);&#10;  });&#10;  &#10;  test(&quot;Message d'erreur approprié&quot;, function() {&#10;    expect(res.body.message).to.exist;&#10;  });&#10;}&#10;&#10;script:post-response {&#10;  if (res.status === 403) {&#10;    console.log(&quot;✅ SÉCURITÉ - Étape 22: User ne peut PAS voir membres d'un groupe auquel il n'appartient pas ✓&quot;);&#10;  } else {&#10;    console.log(&quot;❌ SÉCURITÉ - Étape 22 ÉCHOUÉE: User peut voir membres d'un groupe hors appartenance!&quot;);&#10;  }&#10;}&#10;" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/api-tests/security/23-admin2-create-wish-in-own-group.bru">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/api-tests/security/23-admin2-create-wish-in-own-group.bru" />
+              <option name="updatedContent" value="meta {&#10;  name: 23. Admin2 crée un souhait dans son groupe&#10;  type: http&#10;  seq: 23&#10;}&#10;&#10;post {&#10;  url: {{base_url}}/api/groups/{{security_admin2_group_id}}/wishes&#10;  body: json&#10;  auth: bearer&#10;}&#10;&#10;auth:bearer {&#10;  token: {{security_admin2_token}}&#10;}&#10;&#10;body:json {&#10;  {&#10;    &quot;giftName&quot;: &quot;Souhait Admin2 dans son groupe&quot;,&#10;    &quot;description&quot;: &quot;Pour test isolation groupes&quot;,&#10;    &quot;url&quot;: &quot;https://example.com/admin2-wish&quot;&#10;  }&#10;}&#10;&#10;script:post-response {&#10;  if (res.status === 200 &amp;&amp; res.body.id) {&#10;    bru.setEnvVar(&quot;security_admin2_wish_id&quot;, res.body.id);&#10;    console.log(&quot;✅ SÉCURITÉ - Étape 23: Admin2 a créé un souhait dans son groupe&quot;);&#10;  }&#10;}&#10;&#10;tests {&#10;  test(&quot;Admin2 crée souhait dans son groupe - Status 200&quot;, function() {&#10;    expect(res.getStatus()).to.equal(200);&#10;  });&#10;}&#10;" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/api-tests/security/24-test-user-cannot-reserve-in-other-group.bru">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/api-tests/security/24-test-user-cannot-reserve-in-other-group.bru" />
+              <option name="updatedContent" value="meta {&#10;  name: 24. TEST - User ne peut PAS réserver souhait groupe Admin2&#10;  type: http&#10;  seq: 24&#10;}&#10;&#10;post {&#10;  url: {{base_url}}/api/groups/{{security_admin2_group_id}}/wishes/{{security_admin2_wish_id}}/reserve&#10;  body: none&#10;  auth: bearer&#10;}&#10;&#10;auth:bearer {&#10;  token: {{security_user_token}}&#10;}&#10;&#10;tests {&#10;  test(&quot;SÉCURITÉ: User ne peut pas réserver dans groupe hors appartenance - Status 403&quot;, function() {&#10;    expect(res.getStatus()).to.equal(403);&#10;  });&#10;  &#10;  test(&quot;Message d'erreur approprié&quot;, function() {&#10;    expect(res.body.message).to.exist;&#10;  });&#10;}&#10;&#10;script:post-response {&#10;  if (res.status === 403) {&#10;    console.log(&quot;✅ SÉCURITÉ - Étape 24: User ne peut PAS réserver souhait dans groupe auquel il n'appartient pas ✓&quot;);&#10;  } else {&#10;    console.log(&quot;❌ SÉCURITÉ - Étape 24 ÉCHOUÉE: User peut réserver dans groupe hors appartenance!&quot;);&#10;  }&#10;}&#10;" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/api-tests/security/25-test-user-cannot-see-wishes-in-other-group.bru">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/api-tests/security/25-test-user-cannot-see-wishes-in-other-group.bru" />
+              <option name="updatedContent" value="meta {&#10;  name: 25. TEST - User ne peut PAS voir souhaits Admin2&#10;  type: http&#10;  seq: 25&#10;}&#10;&#10;get {&#10;  url: {{base_url}}/api/groups/{{security_admin2_group_id}}/wishes/users/{{security_admin_id}}&#10;  body: none&#10;  auth: bearer&#10;}&#10;&#10;auth:bearer {&#10;  token: {{security_user_token}}&#10;}&#10;&#10;tests {&#10;  test(&quot;SÉCURITÉ: User ne peut pas voir souhaits dans groupe hors appartenance - Status 403&quot;, function() {&#10;    expect(res.getStatus()).to.equal(403);&#10;  });&#10;  &#10;  test(&quot;Message d'erreur approprié&quot;, function() {&#10;    expect(res.body.message).to.exist;&#10;  });&#10;}&#10;&#10;script:post-response {&#10;  if (res.status === 403) {&#10;    console.log(&quot;✅ SÉCURITÉ - Étape 25: User ne peut PAS voir souhaits d'un user dans groupe auquel il n'appartient pas ✓&quot;);&#10;  } else {&#10;    console.log(&quot;❌ SÉCURITÉ - Étape 25 ÉCHOUÉE: User peut voir souhaits dans groupe hors appartenance!&quot;);&#10;  }&#10;}&#10;" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/api-tests/security/3-admin-create-invitation.bru">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/api-tests/security/3-admin-create-invitation.bru" />
+              <option name="updatedContent" value="meta {&#10;  name: 3. Admin crée invitation pour User&#10;  type: http&#10;  seq: 3&#10;}&#10;&#10;post {&#10;  url: {{base_url}}/api/groups/{{security_group_id}}/invite&#10;  body: json&#10;  auth: bearer&#10;}&#10;&#10;auth:bearer {&#10;  token: {{security_admin_token}}&#10;}&#10;&#10;body:json {&#10;  {&#10;    &quot;email&quot;: &quot;user.security@example.com&quot;&#10;  }&#10;}&#10;&#10;script:post-response {&#10;  if (res.status === 200 &amp;&amp; res.body.token) {&#10;    bru.setEnvVar(&quot;security_invitation_token&quot;, res.body.token);&#10;    console.log(&quot;✅ SÉCURITÉ - Étape 3: Invitation créée&quot;);&#10;  }&#10;}&#10;&#10;tests {&#10;  test(&quot;Invitation créée - Status 200&quot;, function() {&#10;    expect(res.getStatus()).to.equal(200);&#10;  });&#10;}&#10;" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/api-tests/security/4-user-accept-invitation.bru">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/api-tests/security/4-user-accept-invitation.bru" />
+              <option name="updatedContent" value="meta {&#10;  name: 4. User accepte invitation&#10;  type: http&#10;  seq: 4&#10;}&#10;&#10;get {&#10;  url: {{base_url}}/api/invite/{{security_invitation_token}}&#10;  body: none&#10;  auth: none&#10;}&#10;&#10;script:post-response {&#10;  if (res.status === 200 &amp;&amp; res.body.jwtToken) {&#10;    bru.setEnvVar(&quot;security_user_token&quot;, res.body.jwtToken);&#10;    console.log(&quot;✅ SÉCURITÉ - Étape 4: User a accepté l'invitation&quot;);&#10;  }&#10;}&#10;&#10;tests {&#10;  test(&quot;Invitation acceptée - Status 200&quot;, function() {&#10;    expect(res.getStatus()).to.equal(200);&#10;  });&#10;  &#10;  test(&quot;JWT user reçu&quot;, function() {&#10;    expect(res.body.jwtToken).to.be.a('string');&#10;  });&#10;}&#10;" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/api-tests/security/5-test-user-cannot-create-group.bru">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/api-tests/security/5-test-user-cannot-create-group.bru" />
+              <option name="updatedContent" value="meta {&#10;  name: 5. TEST - User ne peut PAS créer de groupe&#10;  type: http&#10;  seq: 5&#10;}&#10;&#10;post {&#10;  url: {{base_url}}/api/groups&#10;  body: json&#10;  auth: bearer&#10;}&#10;&#10;auth:bearer {&#10;  token: {{security_user_token}}&#10;}&#10;&#10;body:json {&#10;  {&#10;    &quot;name&quot;: &quot;Tentative création par user&quot;,&#10;    &quot;type&quot;: &quot;noël&quot;&#10;  }&#10;}&#10;&#10;tests {&#10;  test(&quot;SÉCURITÉ: User ne peut pas créer de groupe - Status 403&quot;, function() {&#10;    expect(res.getStatus()).to.equal(403);&#10;  });&#10;  &#10;  test(&quot;Message d'erreur approprié&quot;, function() {&#10;    expect(res.body.message).to.exist;&#10;    expect(res.body.code).to.equal(&quot;ACCESS_DENIED&quot;);&#10;  });&#10;}&#10;&#10;script:post-response {&#10;  if (res.status === 403) {&#10;    console.log(&quot;✅ SÉCURITÉ - Étape 5: User ne peut PAS créer de groupe ✓&quot;);&#10;  } else {&#10;    console.log(&quot;❌ SÉCURITÉ - Étape 5 ÉCHOUÉE: User peut créer un groupe!&quot;);&#10;  }&#10;}&#10;" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/api-tests/security/6-test-user-cannot-update-group.bru">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/api-tests/security/6-test-user-cannot-update-group.bru" />
+              <option name="updatedContent" value="meta {&#10;  name: 6. TEST - User ne peut PAS modifier le groupe&#10;  type: http&#10;  seq: 6&#10;}&#10;&#10;put {&#10;  url: {{base_url}}/api/groups/{{security_group_id}}&#10;  body: json&#10;  auth: bearer&#10;}&#10;&#10;auth:bearer {&#10;  token: {{security_user_token}}&#10;}&#10;&#10;body:json {&#10;  {&#10;    &quot;name&quot;: &quot;Tentative modification par user&quot;,&#10;    &quot;type&quot;: &quot;noël&quot;&#10;  }&#10;}&#10;&#10;tests {&#10;  test(&quot;SÉCURITÉ: User ne peut pas modifier le groupe - Status 403&quot;, function() {&#10;    expect(res.getStatus()).to.equal(403);&#10;  });&#10;  &#10;  test(&quot;Message d'erreur approprié&quot;, function() {&#10;    expect(res.body.message).to.exist;&#10;  });&#10;}&#10;&#10;script:post-response {&#10;  if (res.status === 403) {&#10;    console.log(&quot;✅ SÉCURITÉ - Étape 6: User ne peut PAS modifier le groupe ✓&quot;);&#10;  } else {&#10;    console.log(&quot;❌ SÉCURITÉ - Étape 6 ÉCHOUÉE: User peut modifier le groupe!&quot;);&#10;  }&#10;}&#10;" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/api-tests/security/7-test-user-cannot-delete-group.bru">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/api-tests/security/7-test-user-cannot-delete-group.bru" />
+              <option name="updatedContent" value="meta {&#10;  name: 7. TEST - User ne peut PAS supprimer le groupe&#10;  type: http&#10;  seq: 7&#10;}&#10;&#10;delete {&#10;  url: {{base_url}}/api/groups/{{security_group_id}}&#10;  body: none&#10;  auth: bearer&#10;}&#10;&#10;auth:bearer {&#10;  token: {{security_user_token}}&#10;}&#10;&#10;tests {&#10;  test(&quot;SÉCURITÉ: User ne peut pas supprimer le groupe - Status 403&quot;, function() {&#10;    expect(res.getStatus()).to.equal(403);&#10;  });&#10;  &#10;  test(&quot;Message d'erreur approprié&quot;, function() {&#10;    expect(res.body.message).to.exist;&#10;  });&#10;}&#10;&#10;script:post-response {&#10;  if (res.status === 403) {&#10;    console.log(&quot;✅ SÉCURITÉ - Étape 7: User ne peut PAS supprimer le groupe ✓&quot;);&#10;  } else {&#10;    console.log(&quot;❌ SÉCURITÉ - Étape 7 ÉCHOUÉE: User peut supprimer le groupe!&quot;);&#10;  }&#10;}&#10;" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/api-tests/security/8-user-create-wish.bru">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/api-tests/security/8-user-create-wish.bru" />
+              <option name="updatedContent" value="meta {&#10;  name: 8. User crée un souhait dans le groupe&#10;  type: http&#10;  seq: 8&#10;}&#10;&#10;post {&#10;  url: {{base_url}}/api/groups/{{security_group_id}}/wishes&#10;  body: json&#10;  auth: bearer&#10;}&#10;&#10;auth:bearer {&#10;  token: {{security_user_token}}&#10;}&#10;&#10;body:json {&#10;  {&#10;    &quot;giftName&quot;: &quot;Souhait du user&quot;,&#10;    &quot;description&quot;: &quot;Pour test de sécurité&quot;,&#10;    &quot;url&quot;: &quot;https://example.com/wish&quot;&#10;  }&#10;}&#10;&#10;script:post-response {&#10;  if (res.status === 200 &amp;&amp; res.body.id) {&#10;    bru.setEnvVar(&quot;security_user_wish_id&quot;, res.body.id);&#10;    console.log(&quot;✅ SÉCURITÉ - Étape 8: User a créé un souhait&quot;);&#10;  }&#10;}&#10;&#10;tests {&#10;  test(&quot;User peut créer un souhait - Status 200&quot;, function() {&#10;    expect(res.getStatus()).to.equal(200);&#10;  });&#10;  &#10;  test(&quot;Souhait créé avec bon userId&quot;, function() {&#10;    expect(res.body.userId).to.be.a('string');&#10;  });&#10;}&#10;" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/api-tests/security/9-admin-create-wish.bru">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/api-tests/security/9-admin-create-wish.bru" />
+              <option name="updatedContent" value="meta {&#10;  name: 9. Admin crée un souhait&#10;  type: http&#10;  seq: 9&#10;}&#10;&#10;post {&#10;  url: {{base_url}}/api/groups/{{security_group_id}}/wishes&#10;  body: json&#10;  auth: bearer&#10;}&#10;&#10;auth:bearer {&#10;  token: {{security_admin_token}}&#10;}&#10;&#10;body:json {&#10;  {&#10;    &quot;giftName&quot;: &quot;Souhait de l'admin&quot;,&#10;    &quot;description&quot;: &quot;Pour test de réservation&quot;,&#10;    &quot;url&quot;: &quot;https://example.com/admin-wish&quot;&#10;  }&#10;}&#10;&#10;script:post-response {&#10;  if (res.status === 200 &amp;&amp; res.body.id) {&#10;    bru.setEnvVar(&quot;security_admin_wish_id&quot;, res.body.id);&#10;    console.log(&quot;✅ SÉCURITÉ - Étape 9: Admin a créé un souhait&quot;);&#10;  }&#10;}&#10;&#10;tests {&#10;  test(&quot;Admin peut créer un souhait - Status 200&quot;, function() {&#10;    expect(res.getStatus()).to.equal(200);&#10;  });&#10;}&#10;" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+</project>

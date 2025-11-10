@@ -1,0 +1,35 @@
+meta {
+  name: 12. TEST - Admin ne peut PAS annuler réservation du user
+  type: http
+  seq: 12
+}
+
+delete {
+  url: {{base_url}}/api/groups/{{security_group_id}}/wishes/{{security_admin_wish_id}}/reserve
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{security_admin_token}}
+}
+
+tests {
+  test("SÉCURITÉ: Admin ne peut pas annuler réservation d'un autre - Status 400", function() {
+    expect(res.getStatus()).to.equal(400);
+  });
+
+  test("Message d'erreur approprié", function() {
+    expect(res.body.message).to.include("pas réservé");
+    expect(res.body.code).to.equal("BUSINESS_RULE_VIOLATION");
+  });
+}
+
+script:post-response {
+  if (res.status === 400) {
+    console.log("✅ SÉCURITÉ - Étape 12: Admin ne peut PAS annuler la réservation du user ✓");
+  } else {
+    console.log("❌ SÉCURITÉ - Étape 12 ÉCHOUÉE: Admin peut annuler réservation d'un autre!");
+  }
+}
+

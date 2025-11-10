@@ -1,0 +1,37 @@
+meta {
+  name: 9. Admin crée un souhait
+  type: http
+  seq: 9
+}
+
+post {
+  url: {{base_url}}/api/groups/{{security_group_id}}/wishes
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{security_admin_token}}
+}
+
+body:json {
+  {
+    "giftName": "Souhait de l'admin",
+    "description": "Pour test de réservation",
+    "url": "https://example.com/admin-wish"
+  }
+}
+
+script:post-response {
+  if (res.status === 200 && res.body.id) {
+    bru.setEnvVar("security_admin_wish_id", res.body.id);
+    console.log("✅ SÉCURITÉ - Étape 9: Admin a créé un souhait");
+  }
+}
+
+tests {
+  test("Admin peut créer un souhait - Status 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+}
+

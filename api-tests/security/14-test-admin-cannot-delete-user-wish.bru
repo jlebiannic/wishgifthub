@@ -1,0 +1,35 @@
+meta {
+  name: 14. TEST - Admin ne peut PAS supprimer le souhait du user
+  type: http
+  seq: 14
+}
+
+delete {
+  url: {{base_url}}/api/groups/{{security_group_id}}/wishes/{{security_user_wish_id}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{security_admin_token}}
+}
+
+tests {
+  test("SÉCURITÉ: Admin ne peut pas supprimer souhait d'un autre - Status 403", function() {
+    expect(res.getStatus()).to.equal(403);
+  });
+
+  test("Message d'erreur approprié", function() {
+    expect(res.body.message).to.include("propres souhaits");
+    expect(res.body.code).to.equal("ACCESS_DENIED");
+  });
+}
+
+script:post-response {
+  if (res.status === 403) {
+    console.log("✅ SÉCURITÉ - Étape 14: Admin ne peut PAS supprimer souhait d'un autre ✓");
+  } else {
+    console.log("❌ SÉCURITÉ - Étape 14 ÉCHOUÉE: Admin peut supprimer souhait d'un autre!");
+  }
+}
+

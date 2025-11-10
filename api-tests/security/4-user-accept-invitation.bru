@@ -1,0 +1,29 @@
+meta {
+  name: 4. User accepte invitation
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{base_url}}/api/invite/{{security_invitation_token}}
+  body: none
+  auth: none
+}
+
+script:post-response {
+  if (res.status === 200 && res.body.jwtToken) {
+    bru.setEnvVar("security_user_token", res.body.jwtToken);
+    console.log("✅ SÉCURITÉ - Étape 4: User a accepté l'invitation");
+  }
+}
+
+tests {
+  test("Invitation acceptée - Status 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("JWT user reçu", function() {
+    expect(res.body.jwtToken).to.be.a('string');
+  });
+}
+

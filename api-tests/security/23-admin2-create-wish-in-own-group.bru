@@ -1,0 +1,37 @@
+meta {
+  name: 23. Admin2 crée un souhait dans son groupe
+  type: http
+  seq: 23
+}
+
+post {
+  url: {{base_url}}/api/groups/{{security_admin2_group_id}}/wishes
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{security_admin2_token}}
+}
+
+body:json {
+  {
+    "giftName": "Souhait Admin2 dans son groupe",
+    "description": "Pour test isolation groupes",
+    "url": "https://example.com/admin2-wish"
+  }
+}
+
+script:post-response {
+  if (res.status === 200 && res.body.id) {
+    bru.setEnvVar("security_admin2_wish_id", res.body.id);
+    console.log("✅ SÉCURITÉ - Étape 23: Admin2 a créé un souhait dans son groupe");
+  }
+}
+
+tests {
+  test("Admin2 crée souhait dans son groupe - Status 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+}
+

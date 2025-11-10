@@ -1,0 +1,41 @@
+meta {
+  name: 5. TEST - User ne peut PAS créer de groupe
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{base_url}}/api/groups
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{security_user_token}}
+}
+
+body:json {
+  {
+    "name": "Tentative création par user",
+    "type": "noël"
+  }
+}
+
+script:post-response {
+  if (res.status === 403) {
+    console.log("✅ SÉCURITÉ - Étape 5: User ne peut PAS créer de groupe ✓");
+  } else {
+    console.log("❌ SÉCURITÉ - Étape 5 ÉCHOUÉE: User peut créer un groupe!");
+  }
+}
+
+tests {
+  test("SÉCURITÉ: User ne peut pas créer de groupe - Status 403", function() {
+    expect(res.getStatus()).to.equal(403);
+  });
+  
+  test("Message d'erreur approprié", function() {
+    expect(res.body.message).to.exist;
+    expect(res.body.code).contains("ACCESS_DENIED");
+  });
+}

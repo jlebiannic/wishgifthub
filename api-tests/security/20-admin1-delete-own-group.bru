@@ -1,0 +1,44 @@
+meta {
+  name: 26. FINAL - Admin1 peut supprimer son propre groupe
+  type: http
+  seq: 26
+}
+
+delete {
+  url: {{base_url}}/api/groups/{{security_group_id}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{security_admin_token}}
+}
+
+tests {
+  test("Admin1 peut supprimer son propre groupe - Status 204", function() {
+    expect(res.getStatus()).to.equal(204);
+  });
+}
+
+script:post-response {
+  if (res.status === 204) {
+    console.log("✅ SÉCURITÉ - Étape 26: Admin1 peut supprimer son propre groupe ✓");
+    console.log("========================================");
+    console.log("✅✅✅ TEST DE SÉCURITÉ TERMINÉ AVEC SUCCÈS! ✅✅✅");
+    console.log("========================================");
+    console.log("Résumé des tests de sécurité:");
+    console.log("  ✅ User ne peut PAS créer de groupe");
+    console.log("  ✅ User ne peut PAS modifier/supprimer un groupe");
+    console.log("  ✅ User ne peut PAS réserver son propre souhait");
+    console.log("  ✅ User ne peut PAS annuler réservation d'un autre");
+    console.log("  ✅ User ne peut PAS supprimer souhait d'un autre");
+    console.log("  ✅ Admin2 ne peut PAS modifier/supprimer groupe d'Admin1");
+    console.log("  ✅ Admin2 ne peut PAS inviter dans groupe d'Admin1");
+    console.log("  ✅ User ne peut PAS voir membres d'un groupe hors appartenance");
+    console.log("  ✅ User ne peut PAS réserver dans un groupe hors appartenance");
+    console.log("  ✅ User ne peut PAS voir souhaits dans groupe hors appartenance");
+    console.log("  ✅ Propriétaire peut gérer son propre groupe");
+    console.log("========================================");
+  }
+}
+

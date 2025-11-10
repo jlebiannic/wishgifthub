@@ -1,0 +1,28 @@
+meta {
+  name: 15. User peut supprimer son propre souhait
+  type: http
+  seq: 15
+}
+
+delete {
+  url: {{base_url}}/api/groups/{{security_group_id}}/wishes/{{security_user_wish_id}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{security_user_token}}
+}
+
+tests {
+  test("User peut supprimer son propre souhait - Status 204", function() {
+    expect(res.getStatus()).to.equal(204);
+  });
+}
+
+script:post-response {
+  if (res.status === 204) {
+    console.log("✅ SÉCURITÉ - Étape 15: User peut supprimer son propre souhait ✓");
+  }
+}
+

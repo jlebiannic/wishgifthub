@@ -1,0 +1,32 @@
+meta {
+  name: 11. User peut réserver le souhait de l'admin
+  type: http
+  seq: 11
+}
+
+post {
+  url: {{base_url}}/api/groups/{{security_group_id}}/wishes/{{security_admin_wish_id}}/reserve
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{security_user_token}}
+}
+
+tests {
+  test("User peut réserver le souhait d'un autre - Status 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("Souhait réservé par le user", function() {
+    expect(res.body.reservedBy).to.be.a('string');
+  });
+}
+
+script:post-response {
+  if (res.status === 200) {
+    console.log("✅ SÉCURITÉ - Étape 11: User peut réserver le souhait de l'admin ✓");
+  }
+}
+

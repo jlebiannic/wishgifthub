@@ -1,0 +1,34 @@
+meta {
+  name: 25. TEST - User ne peut PAS voir souhaits Admin2
+  type: http
+  seq: 25
+}
+
+get {
+  url: {{base_url}}/api/groups/{{security_admin2_group_id}}/wishes/users/{{security_admin_id}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{security_user_token}}
+}
+
+tests {
+  test("SÉCURITÉ: User ne peut pas voir souhaits dans groupe hors appartenance - Status 403", function() {
+    expect(res.getStatus()).to.equal(403);
+  });
+
+  test("Message d'erreur approprié", function() {
+    expect(res.body.message).to.exist;
+  });
+}
+
+script:post-response {
+  if (res.status === 403) {
+    console.log("✅ SÉCURITÉ - Étape 25: User ne peut PAS voir souhaits d'un user dans groupe auquel il n'appartient pas ✓");
+  } else {
+    console.log("❌ SÉCURITÉ - Étape 25 ÉCHOUÉE: User peut voir souhaits dans groupe hors appartenance!");
+  }
+}
+

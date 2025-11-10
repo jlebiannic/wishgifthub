@@ -1,0 +1,36 @@
+meta {
+  name: 1. Créer Admin et User
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{base_url}}/api/auth/register
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "email": "admin.security@example.com",
+    "password": "AdminSecure123!"
+  }
+}
+
+script:post-response {
+  if (res.status === 200 && res.body.token) {
+    bru.setEnvVar("security_admin_token", res.body.token);
+    bru.setEnvVar("security_admin_id", res.body.userId);
+    console.log("✅ SÉCURITÉ - Étape 1: Admin créé");
+  }
+}
+
+tests {
+  test("Admin créé - Status 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+  
+  test("Admin a le rôle admin", function() {
+    expect(res.body.isAdmin).to.equal(true);
+  });
+}
