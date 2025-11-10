@@ -71,12 +71,30 @@
                 <artifactId>openapi-generator-maven-plugin</artifactId>
                 <version>${openapi-generator.version}</version>
                 <executions>
+                    <!-- Première exécution : Assembler les fichiers YAML modulaires en un seul fichier -->
                     <execution>
+                        <id>assemble-openapi-yaml</id>
+                        <phase>generate-sources</phase>
                         <goals>
                             <goal>generate</goal>
                         </goals>
                         <configuration>
-                            <inputSpec>${project.basedir}/src/main/resources/openapi.yml</inputSpec>
+                            <inputSpec>${project.basedir}/src/main/resources/openapi/openapi.yml</inputSpec>
+                            <generatorName>openapi-yaml</generatorName>
+                            <output>${project.build.directory}/generated-sources/openapi-yaml</output>
+                            <skipValidateSpec>true</skipValidateSpec>
+                        </configuration>
+                    </execution>
+
+                    <!-- Deuxième exécution : Générer les classes Java Spring à partir du YAML assemblé -->
+                    <execution>
+                        <id>generate-spring-api</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <inputSpec>${project.build.directory}/generated-sources/openapi-yaml/openapi.yaml</inputSpec>
                             <generatorName>spring</generatorName>
                             <apiPackage>com.wishgifthub.openapi.api</apiPackage>
                             <modelPackage>com.wishgifthub.openapi.model</modelPackage>
