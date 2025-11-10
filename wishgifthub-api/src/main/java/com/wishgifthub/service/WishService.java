@@ -12,7 +12,6 @@ import com.wishgifthub.repository.GroupRepository;
 import com.wishgifthub.repository.UserGroupRepository;
 import com.wishgifthub.repository.UserRepository;
 import com.wishgifthub.repository.WishRepository;
-import org.openapitools.jackson.nullable.JsonNullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -46,11 +45,11 @@ public class WishService {
         wish.setUser(user);
         wish.setGroup(group);
         wish.setGiftName(request.getGiftName());
-        if (request.getDescription() != null && request.getDescription().isPresent()) {
-            wish.setDescription(request.getDescription().get());
+        if (request.getDescription() != null) {
+            wish.setDescription(request.getDescription());
         }
-        if (request.getUrl() != null && request.getUrl().isPresent()) {
-            wish.setUrl(request.getUrl().get().toString());
+        if (request.getUrl() != null) {
+            wish.setUrl(request.getUrl().toString());
         }
         wish = wishRepository.save(wish);
 
@@ -140,17 +139,17 @@ public class WishService {
         resp.setGroupId(wish.getGroup().getId());
         resp.setGiftName(wish.getGiftName());
         if (wish.getDescription() != null) {
-            resp.setDescription(JsonNullable.of(wish.getDescription()));
+            resp.setDescription(wish.getDescription());
         }
         if (wish.getUrl() != null) {
             try {
-                resp.setUrl(JsonNullable.of(new URI(wish.getUrl())));
+                resp.setUrl(new URI(wish.getUrl()));
             } catch (Exception e) {
                 // Log error
             }
         }
         if (wish.getReservedBy() != null) {
-            resp.setReservedBy(JsonNullable.of(wish.getReservedBy().getId()));
+            resp.setReservedBy(wish.getReservedBy().getId());
         }
         resp.setCreatedAt(wish.getCreatedAt());
         return resp;

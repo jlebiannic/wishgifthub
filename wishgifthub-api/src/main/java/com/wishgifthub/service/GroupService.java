@@ -10,7 +10,6 @@ import com.wishgifthub.openapi.model.GroupResponse;
 import com.wishgifthub.repository.GroupRepository;
 import com.wishgifthub.repository.UserGroupRepository;
 import com.wishgifthub.repository.UserRepository;
-import org.openapitools.jackson.nullable.JsonNullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -67,7 +66,7 @@ public class GroupService {
         resp.setType(group.getType());
         resp.setAdminId(admin.getId());
         resp.setCreatedAt(group.getCreatedAt());
-        resp.setJwtToken(JsonNullable.of(jwt));
+        resp.setJwtToken(jwt);
         return resp;
     }
 

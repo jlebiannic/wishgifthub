@@ -12,7 +12,6 @@ import com.wishgifthub.repository.GroupRepository;
 import com.wishgifthub.repository.InvitationRepository;
 import com.wishgifthub.repository.UserGroupRepository;
 import com.wishgifthub.repository.UserRepository;
-import org.openapitools.jackson.nullable.JsonNullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -55,7 +54,7 @@ public class InvitationService {
         resp.setAccepted(false);
         resp.setCreatedAt(invitation.getCreatedAt());
         try {
-            resp.setInvitationLink(JsonNullable.of(new URI(invitationBaseUrl + invitation.getToken())));
+            resp.setInvitationLink(new URI(invitationBaseUrl + invitation.getToken()));
         } catch (Exception e) {
             // Log error
         }
@@ -104,7 +103,7 @@ public class InvitationService {
         resp.setToken(invitation.getToken());
         resp.setAccepted(true);
         resp.setCreatedAt(invitation.getCreatedAt());
-        resp.setJwtToken(JsonNullable.of(jwt));
+        resp.setJwtToken(jwt);
         return resp;
     }
 }
