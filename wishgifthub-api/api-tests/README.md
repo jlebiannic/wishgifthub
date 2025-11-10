@@ -154,7 +154,7 @@ Si une requête échoue :
 ## 📚 Ressources
 
 - [Documentation Bruno](https://www.usebruno.com/docs)
-- [Cahier des charges](../CAHIER_DES_CHARGES.md)
+- [Cahier des charges](../CAHIER_DES_CHARGES_API.md)
 
 ---
 
