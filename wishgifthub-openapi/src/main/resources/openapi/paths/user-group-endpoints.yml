@@ -1,0 +1,81 @@
+/api/groups/me:
+  get:
+    tags:
+      - Utilisateurs
+    summary: Lister mes groupes
+    description: |
+      Retourne la liste de tous les groupes auxquels l'utilisateur appartient.
+      Accessible à tous les utilisateurs authentifiés (admin ou invité).
+    operationId: getUserGroups
+    security:
+      - bearerAuth: []
+    responses:
+      '200':
+        description: Liste des groupes récupérée avec succès
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '../openapi.yml#/components/schemas/GroupResponse'
+            example:
+              - id: "123e4567-e89b-12d3-a456-426614174000"
+                name: "Noël en famille 2025"
+                type: "noël"
+                adminId: "987e6543-e21b-12d3-a456-426614174999"
+                createdAt: "2025-11-10T10:00:00Z"
+              - id: "456e7890-e12b-12d3-a456-426614174111"
+                name: "Anniversaire Marie"
+                type: "noël"
+                adminId: "111e2222-e33b-44d5-a666-777888999000"
+                createdAt: "2025-11-05T14:30:00Z"
+      '401':
+        $ref: '../openapi.yml#/components/responses/UnauthorizedError'
+
+/api/groups/{groupId}/users:
+  get:
+    tags:
+      - Utilisateurs
+    summary: Lister les membres d'un groupe
+    description: |
+      Retourne la liste de tous les utilisateurs membres d'un groupe.
+      L'utilisateur doit être membre du groupe pour accéder à cette information.
+      
+      **Autorisation** : Nécessite l'autorité `GROUP_{groupId}` dans le JWT.
+    operationId: getUsersByGroup
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '../openapi.yml#/components/parameters/GroupIdParam'
+    responses:
+      '200':
+        description: Liste des membres récupérée avec succès
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '../openapi.yml#/components/schemas/UserResponse'
+            example:
+              - id: "987e6543-e21b-12d3-a456-426614174999"
+                email: "admin@example.com"
+                admin: true
+                createdAt: "2025-11-01T10:00:00Z"
+              - id: "111e2222-e33b-44d5-a666-777888999000"
+                email: "user@example.com"
+                admin: false
+                createdAt: "2025-11-05T15:00:00Z"
+      '401':
+        $ref: '../openapi.yml#/components/responses/UnauthorizedError'
+      '403':
+        description: Accès refusé - Vous n'êtes pas membre de ce groupe
+        content:
+          application/json:
+            schema:
+              $ref: '../openapi.yml#/components/responses/ErrorResponse'
+            example:
+              message: "Vous n'avez pas accès à ce groupe"
+              timestamp: "2025-11-10T17:30:00Z"
+      '404':
+        $ref: '../openapi.yml#/components/responses/NotFoundError'
+

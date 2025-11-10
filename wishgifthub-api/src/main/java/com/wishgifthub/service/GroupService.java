@@ -1,15 +1,16 @@
 package com.wishgifthub.service;
 
-import com.wishgifthub.dto.GroupRequest;
-import com.wishgifthub.dto.GroupResponse;
 import com.wishgifthub.entity.Group;
 import com.wishgifthub.entity.User;
 import com.wishgifthub.entity.UserGroup;
 import com.wishgifthub.exception.AccessDeniedException;
 import com.wishgifthub.exception.ResourceNotFoundException;
+import com.wishgifthub.openapi.model.GroupRequest;
+import com.wishgifthub.openapi.model.GroupResponse;
 import com.wishgifthub.repository.GroupRepository;
 import com.wishgifthub.repository.UserGroupRepository;
 import com.wishgifthub.repository.UserRepository;
+import org.openapitools.jackson.nullable.JsonNullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,8 +41,8 @@ public class GroupService {
         }
 
         Group group = new Group();
-        group.setName(request.name);
-        group.setType(request.type);
+        group.setName(request.getName());
+        group.setType(request.getType().getValue());
         group.setAdmin(admin);
         groupRepository.save(group);
 
@@ -61,23 +62,23 @@ public class GroupService {
         String jwt = jwtService.generateToken(admin, groupIds);
 
         GroupResponse resp = new GroupResponse();
-        resp.id = group.getId();
-        resp.name = group.getName();
-        resp.type = group.getType();
-        resp.adminId = admin.getId();
-        resp.createdAt = group.getCreatedAt();
-        resp.jwtToken = jwt;
+        resp.setId(group.getId());
+        resp.setName(group.getName());
+        resp.setType(group.getType());
+        resp.setAdminId(admin.getId());
+        resp.setCreatedAt(group.getCreatedAt());
+        resp.setJwtToken(JsonNullable.of(jwt));
         return resp;
     }
 
     public List<GroupResponse> getGroupsByAdmin(UUID adminId) {
         return groupRepository.findByAdminId(adminId).stream().map(g -> {
             GroupResponse resp = new GroupResponse();
-            resp.id = g.getId();
-            resp.name = g.getName();
-            resp.type = g.getType();
-            resp.adminId = g.getAdmin().getId();
-            resp.createdAt = g.getCreatedAt();
+            resp.setId(g.getId());
+            resp.setName(g.getName());
+            resp.setType(g.getType());
+            resp.setAdminId(g.getAdmin().getId());
+            resp.setCreatedAt(g.getCreatedAt());
             return resp;
         }).collect(Collectors.toList());
     }
@@ -91,16 +92,16 @@ public class GroupService {
             throw new AccessDeniedException("Seul le propriétaire du groupe peut le modifier");
         }
 
-        group.setName(request.name);
-        group.setType(request.type);
+        group.setName(request.getName());
+        group.setType(request.getType().getValue());
         groupRepository.save(group);
 
         GroupResponse resp = new GroupResponse();
-        resp.id = group.getId();
-        resp.name = group.getName();
-        resp.type = group.getType();
-        resp.adminId = group.getAdmin().getId();
-        resp.createdAt = group.getCreatedAt();
+        resp.setId(group.getId());
+        resp.setName(group.getName());
+        resp.setType(group.getType());
+        resp.setAdminId(group.getAdmin().getId());
+        resp.setCreatedAt(group.getCreatedAt());
         return resp;
     }
 

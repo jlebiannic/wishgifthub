@@ -1,0 +1,276 @@
+/api/groups/{groupId}/wishes:
+  get:
+    tags:
+      - Souhaits
+    summary: Lister tous les souhaits d'un groupe
+    description: |
+      Retourne la liste de tous les souhaits du groupe.
+      Affiche qui a réservé chaque cadeau (visible par tous les membres).
+      L'utilisateur doit être membre du groupe.
+    operationId: getGroupWishes
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '../openapi.yml#/components/parameters/GroupIdParam'
+    responses:
+      '200':
+        description: Liste des souhaits récupérée avec succès
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '../openapi.yml#/components/schemas/WishResponse'
+            example:
+              - id: "111e2222-e33b-44d5-a666-777888999000"
+                userId: "987e6543-e21b-12d3-a456-426614174999"
+                groupId: "123e4567-e89b-12d3-a456-426614174000"
+                giftName: "Livre de cuisine"
+                description: "Livre de recettes italiennes"
+                url: "https://example.com/livre"
+                reservedBy: "456e7890-e12b-12d3-a456-426614174111"
+                createdAt: "2025-11-10T10:00:00Z"
+              - id: "222e3333-e44b-55d6-a777-888999000111"
+                userId: "456e7890-e12b-12d3-a456-426614174111"
+                groupId: "123e4567-e89b-12d3-a456-426614174000"
+                giftName: "Casque audio"
+                description: "Casque sans fil avec réduction de bruit"
+                url: null
+                reservedBy: null
+                createdAt: "2025-11-10T11:00:00Z"
+      '401':
+        $ref: '../openapi.yml#/components/responses/UnauthorizedError'
+      '403':
+        $ref: '../openapi.yml#/components/responses/ForbiddenError'
+      '404':
+        $ref: '../openapi.yml#/components/responses/NotFoundError'
+
+  post:
+    tags:
+      - Souhaits
+    summary: Créer un souhait
+    description: |
+      Ajoute un nouveau souhait à sa propre liste dans le groupe.
+      L'utilisateur doit être membre du groupe.
+    operationId: addWish
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '../openapi.yml#/components/parameters/GroupIdParam'
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../openapi.yml#/components/schemas/WishRequest'
+          example:
+            giftName: "Livre de cuisine"
+            description: "Livre de recettes italiennes"
+            url: "https://example.com/livre"
+    responses:
+      '200':
+        description: Souhait créé avec succès
+        content:
+          application/json:
+            schema:
+              $ref: '../openapi.yml#/components/schemas/WishResponse'
+            example:
+              id: "111e2222-e33b-44d5-a666-777888999000"
+              userId: "987e6543-e21b-12d3-a456-426614174999"
+              groupId: "123e4567-e89b-12d3-a456-426614174000"
+              giftName: "Livre de cuisine"
+              description: "Livre de recettes italiennes"
+              url: "https://example.com/livre"
+              reservedBy: null
+              createdAt: "2025-11-10T10:00:00Z"
+      '400':
+        $ref: '../openapi.yml#/components/responses/BadRequestError'
+      '401':
+        $ref: '../openapi.yml#/components/responses/UnauthorizedError'
+      '403':
+        $ref: '../openapi.yml#/components/responses/ForbiddenError'
+
+/api/groups/{groupId}/wishes/me:
+  get:
+    tags:
+      - Souhaits
+    summary: Lister mes souhaits
+    description: |
+      Retourne la liste de tous les souhaits créés par l'utilisateur authentifié dans ce groupe.
+    operationId: getMyWishes
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '../openapi.yml#/components/parameters/GroupIdParam'
+    responses:
+      '200':
+        description: Liste des souhaits récupérée avec succès
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '../openapi.yml#/components/schemas/WishResponse'
+      '401':
+        $ref: '../openapi.yml#/components/responses/UnauthorizedError'
+      '403':
+        $ref: '../openapi.yml#/components/responses/ForbiddenError'
+
+/api/groups/{groupId}/wishes/users/{userId}:
+  get:
+    tags:
+      - Souhaits
+    summary: Lister les souhaits d'un utilisateur
+    description: |
+      Retourne la liste des souhaits d'un utilisateur spécifique dans le groupe.
+      L'utilisateur authentifié et l'utilisateur cible doivent être membres du même groupe.
+    operationId: getUserWishes
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '../openapi.yml#/components/parameters/GroupIdParam'
+      - $ref: '../openapi.yml#/components/parameters/UserIdParam'
+    responses:
+      '200':
+        description: Liste des souhaits récupérée avec succès
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '../openapi.yml#/components/schemas/WishResponse'
+      '401':
+        $ref: '../openapi.yml#/components/responses/UnauthorizedError'
+      '403':
+        description: Accès refusé - Utilisateur non membre du groupe
+        content:
+          application/json:
+            schema:
+              $ref: '../openapi.yml#/components/responses/ErrorResponse'
+
+/api/groups/{groupId}/wishes/{wishId}:
+  delete:
+    tags:
+      - Souhaits
+    summary: Supprimer un souhait
+    description: |
+      Supprime un souhait de sa propre liste.
+      Seul le créateur du souhait peut le supprimer.
+    operationId: deleteWish
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '../openapi.yml#/components/parameters/GroupIdParam'
+      - $ref: '../openapi.yml#/components/parameters/WishIdParam'
+    responses:
+      '204':
+        description: Souhait supprimé avec succès
+      '401':
+        $ref: '../openapi.yml#/components/responses/UnauthorizedError'
+      '403':
+        description: Accès refusé - Vous n'êtes pas le créateur de ce souhait
+        content:
+          application/json:
+            schema:
+              $ref: '../openapi.yml#/components/responses/ErrorResponse'
+      '404':
+        $ref: '../openapi.yml#/components/responses/NotFoundError'
+
+/api/groups/{groupId}/wishes/{wishId}/reserve:
+  post:
+    tags:
+      - Souhaits
+    summary: Réserver un souhait
+    description: |
+      Réserve un cadeau pour un autre membre du groupe.
+      
+      **Règles** :
+      - Un utilisateur ne peut pas réserver ses propres souhaits
+      - Un souhait déjà réservé ne peut pas être réservé à nouveau
+      - L'utilisateur doit être membre du groupe
+    operationId: reserveWish
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '../openapi.yml#/components/parameters/GroupIdParam'
+      - $ref: '../openapi.yml#/components/parameters/WishIdParam'
+    responses:
+      '200':
+        description: Souhait réservé avec succès
+        content:
+          application/json:
+            schema:
+              $ref: '../openapi.yml#/components/schemas/WishResponse'
+            example:
+              id: "111e2222-e33b-44d5-a666-777888999000"
+              userId: "987e6543-e21b-12d3-a456-426614174999"
+              groupId: "123e4567-e89b-12d3-a456-426614174000"
+              giftName: "Livre de cuisine"
+              description: "Livre de recettes italiennes"
+              url: "https://example.com/livre"
+              reservedBy: "456e7890-e12b-12d3-a456-426614174111"
+              createdAt: "2025-11-10T10:00:00Z"
+      '400':
+        description: Règle métier violée
+        content:
+          application/json:
+            schema:
+              $ref: '../openapi.yml#/components/responses/ErrorResponse'
+            examples:
+              ownWish:
+                summary: Tentative de réserver son propre souhait
+                value:
+                  message: "Vous ne pouvez pas réserver vos propres souhaits"
+                  timestamp: "2025-11-10T17:30:00Z"
+              alreadyReserved:
+                summary: Souhait déjà réservé
+                value:
+                  message: "Ce souhait a déjà été réservé"
+                  timestamp: "2025-11-10T17:30:00Z"
+      '401':
+        $ref: '../openapi.yml#/components/responses/UnauthorizedError'
+      '403':
+        $ref: '../openapi.yml#/components/responses/ForbiddenError'
+      '404':
+        $ref: '../openapi.yml#/components/responses/NotFoundError'
+
+  delete:
+    tags:
+      - Souhaits
+    summary: Annuler une réservation
+    description: |
+      Annule la réservation d'un cadeau.
+      Seul l'utilisateur qui a réservé le cadeau peut annuler sa réservation.
+    operationId: unreserveWish
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '../openapi.yml#/components/parameters/GroupIdParam'
+      - $ref: '../openapi.yml#/components/parameters/WishIdParam'
+    responses:
+      '200':
+        description: Réservation annulée avec succès
+        content:
+          application/json:
+            schema:
+              $ref: '../openapi.yml#/components/schemas/WishResponse'
+            example:
+              id: "111e2222-e33b-44d5-a666-777888999000"
+              userId: "987e6543-e21b-12d3-a456-426614174999"
+              groupId: "123e4567-e89b-12d3-a456-426614174000"
+              giftName: "Livre de cuisine"
+              description: "Livre de recettes italiennes"
+              url: "https://example.com/livre"
+              reservedBy: null
+              createdAt: "2025-11-10T10:00:00Z"
+      '401':
+        $ref: '../openapi.yml#/components/responses/UnauthorizedError'
+      '403':
+        description: Accès refusé - Vous n'avez pas réservé ce souhait
+        content:
+          application/json:
+            schema:
+              $ref: '../openapi.yml#/components/responses/ErrorResponse'
+      '404':
+        $ref: '../openapi.yml#/components/responses/NotFoundError'
+

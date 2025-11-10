@@ -1,0 +1,73 @@
+AuthRequest:
+  type: object
+  required:
+    - email
+    - password
+  properties:
+    email:
+      type: string
+      format: email
+      description: Adresse email de l'utilisateur
+      example: "admin@example.com"
+    password:
+      type: string
+      format: password
+      minLength: 8
+      description: Mot de passe (minimum 8 caractères)
+      example: "SecureP@ssw0rd"
+
+GroupRequest:
+  type: object
+  required:
+    - name
+    - type
+  properties:
+    name:
+      type: string
+      minLength: 1
+      maxLength: 255
+      description: Nom du groupe
+      example: "Noël en famille 2025"
+    type:
+      type: string
+      enum:
+        - noël
+      description: Type d'événement (actuellement seul 'noël' est supporté)
+      example: "noël"
+
+InvitationRequest:
+  type: object
+  required:
+    - email
+  properties:
+    email:
+      type: string
+      format: email
+      description: Adresse email de la personne à inviter
+      example: "user@example.com"
+
+WishRequest:
+  type: object
+  required:
+    - giftName
+  properties:
+    giftName:
+      type: string
+      minLength: 1
+      maxLength: 255
+      description: Nom du cadeau souhaité
+      example: "Livre de cuisine"
+    description:
+      type: string
+      maxLength: 1000
+      description: Description détaillée du cadeau (optionnel)
+      example: "Livre de recettes italiennes avec photos"
+      nullable: true
+    url:
+      type: string
+      format: uri
+      maxLength: 500
+      description: Lien vers le produit (optionnel)
+      example: "https://example.com/livre"
+      nullable: true
+

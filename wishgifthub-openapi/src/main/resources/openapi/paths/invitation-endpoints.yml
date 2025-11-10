@@ -1,0 +1,106 @@
+/api/groups/{groupId}/invite:
+  post:
+    tags:
+      - Invitations
+    summary: Créer une invitation
+    description: |
+      Crée une invitation pour rejoindre un groupe.
+      Génère un token UUID unique et retourne un lien d'invitation.
+      Seul l'administrateur du groupe peut créer des invitations.
+      
+      **Note** : L'envoi d'email n'est pas géré par cette API.
+    operationId: invite
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '../openapi.yml#/components/parameters/GroupIdParam'
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../openapi.yml#/components/schemas/InvitationRequest'
+          example:
+            email: "user@example.com"
+    responses:
+      '200':
+        description: Invitation créée avec succès
+        content:
+          application/json:
+            schema:
+              $ref: '../openapi.yml#/components/schemas/InvitationResponse'
+            example:
+              id: "123e4567-e89b-12d3-a456-426614174000"
+              email: "user@example.com"
+              groupId: "987e6543-e21b-12d3-a456-426614174999"
+              token: "abc12345-def6-7890-ghij-klmnopqrstuv"
+              accepted: false
+              createdAt: "2025-11-10T10:00:00Z"
+              invitationLink: "http://localhost:8080/api/invite/abc12345-def6-7890-ghij-klmnopqrstuv"
+      '400':
+        $ref: '../openapi.yml#/components/responses/BadRequestError'
+      '401':
+        $ref: '../openapi.yml#/components/responses/UnauthorizedError'
+      '403':
+        $ref: '../openapi.yml#/components/responses/ForbiddenError'
+      '404':
+        description: Groupe non trouvé
+        content:
+          application/json:
+            schema:
+              $ref: '../openapi.yml#/components/responses/ErrorResponse'
+
+/api/invite/{token}:
+  get:
+    tags:
+      - Invitations
+    summary: Accepter une invitation
+    description: |
+      Accepte une invitation en utilisant le token UUID.
+      
+      **Actions effectuées** :
+      - Vérifie que le token est valide et non expiré
+      - Crée un utilisateur avec l'email de l'invitation (sans mot de passe)
+      - Ajoute l'utilisateur au groupe
+      - Marque l'invitation comme acceptée
+      - Génère et retourne un token JWT pour l'utilisateur
+      
+      Le JWT contient l'ID utilisateur et l'ID du groupe comme autorité.
+    operationId: accept
+    security: []
+    parameters:
+      - $ref: '../openapi.yml#/components/parameters/TokenParam'
+    responses:
+      '200':
+        description: Invitation acceptée avec succès
+        content:
+          application/json:
+            schema:
+              $ref: '../openapi.yml#/components/schemas/InvitationResponse'
+            example:
+              id: "123e4567-e89b-12d3-a456-426614174000"
+              email: "user@example.com"
+              groupId: "987e6543-e21b-12d3-a456-426614174999"
+              token: "abc12345-def6-7890-ghij-klmnopqrstuv"
+              accepted: true
+              createdAt: "2025-11-10T10:00:00Z"
+              jwtToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+      '400':
+        description: Invitation déjà acceptée
+        content:
+          application/json:
+            schema:
+              $ref: '../openapi.yml#/components/responses/ErrorResponse'
+            example:
+              message: "Cette invitation a déjà été acceptée"
+              timestamp: "2025-11-10T17:30:00Z"
+      '404':
+        description: Invitation non trouvée
+        content:
+          application/json:
+            schema:
+              $ref: '../openapi.yml#/components/responses/ErrorResponse'
+            example:
+              message: "Invitation non trouvée"
+              timestamp: "2025-11-10T17:30:00Z"
+

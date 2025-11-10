@@ -1,53 +1,55 @@
 package com.wishgifthub.controller;
 
-import com.wishgifthub.dto.GroupRequest;
-import com.wishgifthub.dto.GroupResponse;
 import com.wishgifthub.entity.User;
+import com.wishgifthub.openapi.api.GroupesApi;
+import com.wishgifthub.openapi.model.GroupRequest;
+import com.wishgifthub.openapi.model.GroupResponse;
 import com.wishgifthub.service.GroupService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/groups")
-public class GroupController {
+public class GroupController implements GroupesApi {
     @Autowired
     private GroupService groupService;
 
     @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping
-    public ResponseEntity<GroupResponse> createGroup(@RequestBody GroupRequest request, @AuthenticationPrincipal User admin) {
-        return ResponseEntity.ok(groupService.createGroup(request, admin.getId()));
+    @Override
+    public ResponseEntity<GroupResponse> createGroup(GroupRequest groupRequest) {
+        User admin = getCurrentUser();
+        return ResponseEntity.ok(groupService.createGroup(groupRequest, admin.getId()));
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping
-    public ResponseEntity<List<GroupResponse>> getGroups(@AuthenticationPrincipal User admin) {
+    @Override
+    public ResponseEntity<List<GroupResponse>> getGroups() {
+        User admin = getCurrentUser();
         return ResponseEntity.ok(groupService.getGroupsByAdmin(admin.getId()));
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @PutMapping("/{id}")
-    public ResponseEntity<GroupResponse> updateGroup(@PathVariable("id") UUID id, @RequestBody GroupRequest request, @AuthenticationPrincipal User admin) {
-        return ResponseEntity.ok(groupService.updateGroup(id, request, admin.getId()));
+    @Override
+    public ResponseEntity<GroupResponse> updateGroup(UUID groupId, GroupRequest groupRequest) {
+        User admin = getCurrentUser();
+        return ResponseEntity.ok(groupService.updateGroup(groupId, groupRequest, admin.getId()));
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteGroup(@PathVariable("id") UUID id, @AuthenticationPrincipal User admin) {
-        groupService.deleteGroup(id, admin.getId());
+    @Override
+    public ResponseEntity<Void> deleteGroup(UUID groupId) {
+        User admin = getCurrentUser();
+        groupService.deleteGroup(groupId, admin.getId());
         return ResponseEntity.noContent().build();
     }
+
+    private User getCurrentUser() {
+        return (User) org.springframework.security.core.context.SecurityContextHolder
+            .getContext().getAuthentication().getPrincipal();
+    }
 }
+

@@ -1,10 +1,10 @@
 package com.wishgifthub.service;
 
-import com.wishgifthub.dto.GroupResponse;
 import com.wishgifthub.entity.Group;
 import com.wishgifthub.entity.User;
 import com.wishgifthub.entity.UserGroup;
 import com.wishgifthub.exception.ResourceNotFoundException;
+import com.wishgifthub.openapi.model.GroupResponse;
 import com.wishgifthub.repository.GroupRepository;
 import com.wishgifthub.repository.UserGroupRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,9 +37,11 @@ public class UserGroupService {
                 .map(ug -> {
                     Group group = ug.getGroup();
                     GroupResponse response = new GroupResponse();
-                    response.id = group.getId();
-                    response.name = group.getName();
-                    response.type = group.getType();
+                    response.setId(group.getId());
+                    response.setName(group.getName());
+                    response.setType(group.getType());
+                    response.setAdminId(group.getAdmin().getId());
+                    response.setCreatedAt(group.getCreatedAt());
                     return response;
                 })
                 .collect(Collectors.toList());

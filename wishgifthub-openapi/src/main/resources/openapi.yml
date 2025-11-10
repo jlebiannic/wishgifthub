@@ -1,0 +1,718 @@
+openapi: 3.0.3
+info:
+  title: WishGiftHub API
+  description: |
+    API REST pour la gestion d'événements et de listes de souhaits.
+    
+    ## Fonctionnalités principales
+    - Authentification des administrateurs et utilisateurs invités
+    - Gestion des groupes d'événements (Noël)
+    - Système d'invitations par email
+    - Gestion des listes de souhaits
+    - Réservation de cadeaux
+    
+    ## Sécurité
+    - Authentification JWT pour tous les endpoints protégés
+    - Les administrateurs peuvent créer et gérer des groupes
+    - Les utilisateurs invités accèdent via un token d'invitation unique
+
+  version: 1.0.0
+  contact:
+    name: WishGiftHub Team
+
+servers:
+  - url: http://localhost:8080
+    description: Serveur de développement local
+  - url: https://api.wishgifthub.com
+    description: Serveur de production
+
+tags:
+  - name: Authentification
+    description: Endpoints pour l'inscription et la connexion des administrateurs
+  - name: Groupes
+    description: Gestion des groupes d'événements
+  - name: Invitations
+    description: Création et acceptation d'invitations
+  - name: Utilisateurs
+    description: Consultation des groupes et membres
+  - name: Souhaits
+    description: Gestion des listes de souhaits et réservations
+
+security:
+  - bearerAuth: []
+
+paths:
+  /api/auth/register:
+    post:
+      tags:
+        - Authentification
+      summary: Inscription d'un administrateur
+      description: Crée un nouveau compte administrateur avec email et mot de passe
+      operationId: register
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthRequest'
+      responses:
+        '200':
+          description: Inscription réussie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '409':
+          description: Email déjà utilisé
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/auth/login:
+    post:
+      tags:
+        - Authentification
+      summary: Connexion d'un administrateur
+      description: Authentifie un administrateur avec son email et mot de passe
+      operationId: login
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthRequest'
+      responses:
+        '200':
+          description: Connexion réussie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /api/groups:
+    get:
+      tags:
+        - Groupes
+      summary: Lister les groupes de l'administrateur
+      description: Retourne tous les groupes dont l'utilisateur est administrateur
+      operationId: getGroups
+      responses:
+        '200':
+          description: Liste des groupes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GroupResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+
+    post:
+      tags:
+        - Groupes
+      summary: Créer un nouveau groupe
+      description: Crée un groupe d'événement
+      operationId: createGroup
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GroupRequest'
+      responses:
+        '200':
+          description: Groupe créé avec succès
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /api/groups/{groupId}:
+    put:
+      tags:
+        - Groupes
+      summary: Modifier un groupe
+      description: Modifie les informations d'un groupe
+      operationId: updateGroup
+      parameters:
+        - $ref: '#/components/parameters/GroupIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GroupRequest'
+      responses:
+        '200':
+          description: Groupe modifié
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+    delete:
+      tags:
+        - Groupes
+      summary: Supprimer un groupe
+      description: Supprime un groupe et toutes ses données
+      operationId: deleteGroup
+      parameters:
+        - $ref: '#/components/parameters/GroupIdParam'
+      responses:
+        '204':
+          description: Groupe supprimé
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /api/groups/{groupId}/invite:
+    post:
+      tags:
+        - Invitations
+      summary: Créer une invitation
+      description: Crée une invitation pour rejoindre un groupe
+      operationId: invite
+      parameters:
+        - $ref: '#/components/parameters/GroupIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InvitationRequest'
+      responses:
+        '200':
+          description: Invitation créée
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvitationResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+
+  /api/invite/{token}:
+    get:
+      tags:
+        - Invitations
+      summary: Accepter une invitation
+      description: Accepte une invitation via le token
+      operationId: accept
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/TokenParam'
+      responses:
+        '200':
+          description: Invitation acceptée
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvitationResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /api/groups/me:
+    get:
+      tags:
+        - Utilisateurs
+      summary: Lister mes groupes
+      description: Retourne tous les groupes de l'utilisateur
+      operationId: getUserGroups
+      responses:
+        '200':
+          description: Liste des groupes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GroupResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /api/groups/{groupId}/users:
+    get:
+      tags:
+        - Utilisateurs
+      summary: Lister les membres d'un groupe
+      description: Retourne les membres d'un groupe
+      operationId: getUsersByGroup
+      parameters:
+        - $ref: '#/components/parameters/GroupIdParam'
+      responses:
+        '200':
+          description: Liste des membres
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /api/groups/{groupId}/wishes:
+    get:
+      tags:
+        - Souhaits
+      summary: Lister tous les souhaits d'un groupe
+      description: Retourne tous les souhaits du groupe
+      operationId: getGroupWishes
+      parameters:
+        - $ref: '#/components/parameters/GroupIdParam'
+      responses:
+        '200':
+          description: Liste des souhaits
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/WishResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+
+    post:
+      tags:
+        - Souhaits
+      summary: Créer un souhait
+      description: Ajoute un souhait à sa liste
+      operationId: addWish
+      parameters:
+        - $ref: '#/components/parameters/GroupIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WishRequest'
+      responses:
+        '200':
+          description: Souhait créé
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WishResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /api/groups/{groupId}/wishes/me:
+    get:
+      tags:
+        - Souhaits
+      summary: Lister mes souhaits
+      description: Retourne mes souhaits dans le groupe
+      operationId: getMyWishes
+      parameters:
+        - $ref: '#/components/parameters/GroupIdParam'
+      responses:
+        '200':
+          description: Liste de mes souhaits
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/WishResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /api/groups/{groupId}/wishes/users/{userId}:
+    get:
+      tags:
+        - Souhaits
+      summary: Lister les souhaits d'un utilisateur
+      description: Retourne les souhaits d'un utilisateur dans le groupe
+      operationId: getUserWishes
+      parameters:
+        - $ref: '#/components/parameters/GroupIdParam'
+        - $ref: '#/components/parameters/UserIdParam'
+      responses:
+        '200':
+          description: Liste des souhaits
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/WishResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+
+  /api/groups/{groupId}/wishes/{wishId}:
+    delete:
+      tags:
+        - Souhaits
+      summary: Supprimer un souhait
+      description: Supprime un souhait
+      operationId: deleteWish
+      parameters:
+        - $ref: '#/components/parameters/GroupIdParam'
+        - $ref: '#/components/parameters/WishIdParam'
+      responses:
+        '204':
+          description: Souhait supprimé
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /api/groups/{groupId}/wishes/{wishId}/reserve:
+    post:
+      tags:
+        - Souhaits
+      summary: Réserver un souhait
+      description: Réserve un cadeau
+      operationId: reserveWish
+      parameters:
+        - $ref: '#/components/parameters/GroupIdParam'
+        - $ref: '#/components/parameters/WishIdParam'
+      responses:
+        '200':
+          description: Souhait réservé
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WishResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+
+    delete:
+      tags:
+        - Souhaits
+      summary: Annuler une réservation
+      description: Annule la réservation d'un cadeau
+      operationId: unreserveWish
+      parameters:
+        - $ref: '#/components/parameters/GroupIdParam'
+        - $ref: '#/components/parameters/WishIdParam'
+      responses:
+        '200':
+          description: Réservation annulée
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WishResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    AuthRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+          minLength: 8
+
+    GroupRequest:
+      type: object
+      required:
+        - name
+        - type
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+        type:
+          type: string
+          enum:
+            - noël
+
+    InvitationRequest:
+      type: object
+      required:
+        - email
+      properties:
+        email:
+          type: string
+          format: email
+
+    WishRequest:
+      type: object
+      required:
+        - giftName
+      properties:
+        giftName:
+          type: string
+          minLength: 1
+          maxLength: 255
+        description:
+          type: string
+          maxLength: 1000
+          nullable: true
+        url:
+          type: string
+          format: uri
+          maxLength: 500
+          nullable: true
+
+    AuthResponse:
+      type: object
+      required:
+        - userId
+        - isAdmin
+        - token
+      properties:
+        userId:
+          type: string
+          format: uuid
+        isAdmin:
+          type: boolean
+        token:
+          type: string
+
+    GroupResponse:
+      type: object
+      required:
+        - id
+        - name
+        - type
+        - adminId
+        - createdAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        type:
+          type: string
+        adminId:
+          type: string
+          format: uuid
+        createdAt:
+          type: string
+          format: date-time
+        jwtToken:
+          type: string
+          nullable: true
+
+    InvitationResponse:
+      type: object
+      required:
+        - id
+        - email
+        - groupId
+        - token
+        - accepted
+        - createdAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        groupId:
+          type: string
+          format: uuid
+        token:
+          type: string
+          format: uuid
+        accepted:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        invitationLink:
+          type: string
+          format: uri
+          nullable: true
+        jwtToken:
+          type: string
+          nullable: true
+
+    WishResponse:
+      type: object
+      required:
+        - id
+        - userId
+        - groupId
+        - giftName
+        - createdAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        groupId:
+          type: string
+          format: uuid
+        giftName:
+          type: string
+        description:
+          type: string
+          nullable: true
+        url:
+          type: string
+          format: uri
+          nullable: true
+        reservedBy:
+          type: string
+          format: uuid
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+
+    UserResponse:
+      type: object
+      required:
+        - id
+        - email
+        - admin
+        - createdAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        admin:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+
+    ErrorResponse:
+      type: object
+      required:
+        - message
+        - timestamp
+      properties:
+        message:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+
+  parameters:
+    GroupIdParam:
+      name: groupId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+
+    WishIdParam:
+      name: wishId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+
+    UserIdParam:
+      name: userId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+
+    TokenParam:
+      name: token
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+
+  responses:
+    UnauthorizedError:
+      description: Non authentifié
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    ForbiddenError:
+      description: Accès refusé
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    NotFoundError:
+      description: Ressource non trouvée
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    BadRequestError:
+      description: Requête invalide
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+

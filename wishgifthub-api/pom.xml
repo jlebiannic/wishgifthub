@@ -18,6 +18,13 @@
     </properties>
 
     <dependencies>
+        <!-- Module OpenAPI -->
+        <dependency>
+            <groupId>com.code</groupId>
+            <artifactId>wishgifthub-openapi</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
         <!-- Spring Boot Web -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

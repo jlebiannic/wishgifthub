@@ -1,0 +1,40 @@
+GroupIdParam:
+  name: groupId
+  in: path
+  required: true
+  description: Identifiant unique du groupe
+  schema:
+    type: string
+    format: uuid
+  example: "123e4567-e89b-12d3-a456-426614174000"
+
+WishIdParam:
+  name: wishId
+  in: path
+  required: true
+  description: Identifiant unique du souhait
+  schema:
+    type: string
+    format: uuid
+  example: "111e2222-e33b-44d5-a666-777888999000"
+
+UserIdParam:
+  name: userId
+  in: path
+  required: true
+  description: Identifiant unique de l'utilisateur
+  schema:
+    type: string
+    format: uuid
+  example: "987e6543-e21b-12d3-a456-426614174999"
+
+TokenParam:
+  name: token
+  in: path
+  required: true
+  description: Token UUID de l'invitation
+  schema:
+    type: string
+    format: uuid
+  example: "abc12345-def6-7890-ghij-klmnopqrstuv"
+

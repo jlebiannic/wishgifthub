@@ -18,6 +18,7 @@
     <packaging>pom</packaging>
     <modules>
         <module>wishgifthub-api</module>
+        <module>wishgifthub-openapi</module>
     </modules>
 
     <properties>

@@ -1,0 +1,189 @@
+AuthResponse:
+  type: object
+  required:
+    - userId
+    - isAdmin
+    - token
+  properties:
+    userId:
+      type: string
+      format: uuid
+      description: Identifiant unique de l'utilisateur
+      example: "123e4567-e89b-12d3-a456-426614174000"
+    isAdmin:
+      type: boolean
+      description: Indique si l'utilisateur est administrateur
+      example: true
+    token:
+      type: string
+      description: Token JWT pour l'authentification
+      example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxMjNlNDU2Ny1lODliLTEyZDMtYTQ1Ni00MjY2MTQxNzQwMDAiLCJpc0FkbWluIjp0cnVlLCJncm91cElkcyI6W10sImlhdCI6MTYzMTcwMDAwMCwiZXhwIjoxNjMxNzg2NDAwfQ.signature"
+
+GroupResponse:
+  type: object
+  required:
+    - id
+    - name
+    - type
+    - adminId
+    - createdAt
+  properties:
+    id:
+      type: string
+      format: uuid
+      description: Identifiant unique du groupe
+      example: "123e4567-e89b-12d3-a456-426614174000"
+    name:
+      type: string
+      description: Nom du groupe
+      example: "Noël en famille 2025"
+    type:
+      type: string
+      description: Type d'événement
+      example: "noël"
+    adminId:
+      type: string
+      format: uuid
+      description: Identifiant de l'administrateur du groupe
+      example: "987e6543-e21b-12d3-a456-426614174999"
+    createdAt:
+      type: string
+      format: date-time
+      description: Date de création du groupe
+      example: "2025-11-10T10:00:00Z"
+    jwtToken:
+      type: string
+      description: Token JWT mis à jour avec l'ID du groupe (présent uniquement lors de la création)
+      example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+      nullable: true
+
+InvitationResponse:
+  type: object
+  required:
+    - id
+    - email
+    - groupId
+    - token
+    - accepted
+    - createdAt
+  properties:
+    id:
+      type: string
+      format: uuid
+      description: Identifiant unique de l'invitation
+      example: "123e4567-e89b-12d3-a456-426614174000"
+    email:
+      type: string
+      format: email
+      description: Email de la personne invitée
+      example: "user@example.com"
+    groupId:
+      type: string
+      format: uuid
+      description: Identifiant du groupe
+      example: "987e6543-e21b-12d3-a456-426614174999"
+    token:
+      type: string
+      format: uuid
+      description: Token UUID pour accepter l'invitation
+      example: "abc12345-def6-7890-ghij-klmnopqrstuv"
+    accepted:
+      type: boolean
+      description: Indique si l'invitation a été acceptée
+      example: false
+    createdAt:
+      type: string
+      format: date-time
+      description: Date de création de l'invitation
+      example: "2025-11-10T10:00:00Z"
+    invitationLink:
+      type: string
+      format: uri
+      description: Lien complet pour accepter l'invitation
+      example: "http://localhost:8080/api/invite/abc12345-def6-7890-ghij-klmnopqrstuv"
+      nullable: true
+    jwtToken:
+      type: string
+      description: Token JWT généré après acceptation de l'invitation
+      example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+      nullable: true
+
+WishResponse:
+  type: object
+  required:
+    - id
+    - userId
+    - groupId
+    - giftName
+    - createdAt
+  properties:
+    id:
+      type: string
+      format: uuid
+      description: Identifiant unique du souhait
+      example: "111e2222-e33b-44d5-a666-777888999000"
+    userId:
+      type: string
+      format: uuid
+      description: Identifiant de l'utilisateur qui a créé le souhait
+      example: "987e6543-e21b-12d3-a456-426614174999"
+    groupId:
+      type: string
+      format: uuid
+      description: Identifiant du groupe
+      example: "123e4567-e89b-12d3-a456-426614174000"
+    giftName:
+      type: string
+      description: Nom du cadeau souhaité
+      example: "Livre de cuisine"
+    description:
+      type: string
+      description: Description détaillée du cadeau
+      example: "Livre de recettes italiennes avec photos"
+      nullable: true
+    url:
+      type: string
+      format: uri
+      description: Lien vers le produit
+      example: "https://example.com/livre"
+      nullable: true
+    reservedBy:
+      type: string
+      format: uuid
+      description: Identifiant de l'utilisateur qui a réservé le cadeau (null si non réservé)
+      example: "456e7890-e12b-12d3-a456-426614174111"
+      nullable: true
+    createdAt:
+      type: string
+      format: date-time
+      description: Date de création du souhait
+      example: "2025-11-10T10:00:00Z"
+
+UserResponse:
+  type: object
+  required:
+    - id
+    - email
+    - admin
+    - createdAt
+  properties:
+    id:
+      type: string
+      format: uuid
+      description: Identifiant unique de l'utilisateur
+      example: "987e6543-e21b-12d3-a456-426614174999"
+    email:
+      type: string
+      format: email
+      description: Adresse email de l'utilisateur
+      example: "admin@example.com"
+    admin:
+      type: boolean
+      description: Indique si l'utilisateur est administrateur
+      example: true
+    createdAt:
+      type: string
+      format: date-time
+      description: Date de création du compte
+      example: "2025-11-01T10:00:00Z"
+

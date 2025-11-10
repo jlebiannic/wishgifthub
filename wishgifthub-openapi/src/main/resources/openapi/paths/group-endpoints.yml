@@ -1,0 +1,144 @@
+/api/groups:
+  get:
+    tags:
+      - Groupes
+    summary: Lister les groupes de l'administrateur
+    description: |
+      Retourne la liste de tous les groupes dont l'utilisateur authentifié est administrateur.
+      Nécessite le rôle ADMIN.
+    operationId: getGroups
+    security:
+      - bearerAuth: []
+    responses:
+      '200':
+        description: Liste des groupes récupérée avec succès
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '../openapi.yml#/components/schemas/GroupResponse'
+            example:
+              - id: "123e4567-e89b-12d3-a456-426614174000"
+                name: "Noël en famille 2025"
+                type: "noël"
+                adminId: "987e6543-e21b-12d3-a456-426614174999"
+                createdAt: "2025-11-10T10:00:00Z"
+      '401':
+        $ref: '../openapi.yml#/components/responses/UnauthorizedError'
+      '403':
+        $ref: '../openapi.yml#/components/responses/ForbiddenError'
+
+  post:
+    tags:
+      - Groupes
+    summary: Créer un nouveau groupe
+    description: |
+      Crée un nouveau groupe d'événement.
+      L'administrateur authentifié devient propriétaire du groupe.
+      Il est automatiquement ajouté comme membre du groupe.
+      Un token JWT mis à jour avec l'ID du groupe est retourné.
+    operationId: createGroup
+    security:
+      - bearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../openapi.yml#/components/schemas/GroupRequest'
+          example:
+            name: "Noël en famille 2025"
+            type: "noël"
+    responses:
+      '200':
+        description: Groupe créé avec succès
+        content:
+          application/json:
+            schema:
+              $ref: '../openapi.yml#/components/schemas/GroupResponse'
+            example:
+              id: "123e4567-e89b-12d3-a456-426614174000"
+              name: "Noël en famille 2025"
+              type: "noël"
+              adminId: "987e6543-e21b-12d3-a456-426614174999"
+              createdAt: "2025-11-10T10:00:00Z"
+              jwtToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+      '400':
+        $ref: '../openapi.yml#/components/responses/BadRequestError'
+      '401':
+        $ref: '../openapi.yml#/components/responses/UnauthorizedError'
+      '403':
+        $ref: '../openapi.yml#/components/responses/ForbiddenError'
+
+/api/groups/{id}:
+  put:
+    tags:
+      - Groupes
+    summary: Modifier un groupe
+    description: |
+      Modifie les informations d'un groupe existant.
+      Seul l'administrateur propriétaire du groupe peut le modifier.
+    operationId: updateGroup
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '../openapi.yml#/components/parameters/GroupIdParam'
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../openapi.yml#/components/schemas/GroupRequest'
+          example:
+            name: "Noël en famille 2025 - Modifié"
+            type: "noël"
+    responses:
+      '200':
+        description: Groupe modifié avec succès
+        content:
+          application/json:
+            schema:
+              $ref: '../openapi.yml#/components/schemas/GroupResponse'
+            example:
+              id: "123e4567-e89b-12d3-a456-426614174000"
+              name: "Noël en famille 2025 - Modifié"
+              type: "noël"
+              adminId: "987e6543-e21b-12d3-a456-426614174999"
+              createdAt: "2025-11-10T10:00:00Z"
+      '400':
+        $ref: '../openapi.yml#/components/responses/BadRequestError'
+      '401':
+        $ref: '../openapi.yml#/components/responses/UnauthorizedError'
+      '403':
+        $ref: '../openapi.yml#/components/responses/ForbiddenError'
+      '404':
+        $ref: '../openapi.yml#/components/responses/NotFoundError'
+
+  delete:
+    tags:
+      - Groupes
+    summary: Supprimer un groupe
+    description: |
+      Supprime définitivement un groupe et toutes ses données associées.
+      Seul l'administrateur propriétaire du groupe peut le supprimer.
+      
+      **Suppression en cascade** :
+      - Tous les liens user_groups
+      - Toutes les invitations
+      - Tous les souhaits
+    operationId: deleteGroup
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '../openapi.yml#/components/parameters/GroupIdParam'
+    responses:
+      '204':
+        description: Groupe supprimé avec succès
+      '401':
+        $ref: '../openapi.yml#/components/responses/UnauthorizedError'
+      '403':
+        $ref: '../openapi.yml#/components/responses/ForbiddenError'
+      '404':
+        $ref: '../openapi.yml#/components/responses/NotFoundError'
+

@@ -1,20 +1,22 @@
 package com.wishgifthub.service;
 
-import com.wishgifthub.dto.WishRequest;
-import com.wishgifthub.dto.WishResponse;
 import com.wishgifthub.entity.Group;
 import com.wishgifthub.entity.User;
 import com.wishgifthub.entity.Wish;
 import com.wishgifthub.exception.AccessDeniedException;
 import com.wishgifthub.exception.BusinessRuleException;
 import com.wishgifthub.exception.ResourceNotFoundException;
+import com.wishgifthub.openapi.model.WishRequest;
+import com.wishgifthub.openapi.model.WishResponse;
 import com.wishgifthub.repository.GroupRepository;
 import com.wishgifthub.repository.UserGroupRepository;
 import com.wishgifthub.repository.UserRepository;
 import com.wishgifthub.repository.WishRepository;
+import org.openapitools.jackson.nullable.JsonNullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.net.URI;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -43,16 +45,19 @@ public class WishService {
         Wish wish = new Wish();
         wish.setUser(user);
         wish.setGroup(group);
-        wish.setGiftName(request.giftName);
-        wish.setDescription(request.description);
-        wish.setUrl(request.url);
+        wish.setGiftName(request.getGiftName());
+        if (request.getDescription() != null && request.getDescription().isPresent()) {
+            wish.setDescription(request.getDescription().get());
+        }
+        if (request.getUrl() != null && request.getUrl().isPresent()) {
+            wish.setUrl(request.getUrl().get().toString());
+        }
         wish = wishRepository.save(wish);
 
         return toResponse(wish);
     }
 
     public List<WishResponse> getWishesByGroup(UUID groupId, UUID userId) {
-        // Vérifier que le groupe existe
         groupRepository.findById(groupId)
                 .orElseThrow(() -> new ResourceNotFoundException("Groupe", groupId));
 
@@ -65,17 +70,14 @@ public class WishService {
         Wish wish = wishRepository.findById(wishId)
                 .orElseThrow(() -> new ResourceNotFoundException("Souhait", wishId));
 
-        // Vérifier que le souhait appartient au bon groupe
         if (!wish.getGroup().getId().equals(groupId)) {
             throw new BusinessRuleException("Le souhait n'appartient pas à ce groupe");
         }
 
-        // Vérifier que l'utilisateur n'essaie pas de réserver son propre souhait
         if (wish.getUser().getId().equals(userId)) {
             throw new BusinessRuleException("Vous ne pouvez pas réserver votre propre souhait");
         }
 
-        // Vérifier que le souhait n'est pas déjà réservé
         if (wish.getReservedBy() != null) {
             throw new BusinessRuleException("Ce souhait est déjà réservé");
         }
@@ -92,12 +94,10 @@ public class WishService {
         Wish wish = wishRepository.findById(wishId)
                 .orElseThrow(() -> new ResourceNotFoundException("Souhait", wishId));
 
-        // Vérifier que le souhait appartient au bon groupe
         if (!wish.getGroup().getId().equals(groupId)) {
             throw new BusinessRuleException("Le souhait n'appartient pas à ce groupe");
         }
 
-        // Vérifier que c'est bien l'utilisateur qui a réservé
         if (wish.getReservedBy() == null || !wish.getReservedBy().getId().equals(userId)) {
             throw new BusinessRuleException("Vous n'avez pas réservé ce souhait");
         }
@@ -112,12 +112,10 @@ public class WishService {
         Wish wish = wishRepository.findById(wishId)
                 .orElseThrow(() -> new ResourceNotFoundException("Souhait", wishId));
 
-        // Vérifier que le souhait appartient au bon groupe
         if (!wish.getGroup().getId().equals(groupId)) {
             throw new BusinessRuleException("Le souhait n'appartient pas à ce groupe");
         }
 
-        // Vérifier que c'est bien l'utilisateur propriétaire du souhait
         if (!wish.getUser().getId().equals(userId)) {
             throw new AccessDeniedException("Vous ne pouvez supprimer que vos propres souhaits");
         }
@@ -126,7 +124,6 @@ public class WishService {
     }
 
     public List<WishResponse> getWishesByUserInGroup(UUID groupId, UUID targetUserId, UUID requestingUserId) {
-        // Vérifier que l'utilisateur cible appartient au groupe
         if (!userGroupRepository.existsByUserIdAndGroupId(targetUserId, groupId)) {
             throw new BusinessRuleException("L'utilisateur cible n'appartient pas à ce groupe");
         }
@@ -138,14 +135,24 @@ public class WishService {
 
     private WishResponse toResponse(Wish wish) {
         WishResponse resp = new WishResponse();
-        resp.id = wish.getId();
-        resp.userId = wish.getUser().getId();
-        resp.groupId = wish.getGroup().getId();
-        resp.giftName = wish.getGiftName();
-        resp.description = wish.getDescription();
-        resp.url = wish.getUrl();
-        resp.reservedBy = wish.getReservedBy() != null ? wish.getReservedBy().getId() : null;
-        resp.createdAt = wish.getCreatedAt();
+        resp.setId(wish.getId());
+        resp.setUserId(wish.getUser().getId());
+        resp.setGroupId(wish.getGroup().getId());
+        resp.setGiftName(wish.getGiftName());
+        if (wish.getDescription() != null) {
+            resp.setDescription(JsonNullable.of(wish.getDescription()));
+        }
+        if (wish.getUrl() != null) {
+            try {
+                resp.setUrl(JsonNullable.of(new URI(wish.getUrl())));
+            } catch (Exception e) {
+                // Log error
+            }
+        }
+        if (wish.getReservedBy() != null) {
+            resp.setReservedBy(JsonNullable.of(wish.getReservedBy().getId()));
+        }
+        resp.setCreatedAt(wish.getCreatedAt());
         return resp;
     }
 }

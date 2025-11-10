@@ -1,3 +1,0 @@
-package com.wishgifthub.dto;
-
-// ...fichier vide, classes déplacées dans WishRequest.java, WishResponse.java, AuthRequest.java et AuthResponse.java...

@@ -1,0 +1,86 @@
+/api/auth/register:
+  post:
+    tags:
+      - Authentification
+    summary: Inscription d'un administrateur
+    description: |
+      Crée un nouveau compte administrateur avec email et mot de passe.
+      Le mot de passe est hashé avant stockage en base de données.
+      Retourne immédiatement un token JWT pour authentification.
+    operationId: register
+    security: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../openapi.yml#/components/schemas/AuthRequest'
+          example:
+            email: "admin@example.com"
+            password: "SecureP@ssw0rd"
+    responses:
+      '200':
+        description: Inscription réussie
+        content:
+          application/json:
+            schema:
+              $ref: '../openapi.yml#/components/schemas/AuthResponse'
+            example:
+              userId: "123e4567-e89b-12d3-a456-426614174000"
+              isAdmin: true
+              token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+      '400':
+        $ref: '../openapi.yml#/components/responses/BadRequestError'
+      '409':
+        description: Email déjà utilisé
+        content:
+          application/json:
+            schema:
+              $ref: '../openapi.yml#/components/schemas/ErrorResponse'
+            example:
+              message: "Un utilisateur avec cet email existe déjà"
+              timestamp: "2025-11-10T17:30:00Z"
+
+/api/auth/login:
+  post:
+    tags:
+      - Authentification
+    summary: Connexion d'un administrateur
+    description: |
+      Authentifie un administrateur avec son email et mot de passe.
+      Vérifie les identifiants et retourne un token JWT en cas de succès.
+    operationId: login
+    security: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../openapi.yml#/components/schemas/AuthRequest'
+          example:
+            email: "admin@example.com"
+            password: "SecureP@ssw0rd"
+    responses:
+      '200':
+        description: Connexion réussie
+        content:
+          application/json:
+            schema:
+              $ref: '../openapi.yml#/components/schemas/AuthResponse'
+            example:
+              userId: "123e4567-e89b-12d3-a456-426614174000"
+              isAdmin: true
+              token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+      '400':
+        $ref: '../openapi.yml#/components/responses/BadRequestError'
+      '401':
+        description: Identifiants invalides
+        content:
+          application/json:
+            schema:
+              $ref: '../openapi.yml#/components/schemas/ErrorResponse'
+            example:
+              message: "Email ou mot de passe incorrect"
+              timestamp: "2025-11-10T17:30:00Z"
+
+
