@@ -627,7 +627,7 @@ components:
       required:
         - id
         - email
-        - admin
+        - isAdmin
         - createdAt
       properties:
         id:
@@ -636,7 +636,7 @@ components:
         email:
           type: string
           format: email
-        admin:
+        isAdmin:
           type: boolean
         createdAt:
           type: string
