@@ -508,7 +508,6 @@ components:
         url:
           type: string
           format: uri
-          maxLength: 500
           nullable: true
 
     AuthResponse:
