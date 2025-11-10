@@ -23,17 +23,16 @@ tests {
   test("Étape 5: Acceptation invitation - Status 200", function() {
     expect(res.getStatus()).to.equal(200);
   });
-
+  
   test("Étape 5: JWT user généré", function() {
     expect(res.body.jwtToken).to.be.a('string');
   });
-
+  
   test("Étape 5: Invitation marquée comme acceptée", function() {
     expect(res.body.accepted).to.equal(true);
   });
-
+  
   test("Étape 5: JWT contient les bonnes informations", function() {
     expect(res.body.jwtToken.split('.')).to.have.lengthOf(3);
   });
 }
-

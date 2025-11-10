@@ -21,12 +21,6 @@ body:json {
   }
 }
 
-tests {
-  test("Étape 15 (Sécurité): User ne peut pas modifier - Status 403", function() {
-    expect(res.getStatus()).to.equal(403);
-  });
-}
-
 script:post-response {
   if (res.status === 403) {
     console.log("✅ ÉTAPE 15: Sécurité OK - User ne peut pas modifier le groupe");
@@ -35,3 +29,8 @@ script:post-response {
   }
 }
 
+tests {
+  test("Étape 15 (Sécurité): User ne peut pas modifier - Status 403", function() {
+    expect(res.getStatus()).to.equal(403);
+  });
+}

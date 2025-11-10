@@ -38,21 +38,20 @@ tests {
   test("Étape 2: Création groupe - Status 200", function() {
     expect(res.getStatus()).to.equal(200);
   });
-
+  
   test("Étape 2: Groupe créé avec ID", function() {
     expect(res.body.id).to.be.a('string');
   });
-
+  
   test("Étape 2: Nom du groupe correct", function() {
     expect(res.body.name).to.equal("Noël en famille 2025");
   });
-
+  
   test("Étape 2: Type du groupe correct", function() {
     expect(res.body.type).to.equal("noël");
   });
-
+  
   test("Étape 2: JWT token retourné", function() {
     expect(res.body.jwtToken).to.be.a('string');
   });
 }
-

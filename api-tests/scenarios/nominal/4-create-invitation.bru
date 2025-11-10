@@ -33,22 +33,21 @@ tests {
   test("Étape 4: Création invitation - Status 200", function() {
     expect(res.getStatus()).to.equal(200);
   });
-
+  
   test("Étape 4: Token d'invitation généré", function() {
     expect(res.body.token).to.be.a('string');
   });
-
+  
   test("Étape 4: Email correct", function() {
     expect(res.body.email).to.equal("user.invite@example.com");
   });
-
+  
   test("Étape 4: Lien d'invitation généré", function() {
     expect(res.body.invitationLink).to.be.a('string');
     expect(res.body.invitationLink).to.include(res.body.token);
   });
-
+  
   test("Étape 4: Invitation non acceptée", function() {
     expect(res.body.accepted).to.equal(false);
   });
 }
-

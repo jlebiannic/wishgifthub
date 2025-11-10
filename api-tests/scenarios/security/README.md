@@ -40,11 +40,12 @@ Garantir que :
 14. ❌ **SÉCURITÉ**: Admin ne peut PAS supprimer souhait du user
 15. ✅ User peut supprimer son propre souhait
 
-### Phase 6 : Tests Inter-Admins (Étapes 16-19)
+### Phase 6 : Tests Inter-Admins (Étapes 16-20)
 16. ✅ Créer un second admin
 17. ❌ **SÉCURITÉ**: Admin2 ne peut PAS modifier groupe d'Admin1
 18. ❌ **SÉCURITÉ**: Admin2 ne peut PAS supprimer groupe d'Admin1
 19. ❌ **SÉCURITÉ**: Admin2 ne peut PAS inviter dans groupe d'Admin1
+20. ❌ **SÉCURITÉ**: Admin2 ne peut PAS voir les membres du groupe d'Admin1
 
 ### Phase 7 : Tests Isolation des Groupes (Étapes 21-25)
 21. ✅ Admin2 crée son propre groupe

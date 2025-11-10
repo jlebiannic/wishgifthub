@@ -21,25 +21,6 @@ body:json {
   }
 }
 
-tests {
-  test("Étape 14: Modification groupe - Status 200", function() {
-    expect(res.getStatus()).to.equal(200);
-  });
-
-  test("Étape 14: Nom du groupe modifié", function() {
-    expect(res.body.name).to.equal("Noël en famille 2025 - Modifié");
-  });
-
-  test("Étape 14: Type du groupe inchangé", function() {
-    expect(res.body.type).to.equal("noël");
-  });
-
-  test("Étape 14: ID du groupe inchangé", function() {
-    const groupId = bru.getEnvVar("group_id");
-    expect(res.body.id).to.equal(groupId);
-  });
-}
-
 script:post-response {
   if (res.status === 200) {
     console.log("✅ ÉTAPE 14: Admin a modifié le groupe");
@@ -48,3 +29,21 @@ script:post-response {
   }
 }
 
+tests {
+  test("Étape 14: Modification groupe - Status 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+  
+  test("Étape 14: Nom du groupe modifié", function() {
+    expect(res.body.name).to.equal("Noël en famille 2025 - Modifié");
+  });
+  
+  test("Étape 14: Type du groupe inchangé", function() {
+    expect(res.body.type).to.equal("noël");
+  });
+  
+  test("Étape 14: ID du groupe inchangé", function() {
+    const groupId = bru.getEnvVar("group_id");
+    expect(res.body.id).to.equal(groupId);
+  });
+}

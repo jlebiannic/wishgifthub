@@ -14,24 +14,6 @@ auth:bearer {
   token: {{user_token}}
 }
 
-tests {
-  test("Étape 6: Liste groupes user - Status 200", function() {
-    expect(res.getStatus()).to.equal(200);
-  });
-
-  test("Étape 6: User appartient au groupe", function() {
-    expect(res.body).to.be.an('array');
-    expect(res.body.length).to.be.greaterThan(0);
-  });
-
-  test("Étape 6: Le groupe créé est dans la liste", function() {
-    const groupId = bru.getEnvVar("group_id");
-    const foundGroup = res.body.find(g => g.id === groupId);
-    expect(foundGroup).to.not.be.undefined;
-    expect(foundGroup.name).to.equal("Noël en famille 2025");
-  });
-}
-
 script:post-response {
   if (res.status === 200) {
     console.log("✅ ÉTAPE 6: User liste ses groupes - " + res.body.length + " groupe(s)");
@@ -40,3 +22,20 @@ script:post-response {
   }
 }
 
+tests {
+  test("Étape 6: Liste groupes user - Status 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+  
+  test("Étape 6: User appartient au groupe", function() {
+    expect(res.body).to.be.an('array');
+    expect(res.body.length).to.be.greaterThan(0);
+  });
+  
+  test("Étape 6: Le groupe créé est dans la liste", function() {
+    const groupId = bru.getEnvVar("group_id");
+    const foundGroup = res.body.find(g => g.id === groupId);
+    expect(foundGroup).to.not.be.undefined;
+    expect(foundGroup.name).to.equal("Noël en famille 2025");
+  });
+}

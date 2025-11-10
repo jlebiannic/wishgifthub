@@ -14,12 +14,6 @@ auth:bearer {
   token: {{admin_token}}
 }
 
-tests {
-  test("Étape 17: Suppression groupe - Status 204", function() {
-    expect(res.getStatus()).to.equal(204);
-  });
-}
-
 script:post-response {
   if (res.status === 204) {
     console.log("✅ ÉTAPE 17: Admin a supprimé le groupe");
@@ -31,3 +25,8 @@ script:post-response {
   }
 }
 
+tests {
+  test("Étape 17: Suppression groupe - Status 204", function() {
+    expect(res.getStatus()).to.equal(204);
+  });
+}

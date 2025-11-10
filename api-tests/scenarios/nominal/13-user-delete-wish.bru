@@ -14,12 +14,6 @@ auth:bearer {
   token: {{user_token}}
 }
 
-tests {
-  test("Étape 13: Suppression souhait - Status 204", function() {
-    expect(res.getStatus()).to.equal(204);
-  });
-}
-
 script:post-response {
   if (res.status === 204) {
     console.log("✅ ÉTAPE 13: User a supprimé son souhait");
@@ -28,3 +22,8 @@ script:post-response {
   }
 }
 
+tests {
+  test("Étape 13: Suppression souhait - Status 204", function() {
+    expect(res.getStatus()).to.equal(204);
+  });
+}

@@ -14,12 +14,6 @@ auth:bearer {
   token: {{user_token}}
 }
 
-tests {
-  test("Étape 16b (Sécurité): User ne peut pas réserver son propre souhait - Status 400 ou 403", function() {
-    expect(res.getStatus()).to.be.oneOf([400, 403]);
-  });
-}
-
 script:post-response {
   if (res.status === 400 || res.status === 403) {
     console.log("✅ ÉTAPE 16b: Sécurité OK - User ne peut pas réserver son propre souhait");
@@ -28,3 +22,8 @@ script:post-response {
   }
 }
 
+tests {
+  test("Étape 16b (Sécurité): User ne peut pas réserver son propre souhait - Status 400 ou 403", function() {
+    expect(res.getStatus()).to.be.oneOf([400, 403]);
+  });
+}
