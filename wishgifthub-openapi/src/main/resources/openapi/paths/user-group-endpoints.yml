@@ -72,7 +72,7 @@
         content:
           application/json:
             schema:
-              $ref: '../schemas/errors.yml/#/ErrorResponse'
+              $ref: '../schemas/errors.yml/#/components/schemas/ErrorResponse'
             example:
               message: "Vous n'avez pas accès à ce groupe"
               timestamp: "2025-11-10T17:30:00Z"

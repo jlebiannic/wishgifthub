@@ -146,7 +146,7 @@
         content:
           application/json:
             schema:
-              $ref: '../schemas/errors.yml/#/ErrorResponse'
+              $ref: '../schemas/errors.yml/#/components/schemas/ErrorResponse'
 
 /api/groups/{groupId}/wishes/{wishId}:
   delete:
@@ -172,7 +172,7 @@
         content:
           application/json:
             schema:
-              $ref: '../schemas/errors.yml/#/ErrorResponse'
+              $ref: '../schemas/errors.yml/#/components/schemas/ErrorResponse'
       '404':
         $ref: '../schemas/errors.yml/#/NotFoundError'
 
@@ -215,7 +215,7 @@
         content:
           application/json:
             schema:
-              $ref: '../schemas/errors.yml/#/ErrorResponse'
+              $ref: '../schemas/errors.yml/#/components/schemas/ErrorResponse'
             examples:
               ownWish:
                 summary: Tentative de réserver son propre souhait
@@ -270,7 +270,7 @@
         content:
           application/json:
             schema:
-              $ref: '../schemas/errors.yml/#/ErrorResponse'
+              $ref: '../schemas/errors.yml/#/components/schemas/ErrorResponse'
       '404':
         $ref: '../schemas/errors.yml/#/NotFoundError'
 

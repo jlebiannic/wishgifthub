@@ -1,25 +1,27 @@
-ErrorResponse:
-  type: object
-  required:
-    - message
-    - timestamp
-  properties:
-    message:
-      type: string
-      description: Message d'erreur détaillé
-      example: "Une erreur s'est produite"
-    timestamp:
-      type: string
-      format: date-time
-      description: Horodatage de l'erreur
-      example: "2025-11-10T17:30:00Z"
+components:
+  schemas:
+    ErrorResponse:
+      type: object
+      required:
+        - message
+        - timestamp
+      properties:
+        message:
+          type: string
+          description: Message d'erreur détaillé
+          example: "Une erreur s'est produite"
+        timestamp:
+          type: string
+          format: date-time
+          description: Horodatage de l'erreur
+          example: "2025-11-10T17:30:00Z"
 
 UnauthorizedError:
   description: Non authentifié - Token JWT manquant ou invalide
   content:
     application/json:
       schema:
-        $ref: '#/ErrorResponse'
+        $ref: '#/components/schemas/ErrorResponse'
       example:
         message: "Token JWT manquant ou invalide"
         timestamp: "2025-11-10T17:30:00Z"
@@ -29,7 +31,7 @@ ForbiddenError:
   content:
     application/json:
       schema:
-        $ref: '#/ErrorResponse'
+        $ref: '#/components/schemas/ErrorResponse'
       example:
         message: "Vous n'avez pas les permissions nécessaires"
         timestamp: "2025-11-10T17:30:00Z"
@@ -39,7 +41,7 @@ NotFoundError:
   content:
     application/json:
       schema:
-        $ref: '#/ErrorResponse'
+        $ref: '#/components/schemas/ErrorResponse'
       example:
         message: "Ressource non trouvée"
         timestamp: "2025-11-10T17:30:00Z"
@@ -49,7 +51,7 @@ BadRequestError:
   content:
     application/json:
       schema:
-        $ref: '#/ErrorResponse'
+        $ref: '#/components/schemas/ErrorResponse'
       example:
         message: "Données de requête invalides"
         timestamp: "2025-11-10T17:30:00Z"

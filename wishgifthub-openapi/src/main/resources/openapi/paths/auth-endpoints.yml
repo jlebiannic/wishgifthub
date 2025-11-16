@@ -36,7 +36,7 @@
         content:
           application/json:
             schema:
-              $ref: '../schemas/errors.yml/#/ErrorResponse'
+              $ref: '../schemas/errors.yml/#/components/schemas/ErrorResponse'
             example:
               message: "Un utilisateur avec cet email existe déjà"
               timestamp: "2025-11-10T17:30:00Z"
@@ -78,7 +78,7 @@
         content:
           application/json:
             schema:
-              $ref: '../schemas/errors.yml/#/ErrorResponse'
+              $ref: '../schemas/errors.yml/#/components/schemas/ErrorResponse'
             example:
               message: "Email ou mot de passe incorrect"
               timestamp: "2025-11-10T17:30:00Z"

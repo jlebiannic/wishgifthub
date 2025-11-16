@@ -48,7 +48,7 @@
         content:
           application/json:
             schema:
-              $ref: '../schemas/errors.yml/#/ErrorResponse'
+              $ref: '../schemas/errors.yml/#/components/schemas/ErrorResponse'
 
 /api/invite/{token}:
   get:
@@ -90,7 +90,7 @@
         content:
           application/json:
             schema:
-              $ref: '../schemas/errors.yml/#/ErrorResponse'
+              $ref: '../schemas/errors.yml/#/components/schemas/ErrorResponse'
             example:
               message: "Cette invitation a déjà été acceptée"
               timestamp: "2025-11-10T17:30:00Z"
@@ -99,7 +99,7 @@
         content:
           application/json:
             schema:
-              $ref: '../schemas/errors.yml/#/ErrorResponse'
+              $ref: '../schemas/errors.yml/#/components/schemas/ErrorResponse'
             example:
               message: "Invitation non trouvée"
               timestamp: "2025-11-10T17:30:00Z"
