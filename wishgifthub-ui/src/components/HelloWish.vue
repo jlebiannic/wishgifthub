@@ -5,50 +5,61 @@ const message = ref('Hello Wish !')
 </script>
 
 <template>
-  <div class="hello-wish">
-    <div class="gift-icon">🎁</div>
-    <h1 class="title">{{ message }}</h1>
-    <p class="subtitle">Bienvenue sur votre plateforme de gestion de cadeaux</p>
-  </div>
+  <v-container class="fill-height">
+    <v-row align="center" justify="center">
+      <v-col cols="12" md="8" lg="6">
+        <v-card class="mx-auto elevation-12" rounded="xl">
+          <v-card-text class="text-center pa-12">
+            <v-avatar size="120" class="mb-6" color="primary">
+              <v-icon size="64" color="white">mdi-gift</v-icon>
+            </v-avatar>
+
+            <h1 class="text-h2 font-weight-bold mb-4 text-gradient">
+              {{ message }}
+            </h1>
+
+            <p class="text-h6 text-medium-emphasis mb-8">
+              Bienvenue sur votre plateforme de gestion de cadeaux 🎁
+            </p>
+
+            <v-divider class="mb-6"></v-divider>
+
+            <v-chip-group class="justify-center mb-6">
+              <v-chip color="primary" variant="flat">
+                <v-icon start>mdi-vuejs</v-icon>
+                Vue 3
+              </v-chip>
+              <v-chip color="secondary" variant="flat">
+                <v-icon start>mdi-language-typescript</v-icon>
+                TypeScript
+              </v-chip>
+              <v-chip color="accent" variant="flat">
+                <v-icon start>mdi-material-design</v-icon>
+                Vuetify 3
+              </v-chip>
+            </v-chip-group>
+
+            <v-btn
+              color="primary"
+              size="large"
+              variant="elevated"
+              prepend-icon="mdi-rocket-launch"
+            >
+              Commencer
+            </v-btn>
+          </v-card-text>
+        </v-card>
+      </v-col>
+    </v-row>
+  </v-container>
 </template>
 
 <style scoped>
-.hello-wish {
-  padding: 40px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 20px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-  max-width: 600px;
-  margin: 0 auto;
-  color: white;
-}
-
-.gift-icon {
-  font-size: 80px;
-  margin-bottom: 20px;
-  animation: bounce 2s infinite;
-}
-
-.title {
-  font-size: 48px;
-  font-weight: bold;
-  margin: 20px 0;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-}
-
-.subtitle {
-  font-size: 18px;
-  margin-top: 10px;
-  opacity: 0.9;
-}
-
-@keyframes bounce {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-20px);
-  }
+.text-gradient {
+  background: linear-gradient(45deg, #6366F1, #EC4899);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 </style>
 
