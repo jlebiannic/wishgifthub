@@ -13,13 +13,13 @@
     security:
       - bearerAuth: []
     parameters:
-      - $ref: '../openapi.yml#/components/parameters/GroupIdParam'
+      - $ref: '../schemas/parameters.yml/#/GroupIdParam'
     requestBody:
       required: true
       content:
         application/json:
           schema:
-            $ref: '../openapi.yml#/components/schemas/InvitationRequest'
+            $ref: '../schemas/requests.yml/#/InvitationRequest'
           example:
             email: "user@example.com"
     responses:
@@ -28,7 +28,7 @@
         content:
           application/json:
             schema:
-              $ref: '../openapi.yml#/components/schemas/InvitationResponse'
+              $ref: '../schemas/responses.yml/#/InvitationResponse'
             example:
               id: "123e4567-e89b-12d3-a456-426614174000"
               email: "user@example.com"
@@ -38,17 +38,17 @@
               createdAt: "2025-11-10T10:00:00Z"
               invitationLink: "http://localhost:8080/api/invite/abc12345-def6-7890-ghij-klmnopqrstuv"
       '400':
-        $ref: '../openapi.yml#/components/responses/BadRequestError'
+        $ref: '../schemas/errors.yml/#/BadRequestError'
       '401':
-        $ref: '../openapi.yml#/components/responses/UnauthorizedError'
+        $ref: '../schemas/errors.yml/#/UnauthorizedError'
       '403':
-        $ref: '../openapi.yml#/components/responses/ForbiddenError'
+        $ref: '../schemas/errors.yml/#/ForbiddenError'
       '404':
         description: Groupe non trouvé
         content:
           application/json:
             schema:
-              $ref: '../openapi.yml#/components/responses/ErrorResponse'
+              $ref: '../schemas/errors.yml/#/ErrorResponse'
 
 /api/invite/{token}:
   get:
@@ -69,14 +69,14 @@
     operationId: accept
     security: []
     parameters:
-      - $ref: '../openapi.yml#/components/parameters/TokenParam'
+      - $ref: '../schemas/parameters.yml/#/TokenParam'
     responses:
       '200':
         description: Invitation acceptée avec succès
         content:
           application/json:
             schema:
-              $ref: '../openapi.yml#/components/schemas/InvitationResponse'
+              $ref: '../schemas/responses.yml/#/InvitationResponse'
             example:
               id: "123e4567-e89b-12d3-a456-426614174000"
               email: "user@example.com"
@@ -90,7 +90,7 @@
         content:
           application/json:
             schema:
-              $ref: '../openapi.yml#/components/responses/ErrorResponse'
+              $ref: '../schemas/errors.yml/#/ErrorResponse'
             example:
               message: "Cette invitation a déjà été acceptée"
               timestamp: "2025-11-10T17:30:00Z"
@@ -99,7 +99,7 @@
         content:
           application/json:
             schema:
-              $ref: '../openapi.yml#/components/responses/ErrorResponse'
+              $ref: '../schemas/errors.yml/#/ErrorResponse'
             example:
               message: "Invitation non trouvée"
               timestamp: "2025-11-10T17:30:00Z"

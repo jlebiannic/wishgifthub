@@ -17,7 +17,7 @@
             schema:
               type: array
               items:
-                $ref: '../openapi.yml#/components/schemas/GroupResponse'
+                $ref: '../schemas/responses.yml/#/GroupResponse'
             example:
               - id: "123e4567-e89b-12d3-a456-426614174000"
                 name: "Noël en famille 2025"
@@ -25,9 +25,9 @@
                 adminId: "987e6543-e21b-12d3-a456-426614174999"
                 createdAt: "2025-11-10T10:00:00Z"
       '401':
-        $ref: '../openapi.yml#/components/responses/UnauthorizedError'
+        $ref: '../schemas/errors.yml/#/UnauthorizedError'
       '403':
-        $ref: '../openapi.yml#/components/responses/ForbiddenError'
+        $ref: '../schemas/errors.yml/#/ForbiddenError'
 
   post:
     tags:
@@ -46,7 +46,7 @@
       content:
         application/json:
           schema:
-            $ref: '../openapi.yml#/components/schemas/GroupRequest'
+            $ref: '../schemas/requests.yml/#/GroupRequest'
           example:
             name: "Noël en famille 2025"
             type: "noël"
@@ -56,7 +56,7 @@
         content:
           application/json:
             schema:
-              $ref: '../openapi.yml#/components/schemas/GroupResponse'
+              $ref: '../schemas/responses.yml/#/GroupResponse'
             example:
               id: "123e4567-e89b-12d3-a456-426614174000"
               name: "Noël en famille 2025"
@@ -65,13 +65,13 @@
               createdAt: "2025-11-10T10:00:00Z"
               jwtToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
       '400':
-        $ref: '../openapi.yml#/components/responses/BadRequestError'
+        $ref: '../schemas/errors.yml/#/BadRequestError'
       '401':
-        $ref: '../openapi.yml#/components/responses/UnauthorizedError'
+        $ref: '../schemas/errors.yml/#/UnauthorizedError'
       '403':
-        $ref: '../openapi.yml#/components/responses/ForbiddenError'
+        $ref: '../schemas/errors.yml/#/ForbiddenError'
 
-/api/groups/{id}:
+/api/groups/{groupId}:
   put:
     tags:
       - Groupes
@@ -83,13 +83,13 @@
     security:
       - bearerAuth: []
     parameters:
-      - $ref: '../openapi.yml#/components/parameters/GroupIdParam'
+      - $ref: '../schemas/parameters.yml/#/GroupIdParam'
     requestBody:
       required: true
       content:
         application/json:
           schema:
-            $ref: '../openapi.yml#/components/schemas/GroupRequest'
+            $ref: '../schemas/requests.yml/#/GroupRequest'
           example:
             name: "Noël en famille 2025 - Modifié"
             type: "noël"
@@ -99,7 +99,7 @@
         content:
           application/json:
             schema:
-              $ref: '../openapi.yml#/components/schemas/GroupResponse'
+              $ref: '../schemas/responses.yml/#/GroupResponse'
             example:
               id: "123e4567-e89b-12d3-a456-426614174000"
               name: "Noël en famille 2025 - Modifié"
@@ -107,13 +107,13 @@
               adminId: "987e6543-e21b-12d3-a456-426614174999"
               createdAt: "2025-11-10T10:00:00Z"
       '400':
-        $ref: '../openapi.yml#/components/responses/BadRequestError'
+        $ref: '../schemas/errors.yml/#/BadRequestError'
       '401':
-        $ref: '../openapi.yml#/components/responses/UnauthorizedError'
+        $ref: '../schemas/errors.yml/#/UnauthorizedError'
       '403':
-        $ref: '../openapi.yml#/components/responses/ForbiddenError'
+        $ref: '../schemas/errors.yml/#/ForbiddenError'
       '404':
-        $ref: '../openapi.yml#/components/responses/NotFoundError'
+        $ref: '../schemas/errors.yml/#/NotFoundError'
 
   delete:
     tags:
@@ -131,14 +131,14 @@
     security:
       - bearerAuth: []
     parameters:
-      - $ref: '../openapi.yml#/components/parameters/GroupIdParam'
+      - $ref: '../schemas/parameters.yml/#/GroupIdParam'
     responses:
       '204':
         description: Groupe supprimé avec succès
       '401':
-        $ref: '../openapi.yml#/components/responses/UnauthorizedError'
+        $ref: '../schemas/errors.yml/#/UnauthorizedError'
       '403':
-        $ref: '../openapi.yml#/components/responses/ForbiddenError'
+        $ref: '../schemas/errors.yml/#/ForbiddenError'
       '404':
-        $ref: '../openapi.yml#/components/responses/NotFoundError'
+        $ref: '../schemas/errors.yml/#/NotFoundError'
 

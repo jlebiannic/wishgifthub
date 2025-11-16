@@ -94,7 +94,7 @@
                             <goal>generate</goal>
                         </goals>
                         <configuration>
-                            <inputSpec>${project.build.directory}/generated-sources/openapi-yaml/openapi.yaml</inputSpec>
+                            <inputSpec>${project.build.directory}/generated-sources/openapi-yaml/openapi/openapi.yaml</inputSpec>
                             <generatorName>spring</generatorName>
                             <apiPackage>com.wishgifthub.openapi.api</apiPackage>
                             <modelPackage>com.wishgifthub.openapi.model</modelPackage>

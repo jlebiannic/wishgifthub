@@ -17,7 +17,7 @@
             schema:
               type: array
               items:
-                $ref: '../openapi.yml#/components/schemas/GroupResponse'
+                $ref: '../schemas/responses.yml/#/GroupResponse'
             example:
               - id: "123e4567-e89b-12d3-a456-426614174000"
                 name: "Noël en famille 2025"
@@ -30,7 +30,7 @@
                 adminId: "111e2222-e33b-44d5-a666-777888999000"
                 createdAt: "2025-11-05T14:30:00Z"
       '401':
-        $ref: '../openapi.yml#/components/responses/UnauthorizedError'
+        $ref: '../schemas/errors.yml/#/UnauthorizedError'
 
 /api/groups/{groupId}/users:
   get:
@@ -46,7 +46,7 @@
     security:
       - bearerAuth: []
     parameters:
-      - $ref: '../openapi.yml#/components/parameters/GroupIdParam'
+      - $ref: '../schemas/parameters.yml/#/GroupIdParam'
     responses:
       '200':
         description: Liste des membres récupérée avec succès
@@ -55,7 +55,7 @@
             schema:
               type: array
               items:
-                $ref: '../openapi.yml#/components/schemas/UserResponse'
+                $ref: '../schemas/responses.yml/#/UserResponse'
             example:
               - id: "987e6543-e21b-12d3-a456-426614174999"
                 email: "admin@example.com"
@@ -66,16 +66,16 @@
                 admin: false
                 createdAt: "2025-11-05T15:00:00Z"
       '401':
-        $ref: '../openapi.yml#/components/responses/UnauthorizedError'
+        $ref: '../schemas/errors.yml/#/UnauthorizedError'
       '403':
         description: Accès refusé - Vous n'êtes pas membre de ce groupe
         content:
           application/json:
             schema:
-              $ref: '../openapi.yml#/components/responses/ErrorResponse'
+              $ref: '../schemas/errors.yml/#/ErrorResponse'
             example:
               message: "Vous n'avez pas accès à ce groupe"
               timestamp: "2025-11-10T17:30:00Z"
       '404':
-        $ref: '../openapi.yml#/components/responses/NotFoundError'
+        $ref: '../schemas/errors.yml/#/NotFoundError'
 

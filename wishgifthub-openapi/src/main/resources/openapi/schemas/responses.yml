@@ -177,7 +177,7 @@ UserResponse:
       format: email
       description: Adresse email de l'utilisateur
       example: "admin@example.com"
-    admin:
+    isAdmin:
       type: boolean
       description: Indique si l'utilisateur est administrateur
       example: true

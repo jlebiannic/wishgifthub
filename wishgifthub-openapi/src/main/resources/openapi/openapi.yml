@@ -50,8 +50,8 @@ paths:
   # Group endpoints
   /api/groups:
     $ref: './paths/group-endpoints.yml#/~1api~1groups'
-  /api/groups/{id}:
-    $ref: './paths/group-endpoints.yml#/~1api~1groups~1{id}'
+  /api/groups/{groupId}:
+    $ref: './paths/group-endpoints.yml#/~1api~1groups~1{groupId}'
 
   # Invitation endpoints
   /api/groups/{groupId}/invite:
