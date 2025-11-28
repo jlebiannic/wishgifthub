@@ -1,7 +1,6 @@
 import {computed, ref} from 'vue'
 import {defineStore} from 'pinia'
 
-const API_URL = import.meta.env.VITE_API_URL || ''
 
 /**
  * Interface représentant un utilisateur authentifié
@@ -79,12 +78,29 @@ export const useAuthStore = defineStore('auth', () => {
    * Restaurer la session depuis localStorage
    */
   function restoreSession() {
-    const storedToken = localStorage.getItem('auth_token')
-    const storedUser = localStorage.getItem('user')
+    try {
+      const storedToken = localStorage.getItem('auth_token')
+      const storedUser = localStorage.getItem('user')
 
-    if (storedToken && storedUser) {
-      token.value = storedToken
-      user.value = JSON.parse(storedUser)
+      // Vérifier que les valeurs existent et ne sont pas "undefined" ou "null"
+      if (
+        storedToken &&
+        storedUser &&
+        storedToken !== 'undefined' &&
+        storedToken !== 'null' &&
+        storedUser !== 'undefined' &&
+        storedUser !== 'null'
+      ) {
+        token.value = storedToken
+        user.value = JSON.parse(storedUser)
+      } else {
+        // Nettoyer le localStorage si les données sont invalides
+        logout()
+      }
+    } catch (err) {
+      // En cas d'erreur de parsing JSON, nettoyer le localStorage
+      console.error('Erreur lors de la restauration de la session:', err)
+      logout()
     }
   }
 

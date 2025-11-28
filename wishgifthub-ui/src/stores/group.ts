@@ -2,6 +2,8 @@ import {ref} from 'vue'
 import {defineStore} from 'pinia'
 import {useAuthStore} from './auth'
 
+const API_URL = import.meta.env.VITE_API_URL || ''
+
 /**
  * Interface représentant un groupe
  */

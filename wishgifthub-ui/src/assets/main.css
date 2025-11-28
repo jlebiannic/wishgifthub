@@ -1,35 +1,28 @@
-@import './base.css';
+/* Styles ultra-minimalistes - 100% compatibles Vuetify */
+/* Ne touche AUCUN élément HTML de base pour éviter les conflits */
 
-#app {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  font-weight: normal;
+/* DEBUG TEMPORAIRE - Force les interactions sur les champs */
+input,
+textarea,
+.v-field__input,
+.v-text-field input {
+  pointer-events: auto !important;
+  cursor: text !important;
 }
 
-a,
-.green {
-  text-decoration: none;
-  color: hsla(160, 100%, 37%, 1);
-  transition: 0.4s;
-  padding: 3px;
+/* S'assure qu'aucun overlay ne bloque */
+.v-overlay {
+  pointer-events: none !important;
 }
 
-@media (hover: hover) {
-  a:hover {
-    background-color: hsla(160, 100%, 37%, 0.2);
-  }
+.v-overlay__content {
+  pointer-events: auto !important;
 }
 
-@media (min-width: 1024px) {
-  body {
-    display: flex;
-    place-items: center;
-  }
-
-  #app {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    padding: 0 2rem;
-  }
+/* Force le z-index des champs de formulaire */
+.v-field,
+.v-input {
+  position: relative !important;
+  z-index: 1 !important;
 }
+

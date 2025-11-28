@@ -53,11 +53,11 @@ function handleLogout() {
 </script>
 
 <template>
-  <v-container class="py-8">
+  <v-container fluid class="py-8 px-6">
     <!-- Page d'accueil - Non connecté -->
     <div v-if="!authStore.isAuthenticated" class="text-center">
       <v-row justify="center">
-        <v-col cols="12">
+        <v-col cols="12" md="8" lg="6">
           <v-icon size="80" color="primary" class="mb-4">mdi-gift-outline</v-icon>
           <h1 class="text-h3 font-weight-bold mb-2">Bienvenue sur WishGiftHub</h1>
           <p class="text-h6 text-medium-emphasis mb-8">
@@ -67,7 +67,7 @@ function handleLogout() {
       </v-row>
 
       <v-row justify="center">
-        <v-col cols="12" md="6" lg="5">
+        <v-col cols="12" md="8" lg="6" xl="4">
           <LoginForm @login-success="handleLoginSuccess" />
         </v-col>
       </v-row>
