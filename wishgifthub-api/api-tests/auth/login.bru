@@ -12,23 +12,9 @@ post {
 
 body:json {
   {
-    "email": "admin@example.com",
-    "password": "Password123!"
+    "email": "admin.test@example.com",
+    "password": "AdminPassword123!"
   }
-}
-
-tests {
-  test("Status 200", function() {
-    expect(res.getStatus()).to.equal(200);
-  });
-
-  test("Has token", function() {
-    expect(res.body.token).to.be.a('string');
-  });
-
-  test("Has userId", function() {
-    expect(res.body.userId).to.be.a('string');
-  });
 }
 
 script:post-response {
@@ -37,3 +23,16 @@ script:post-response {
   }
 }
 
+tests {
+  test("Status 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+  
+  test("Has token", function() {
+    expect(res.body.token).to.be.a('string');
+  });
+  
+  test("Has userId", function() {
+    expect(res.body.userId).to.be.a('string');
+  });
+}

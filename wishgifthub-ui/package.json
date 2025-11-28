@@ -14,7 +14,8 @@
     "build-only": "vite build",
     "type-check": "vue-tsc --build",
     "lint": "eslint . --fix --cache",
-    "format": "prettier --write src/"
+    "format": "prettier --write src/",
+    "generate-api": "sta generate -p ../wishgifthub-openapi/target/generated-sources/openapi-yaml/openapi/openapi.yaml -o src/generated/api/wish -n --modular --clean-output --axios"
   },
   "dependencies": {
     "@mdi/font": "^7.4.47",
@@ -40,6 +41,7 @@
     "npm-run-all2": "^8.0.4",
     "prettier": "3.6.2",
     "sass": "^1.94.0",
+    "swagger-typescript-api": "^13.2.16",
     "typescript": "~5.9.0",
     "vite": "^7.1.11",
     "vite-plugin-vue-devtools": "^8.0.3",
