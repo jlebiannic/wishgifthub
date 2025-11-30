@@ -1,6 +1,5 @@
 /* eslint-disable */
 /* tslint:disable */
-// @ts-nocheck
 /*
  * ---------------------------------------------------------------
  * ## THIS FILE WAS GENERATED VIA SWAGGER-TYPESCRIPT-API        ##
@@ -10,7 +9,7 @@
  * ---------------------------------------------------------------
  */
 
-import {
+import type {
   AuthRequest,
   AuthResponse,
   ErrorResponse,
@@ -22,7 +21,7 @@ import {
   WishRequest,
   WishResponse,
 } from "./data-contracts";
-import { ContentType, HttpClient, RequestParams } from "./http-client";
+import {ContentType, HttpClient, type RequestParams} from "./http-client";
 
 export class Api<
   SecurityDataType = unknown,

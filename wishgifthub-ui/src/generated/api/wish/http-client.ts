@@ -1,6 +1,5 @@
 /* eslint-disable */
 /* tslint:disable */
-// @ts-nocheck
 /*
  * ---------------------------------------------------------------
  * ## THIS FILE WAS GENERATED VIA SWAGGER-TYPESCRIPT-API        ##
@@ -74,7 +73,7 @@ export class HttpClient<SecurityDataType = unknown> {
   }: ApiConfig<SecurityDataType> = {}) {
     this.instance = axios.create({
       ...axiosConfig,
-      baseURL: axiosConfig.baseURL || "http://localhost:8080",
+      baseURL: axiosConfig.baseURL || "",
     });
     this.secure = secure;
     this.format = format;
