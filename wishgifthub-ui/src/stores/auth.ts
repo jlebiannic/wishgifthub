@@ -1,6 +1,6 @@
 import {computed, ref} from 'vue'
 import {defineStore} from 'pinia'
-
+import {getApiClient, updateApiToken} from '@/api/client'
 
 /**
  * Interface représentant un utilisateur authentifié
@@ -32,32 +32,36 @@ export const useAuthStore = defineStore('auth', () => {
     error.value = null
 
     try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      })
+      const apiClient = getApiClient()
+      const response = await apiClient.login({email, password})
 
-      if (!response.ok) {
-        if (response.status === 403) {
-          throw new Error('Accès réservé aux administrateurs')
-        }
-        throw new Error('Identifiants incorrects')
+      const authData = response.data
+
+      // Construire l'objet User à partir de la réponse
+      user.value = {
+        id: authData.userId,
+        username: email.split('@')[0] || email, // Utiliser la partie avant @ comme username
+        email: email,
+        roles: authData.isAdmin ? ['ADMIN'] : ['USER']
       }
+      token.value = authData.token
 
-      const data = await response.json()
-      user.value = data.user
-      token.value = data.token
+      // Mettre à jour le client API avec le nouveau token
+      updateApiToken(authData.token)
 
       // Stocker le token dans localStorage
-      localStorage.setItem('auth_token', data.token)
-      localStorage.setItem('user', JSON.stringify(data.user))
+      localStorage.setItem('auth_token', authData.token)
+      localStorage.setItem('user', JSON.stringify(user.value))
 
       return true
-    } catch (err) {
-      error.value = err instanceof Error ? err.message : 'Erreur de connexion'
+    } catch (err: any) {
+      if (err.response?.status === 403) {
+        error.value = 'Accès réservé aux administrateurs'
+      } else if (err.response?.status === 401) {
+        error.value = 'Identifiants incorrects'
+      } else {
+        error.value = err.response?.data?.message || 'Erreur de connexion'
+      }
       return false
     } finally {
       isLoading.value = false
@@ -72,6 +76,8 @@ export const useAuthStore = defineStore('auth', () => {
     token.value = null
     localStorage.removeItem('auth_token')
     localStorage.removeItem('user')
+    // Réinitialiser le client API
+    updateApiToken(null)
   }
 
   /**
@@ -93,6 +99,8 @@ export const useAuthStore = defineStore('auth', () => {
       ) {
         token.value = storedToken
         user.value = JSON.parse(storedUser)
+        // Mettre à jour le client API avec le token restauré
+        updateApiToken(storedToken)
       } else {
         // Nettoyer le localStorage si les données sont invalides
         logout()

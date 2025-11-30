@@ -6,18 +6,16 @@ const groupStore = useGroupStore()
 
 const dialog = ref(false)
 const groupName = ref('')
-const groupDescription = ref('')
 
 const emit = defineEmits<{
   groupCreated: []
 }>()
 
 async function handleCreateGroup() {
-  const success = await groupStore.createGroup(groupName.value, groupDescription.value)
+  const success = await groupStore.createGroup(groupName.value, 'noël')
   if (success) {
     dialog.value = false
     groupName.value = ''
-    groupDescription.value = ''
     emit('groupCreated')
   }
 }
@@ -25,7 +23,6 @@ async function handleCreateGroup() {
 function closeDialog() {
   dialog.value = false
   groupName.value = ''
-  groupDescription.value = ''
 }
 </script>
 
@@ -45,7 +42,7 @@ function closeDialog() {
         <v-card-title class="pa-4">
           <div class="text-h6">
             <v-icon class="mr-2">mdi-account-group</v-icon>
-            Créer un nouveau groupe
+            Créer un nouveau groupe Noël
           </div>
         </v-card-title>
 
@@ -70,16 +67,9 @@ function closeDialog() {
               variant="outlined"
               :disabled="groupStore.isLoading"
               required
-              class="mb-3"
-            />
-
-            <v-textarea
-              v-model="groupDescription"
-              label="Description (optionnel)"
-              prepend-inner-icon="mdi-text"
-              variant="outlined"
-              :disabled="groupStore.isLoading"
-              rows="3"
+              placeholder="Ex: Noël en famille 2025"
+              hint="Le type du groupe est automatiquement défini sur 'noël'"
+              persistent-hint
             />
           </v-form>
         </v-card-text>

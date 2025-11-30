@@ -10,7 +10,7 @@ import InvitationsDialog from '@/components/InvitationsDialog.vue'
 const authStore = useAuthStore()
 const groupStore = useGroupStore()
 
-const showInvitationsDialog = ref(false)
+const showMembersDialog = ref(false)
 const selectedGroupId = ref<string | null>(null)
 
 onMounted(() => {
@@ -35,14 +35,14 @@ async function handleGroupCreated() {
   await loadGroups()
 }
 
-async function handleShowInvitations(groupId: string) {
+async function handleShowMembers(groupId: string) {
   selectedGroupId.value = groupId
-  showInvitationsDialog.value = true
-  await groupStore.fetchGroupInvitations(groupId)
+  showMembersDialog.value = true
+  await groupStore.fetchGroupMembers(groupId)
 }
 
-function handleCloseInvitations() {
-  showInvitationsDialog.value = false
+function handleCloseMembers() {
+  showMembersDialog.value = false
   selectedGroupId.value = null
 }
 
@@ -158,7 +158,7 @@ function handleLogout() {
                   :key="group.id"
                   :group="group"
                   :is-admin="authStore.isAdmin"
-                  @show-invitations="handleShowInvitations"
+                  @show-members="handleShowMembers"
                 />
               </div>
             </v-card-text>
@@ -167,12 +167,12 @@ function handleLogout() {
       </v-row>
     </div>
 
-    <!-- Dialog des invitations -->
-    <v-dialog v-model="showInvitationsDialog" max-width="700">
+    <!-- Dialog des membres -->
+    <v-dialog v-model="showMembersDialog" max-width="700">
       <InvitationsDialog
-        :invitations="groupStore.invitations"
+        :members="groupStore.members"
         :is-loading="groupStore.isLoading"
-        @close="handleCloseInvitations"
+        @close="handleCloseMembers"
       />
     </v-dialog>
   </v-container>

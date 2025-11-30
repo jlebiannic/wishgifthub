@@ -7,11 +7,19 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  showInvitations: [groupId: string]
+  showMembers: [groupId: string]
 }>()
 
-function handleShowInvitations() {
-  emit('showInvitations', props.group.id)
+function handleShowMembers() {
+  emit('showMembers', props.group.id)
+}
+
+function formatDate(dateString: string) {
+  return new Date(dateString).toLocaleDateString('fr-FR', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  })
 }
 </script>
 
@@ -19,22 +27,28 @@ function handleShowInvitations() {
   <v-card elevation="2" class="mb-3" hover>
     <v-card-text class="d-flex align-center justify-space-between">
       <div class="flex-grow-1">
-        <div class="text-h6 mb-1">{{ group.name }}</div>
-        <div v-if="group.description" class="text-body-2 text-medium-emphasis">
-          {{ group.description }}
+        <div class="d-flex align-center mb-1">
+          <v-icon color="primary" class="mr-2">mdi-gift-outline</v-icon>
+          <div class="text-h6">{{ group.name }}</div>
+        </div>
+        <div class="text-body-2 text-medium-emphasis">
+          <v-chip size="x-small" color="secondary" class="mr-2">
+            {{ group.type }}
+          </v-chip>
+          Créé le {{ formatDate(group.createdAt) }}
         </div>
       </div>
 
-      <v-tooltip v-if="isAdmin" text="Voir les invitations" location="left">
+      <v-tooltip text="Voir les membres" location="left">
         <template v-slot:activator="{ props: tooltipProps }">
           <v-btn
             icon
             variant="text"
             color="primary"
             v-bind="tooltipProps"
-            @click="handleShowInvitations"
+            @click="handleShowMembers"
           >
-            <v-icon>mdi-eye</v-icon>
+            <v-icon>mdi-account-group</v-icon>
           </v-btn>
         </template>
       </v-tooltip>
