@@ -1,6 +1,8 @@
 import {computed, ref} from 'vue'
 import {defineStore} from 'pinia'
+import {jwtDecode} from 'jwt-decode'
 import {getApiClient, updateApiToken} from '@/api/client'
+import {useGroupStore} from './group'
 
 /**
  * Interface représentant un utilisateur authentifié
@@ -10,6 +12,18 @@ export interface User {
   username: string
   email: string
   roles: string[]
+  groupIds?: string[]
+}
+
+/**
+ * Interface pour le payload du JWT
+ */
+interface JwtPayload {
+  sub: string // userId
+  isAdmin: boolean
+  groupIds?: string[]
+  iat: number
+  exp: number
 }
 
 /**
@@ -37,12 +51,17 @@ export const useAuthStore = defineStore('auth', () => {
 
       const authData = response.data
 
+      // Décoder le token JWT pour extraire les groupIds
+      const decodedToken = jwtDecode<JwtPayload>(authData.token)
+      const groupIds = decodedToken.groupIds || []
+
       // Construire l'objet User à partir de la réponse
       user.value = {
         id: authData.userId,
         username: email.split('@')[0] || email, // Utiliser la partie avant @ comme username
         email: email,
-        roles: authData.isAdmin ? ['ADMIN'] : ['USER']
+        roles: authData.isAdmin ? ['ADMIN'] : ['USER'],
+        groupIds: groupIds
       }
       token.value = authData.token
 
@@ -52,6 +71,12 @@ export const useAuthStore = defineStore('auth', () => {
       // Stocker le token dans localStorage
       localStorage.setItem('auth_token', authData.token)
       localStorage.setItem('user', JSON.stringify(user.value))
+
+      // Récupérer les groupes de l'utilisateur
+      if (authData.isAdmin && groupIds.length > 0) {
+        const groupStore = useGroupStore()
+        await groupStore.fetchGroups()
+      }
 
       return true
     } catch (err: any) {
@@ -78,12 +103,15 @@ export const useAuthStore = defineStore('auth', () => {
     localStorage.removeItem('user')
     // Réinitialiser le client API
     updateApiToken(null)
+    // Réinitialiser le store group
+    const groupStore = useGroupStore()
+    groupStore.reset()
   }
 
   /**
    * Restaurer la session depuis localStorage
    */
-  function restoreSession() {
+  async function restoreSession() {
     try {
       const storedToken = localStorage.getItem('auth_token')
       const storedUser = localStorage.getItem('user')
@@ -101,6 +129,20 @@ export const useAuthStore = defineStore('auth', () => {
         user.value = JSON.parse(storedUser)
         // Mettre à jour le client API avec le token restauré
         updateApiToken(storedToken)
+
+        // Décoder le token pour extraire les groupIds et les récupérer
+        try {
+          const decodedToken = jwtDecode<JwtPayload>(storedToken)
+          const groupIds = decodedToken.groupIds || []
+
+          if (decodedToken.isAdmin && groupIds.length > 0) {
+            const groupStore = useGroupStore()
+            await groupStore.fetchGroups()
+          }
+        } catch (decodeError) {
+          console.error('Erreur lors du décodage du token:', decodeError)
+          // Le token est peut-être expiré ou invalide, on continue sans récupérer les groupes
+        }
       } else {
         // Nettoyer le localStorage si les données sont invalides
         logout()

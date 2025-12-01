@@ -28,7 +28,8 @@ async function loadGroups() {
 }
 
 async function handleLoginSuccess() {
-  await loadGroups()
+  // Les groupes sont déjà chargés automatiquement par le store auth lors du login
+  // Pas besoin de les recharger ici
 }
 
 async function handleGroupCreated() {

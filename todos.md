@@ -1,5 +1,1 @@
-- documentation swagger
-- tests NR sécu en cours
-- voir la pertinence d'avoir le groupId dans la réservation des souhaits
-- voir les tests de droits sur la résa par ex car si le groupId est passé en param et c'est sur lui qu'on fait les tests ça ne sert à rien
-- 
+- Les apis générées coté front ont été modifiées, il faut trouver un moyen de les générer un fois pour toute sna modif manuelle 

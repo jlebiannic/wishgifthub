@@ -4,37 +4,46 @@ import {getApiClient} from '@/api/client'
 import type {GroupResponse, UserResponse} from '@/generated/api/wish/data-contracts'
 
 /**
- * Interface représentant un groupe (mappée depuis GroupResponse)
+ * Type pour un groupe (alias de GroupResponse)
  */
-export interface Group {
-  id: string
-  name: string
-  type: string
-  adminId: string
-  createdAt: string
-}
+export type Group = GroupResponse
 
 /**
- * Interface représentant un membre du groupe
+ * Type pour un membre de groupe (alias de UserResponse)
  */
-export interface GroupMember {
-  id: string
-  email: string
-  isAdmin?: boolean
-  createdAt: string
-}
+export type GroupMember = UserResponse
 
 /**
- * Store gérant les groupes et invitations
+ * Store gérant les groupes de l'utilisateur
  */
 export const useGroupStore = defineStore('group', () => {
-  const groups = ref<Group[]>([])
-  const members = ref<GroupMember[]>([])
+  const groups = ref<GroupResponse[]>([])
+  const members = ref<UserResponse[]>([])
   const isLoading = ref(false)
   const error = ref<string | null>(null)
 
   /**
-   * Récupérer les groupes de l'utilisateur connecté
+   * Récupère tous les groupes de l'administrateur
+   */
+  async function fetchGroups() {
+    isLoading.value = true
+    error.value = null
+
+    try {
+      const apiClient = getApiClient()
+      const response = await apiClient.getGroups()
+      groups.value = response.data
+      return groups.value
+    } catch (err: any) {
+      error.value = err.response?.data?.message || 'Erreur lors de la récupération des groupes'
+      throw err
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  /**
+   * Récupère les groupes de l'utilisateur connecté (admin ou invité)
    */
   async function fetchMyGroups() {
     isLoading.value = true
@@ -43,24 +52,34 @@ export const useGroupStore = defineStore('group', () => {
     try {
       const apiClient = getApiClient()
       const response = await apiClient.getUserGroups()
-
-      // Mapper les GroupResponse vers notre interface Group
-      groups.value = response.data.map((g: GroupResponse) => ({
-        id: g.id,
-        name: g.name,
-        type: g.type,
-        adminId: g.adminId,
-        createdAt: g.createdAt
-      }))
+      groups.value = response.data
+      return groups.value
     } catch (err: any) {
       error.value = err.response?.data?.message || 'Erreur lors de la récupération des groupes'
+      throw err
     } finally {
       isLoading.value = false
     }
   }
 
   /**
-   * Récupérer les membres d'un groupe
+   * Récupère les groupes par leurs IDs
+   */
+  async function fetchGroupsByIds(groupIds: string[]) {
+    if (groupIds.length === 0) {
+      groups.value = []
+      return groups.value
+    }
+
+    // Pour l'instant, on récupère tous les groupes et on filtre
+    // Une optimisation future pourrait être d'ajouter un endpoint pour récupérer par IDs
+    await fetchGroups()
+    groups.value = groups.value.filter(group => groupIds.includes(group.id))
+    return groups.value
+  }
+
+  /**
+   * Récupère les membres d'un groupe
    */
   async function fetchGroupMembers(groupId: string) {
     isLoading.value = true
@@ -69,23 +88,18 @@ export const useGroupStore = defineStore('group', () => {
     try {
       const apiClient = getApiClient()
       const response = await apiClient.getUsersByGroup(groupId)
-
-      // Mapper les UserResponse vers notre interface GroupMember
-      members.value = response.data.map((u: UserResponse) => ({
-        id: u.id,
-        email: u.email,
-        isAdmin: u.isAdmin,
-        createdAt: u.createdAt
-      }))
+      members.value = response.data
+      return members.value
     } catch (err: any) {
       error.value = err.response?.data?.message || 'Erreur lors de la récupération des membres'
+      throw err
     } finally {
       isLoading.value = false
     }
   }
 
   /**
-   * Créer un nouveau groupe
+   * Crée un nouveau groupe
    */
   async function createGroup(name: string, type: 'noël' = 'noël') {
     isLoading.value = true
@@ -95,20 +109,9 @@ export const useGroupStore = defineStore('group', () => {
       const apiClient = getApiClient()
       const response = await apiClient.createGroup({name, type})
 
-      const newGroup: Group = {
-        id: response.data.id,
-        name: response.data.name,
-        type: response.data.type,
-        adminId: response.data.adminId,
-        createdAt: response.data.createdAt
-      }
-
-      groups.value.push(newGroup)
-
-      // Si un nouveau token JWT est retourné, le mettre à jour
-      if (response.data.jwtToken) {
-        // TODO: Mettre à jour le token dans le store auth
-        console.log('Nouveau JWT reçu:', response.data.jwtToken)
+      // Ajouter le nouveau groupe à la liste
+      if (response.data) {
+        groups.value.push(response.data)
       }
 
       return true
@@ -121,83 +124,13 @@ export const useGroupStore = defineStore('group', () => {
   }
 
   /**
-   * Supprimer un groupe
+   * Réinitialise le store
    */
-  async function deleteGroup(groupId: string) {
-    isLoading.value = true
+  function reset() {
+    groups.value = []
+    members.value = []
     error.value = null
-
-    try {
-      const apiClient = getApiClient()
-      await apiClient.deleteGroup(groupId)
-
-      // Retirer le groupe de la liste
-      groups.value = groups.value.filter(g => g.id !== groupId)
-      return true
-    } catch (err: any) {
-      error.value = err.response?.data?.message || 'Erreur lors de la suppression du groupe'
-      return false
-    } finally {
-      isLoading.value = false
-    }
-  }
-
-  /**
-   * Modifier un groupe
-   */
-  async function updateGroup(groupId: string, name: string, type: 'noël' = 'noël') {
-    isLoading.value = true
-    error.value = null
-
-    try {
-      const apiClient = getApiClient()
-      const response = await apiClient.updateGroup(groupId, {name, type})
-
-      // Mettre à jour le groupe dans la liste
-      const index = groups.value.findIndex(g => g.id === groupId)
-      if (index !== -1) {
-        groups.value[index] = {
-          id: response.data.id,
-          name: response.data.name,
-          type: response.data.type,
-          adminId: response.data.adminId,
-          createdAt: response.data.createdAt
-        }
-      }
-
-      return true
-    } catch (err: any) {
-      error.value = err.response?.data?.message || 'Erreur lors de la modification du groupe'
-      return false
-    } finally {
-      isLoading.value = false
-    }
-  }
-
-  /**
-   * Inviter un utilisateur dans un groupe
-   */
-  async function inviteUser(groupId: string, email: string) {
-    isLoading.value = true
-    error.value = null
-
-    try {
-      const apiClient = getApiClient()
-      const response = await apiClient.invite(groupId, {email})
-
-      return {
-        success: true,
-        invitationLink: response.data.invitationLink || null
-      }
-    } catch (err: any) {
-      error.value = err.response?.data?.message || 'Erreur lors de l\'invitation'
-      return {
-        success: false,
-        invitationLink: null
-      }
-    } finally {
-      isLoading.value = false
-    }
+    isLoading.value = false
   }
 
   return {
@@ -205,12 +138,12 @@ export const useGroupStore = defineStore('group', () => {
     members,
     isLoading,
     error,
+    fetchGroups,
     fetchMyGroups,
+    fetchGroupsByIds,
     fetchGroupMembers,
     createGroup,
-    deleteGroup,
-    updateGroup,
-    inviteUser,
+    reset,
   }
 })
 
