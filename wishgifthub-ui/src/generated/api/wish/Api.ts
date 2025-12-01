@@ -17,12 +17,13 @@ import type {
   GroupResponse,
   InvitationRequest,
   InvitationResponse,
+  MetadataResponse,
   UserResponse,
   WishRequest,
   WishResponse,
 } from "./data-contracts";
-import type {RequestParams} from "./http-client";
-import {ContentType, HttpClient} from "./http-client";
+import type { RequestParams } from "./http-client";
+import { ContentType, HttpClient } from "./http-client";
 
 export class Api<
   SecurityDataType = unknown,
@@ -349,6 +350,34 @@ export class Api<
     this.request<WishResponse, ErrorResponse>({
       path: `/api/groups/${groupId}/wishes/${wishId}/reserve`,
       method: "POST",
+      secure: true,
+      format: "json",
+      ...params,
+    });
+  /**
+   * @description Extrait les métadonnées d'une URL de produit (titre, description, image, prix). Utilise les tags OpenGraph, meta tags, et analyse le contenu HTML. **Utilisation** : Permet de pré-remplir automatiquement un formulaire d'ajout de souhait en analysant la page web du produit souhaité.
+   *
+   * @tags Metadata
+   * @name ExtractMetadata
+   * @summary Extraire les métadonnées d'une URL
+   * @request GET:/api/metadata
+   * @secure
+   */
+  extractMetadata = (
+    query: {
+      /**
+       * URL de la page à analyser
+       * @format uri
+       * @example "https://www.amazon.fr/produit-exemple"
+       */
+      url: string;
+    },
+    params: RequestParams = {},
+  ) =>
+    this.request<MetadataResponse, ErrorResponse>({
+      path: `/api/metadata`,
+      method: "GET",
+      query: query,
       secure: true,
       format: "json",
       ...params,

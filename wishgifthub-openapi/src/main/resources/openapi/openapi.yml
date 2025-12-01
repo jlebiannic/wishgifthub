@@ -36,6 +36,8 @@ tags:
     description: Consultation des groupes et membres
   - name: Souhaits
     description: Gestion des listes de souhaits et réservations
+  - name: Metadata
+    description: Extraction de métadonnées depuis des URLs
 
 security:
   - bearerAuth: []
@@ -78,6 +80,10 @@ paths:
     $ref: './paths/wish-endpoints.yml#/~1api~1groups~1{groupId}~1wishes~1{wishId}'
   /api/groups/{groupId}/wishes/{wishId}/reserve:
     $ref: './paths/wish-endpoints.yml#/~1api~1groups~1{groupId}~1wishes~1{wishId}~1reserve'
+
+  # Metadata endpoint
+  /api/metadata:
+    $ref: './paths/metadata-endpoints.yml#/~1api~1metadata'
 
 components:
   securitySchemes:

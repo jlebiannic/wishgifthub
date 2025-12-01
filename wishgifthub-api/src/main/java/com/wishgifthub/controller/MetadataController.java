@@ -1,45 +1,48 @@
 package com.wishgifthub.controller;
 
+import com.wishgifthub.openapi.api.MetadataApi;
+import com.wishgifthub.openapi.model.MetadataResponse;
 import com.wishgifthub.service.MetadataExtractionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.net.URI;
 import java.util.Map;
 
 /**
  * Controller pour l'extraction de métadonnées depuis des URLs
  */
 @RestController
-@RequestMapping("/api/metadata")
-public class MetadataController {
+public class MetadataController implements MetadataApi {
 
     @Autowired
     private MetadataExtractionService metadataExtractionService;
 
-    /**
-     * Extrait les métadonnées d'une URL
-     *
-     * @param url L'URL à analyser
-     * @return Les métadonnées extraites (title, description, image, price)
-     */
-    @GetMapping
-    public ResponseEntity<Map<String, String>> extractMetadata(@RequestParam String url) {
+    @Override
+    public ResponseEntity<MetadataResponse> extractMetadata(URI url) {
         try {
-            Map<String, String> metadata = metadataExtractionService.extractMetadata(url);
-            return ResponseEntity.ok(metadata);
+            // Convertir l'URI en String pour le service
+            Map<String, String> metadata = metadataExtractionService.extractMetadata(url.toString());
+
+            MetadataResponse response = new MetadataResponse();
+            response.setTitle(metadata.getOrDefault("title", ""));
+            response.setDescription(metadata.getOrDefault("description", ""));
+            response.setImage(metadata.getOrDefault("image", ""));
+            response.setPrice(metadata.getOrDefault("price", ""));
+            response.setError(null);
+
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
-            // En cas d'erreur, retourner un objet vide
-            return ResponseEntity.ok(Map.of(
-                "title", "",
-                "description", "",
-                "image", "",
-                "price", "",
-                "error", e.getMessage()
-            ));
+            // En cas d'erreur, retourner un objet avec le message d'erreur
+            MetadataResponse response = new MetadataResponse();
+            response.setTitle("");
+            response.setDescription("");
+            response.setImage("");
+            response.setPrice("");
+            response.setError(e.getMessage());
+
+            return ResponseEntity.ok(response);
         }
     }
 }

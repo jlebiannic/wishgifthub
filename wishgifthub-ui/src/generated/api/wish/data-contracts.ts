@@ -199,7 +199,7 @@ export interface UserResponse {
   createdAt: string;
 }
 
-/** @example {"createdAt":"2025-11-10T10:00:00Z","giftName":"Livre de cuisine","groupId":"123e4567-e89b-12d3-a456-426614174000","reservedBy":"456e7890-e12b-12d3-a456-426614174111","description":"Livre de recettes italiennes avec photos","id":"111e2222-e33b-44d5-a666-777888999000","userId":"987e6543-e21b-12d3-a456-426614174999","url":"https://example.com/livre"} */
+/** @example {"createdAt":"2025-11-10T10:00:00Z","giftName":"Livre de cuisine","price":"29.99 €","groupId":"123e4567-e89b-12d3-a456-426614174000","imageUrl":"https://example.com/image.jpg","reservedBy":"456e7890-e12b-12d3-a456-426614174111","description":"Livre de recettes italiennes avec photos","id":"111e2222-e33b-44d5-a666-777888999000","userId":"987e6543-e21b-12d3-a456-426614174999","url":"https://example.com/livre"} */
 export interface WishResponse {
   /**
    * Identifiant unique du souhait
@@ -236,6 +236,17 @@ export interface WishResponse {
    */
   url?: string | null;
   /**
+   * URL de l'image du produit
+   * @format uri
+   * @example "https://example.com/image.jpg"
+   */
+  imageUrl?: string | null;
+  /**
+   * Prix estimé du produit
+   * @example "29.99 €"
+   */
+  price?: string | null;
+  /**
    * Identifiant de l'utilisateur qui a réservé le cadeau (null si non réservé)
    * @format uuid
    * @example "456e7890-e12b-12d3-a456-426614174111"
@@ -249,7 +260,7 @@ export interface WishResponse {
   createdAt: string;
 }
 
-/** @example {"giftName":"Livre de cuisine","description":"Livre de recettes italiennes avec photos","url":"https://example.com/livre"} */
+/** @example {"giftName":"Livre de cuisine","price":"29.99 €","imageUrl":"https://example.com/image.jpg","description":"Livre de recettes italiennes avec photos","url":"https://example.com/livre"} */
 export interface WishRequest {
   /**
    * Nom du cadeau souhaité
@@ -270,4 +281,44 @@ export interface WishRequest {
    * @example "https://example.com/livre"
    */
   url?: string | null;
+  /**
+   * URL de l'image du produit (optionnel)
+   * @format uri
+   * @example "https://example.com/image.jpg"
+   */
+  imageUrl?: string | null;
+  /**
+   * Prix estimé du produit (optionnel)
+   * @example "29.99 €"
+   */
+  price?: string | null;
+}
+
+/** @example {"image":"https://example.com/image.jpg","price":"2499.00 €","description":"Ordinateur portable Apple avec puce M3 Pro","title":"MacBook Pro 16 pouces","error":"error"} */
+export interface MetadataResponse {
+  /**
+   * Titre extrait de la page (og:title ou title tag)
+   * @example "MacBook Pro 16 pouces"
+   */
+  title: string;
+  /**
+   * Description extraite de la page (og:description ou meta description)
+   * @example "Ordinateur portable Apple avec puce M3 Pro"
+   */
+  description: string;
+  /**
+   * URL de l'image du produit (og:image ou première image)
+   * @example "https://example.com/image.jpg"
+   */
+  image: string;
+  /**
+   * Prix extrait de la page (si disponible)
+   * @example "2499.00 €"
+   */
+  price: string;
+  /**
+   * Message d'erreur si l'extraction a partiellement échoué
+   * @example null
+   */
+  error?: string | null;
 }

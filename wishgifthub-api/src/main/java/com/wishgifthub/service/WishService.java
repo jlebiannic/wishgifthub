@@ -12,6 +12,7 @@ import com.wishgifthub.repository.GroupRepository;
 import com.wishgifthub.repository.UserGroupRepository;
 import com.wishgifthub.repository.UserRepository;
 import com.wishgifthub.repository.WishRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +21,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class WishService {
     @Autowired
@@ -50,6 +52,12 @@ public class WishService {
         }
         if (request.getUrl() != null) {
             wish.setUrl(request.getUrl().toString());
+        }
+        if (request.getImageUrl() != null) {
+            wish.setImageUrl(request.getImageUrl().toString());
+        }
+        if (request.getPrice() != null) {
+            wish.setPrice(request.getPrice());
         }
         wish = wishRepository.save(wish);
 
@@ -145,8 +153,18 @@ public class WishService {
             try {
                 resp.setUrl(new URI(wish.getUrl()));
             } catch (Exception e) {
-                // Log error
+                log.warn("URL invalide pour le souhait {}: {}", wish.getId(), wish.getUrl(), e);
             }
+        }
+        if (wish.getImageUrl() != null) {
+            try {
+                resp.setImageUrl(new URI(wish.getImageUrl()));
+            } catch (Exception e) {
+                log.warn("URL d'image invalide pour le souhait {}: {}", wish.getId(), wish.getImageUrl(), e);
+            }
+        }
+        if (wish.getPrice() != null) {
+            resp.setPrice(wish.getPrice());
         }
         if (wish.getReservedBy() != null) {
             resp.setReservedBy(wish.getReservedBy().getId());

@@ -162,8 +162,8 @@ function toggleExpand() {
               <v-card variant="outlined" class="h-100">
                 <!-- Image du souhait (si disponible) -->
                 <v-img
-                  v-if="wish.url && wish.url.match(/\.(jpg|jpeg|png|gif|webp)$/i)"
-                  :src="wish.url"
+                  v-if="wish.imageUrl"
+                  :src="wish.imageUrl"
                   height="150"
                   cover
                 >
@@ -191,6 +191,11 @@ function toggleExpand() {
                   <!-- Titre -->
                   <div class="text-subtitle-1 font-weight-bold mb-2">
                     {{ wish.giftName }}
+                  </div>
+
+                  <!-- Prix (si disponible) -->
+                  <div v-if="wish.price" class="text-h6 text-primary mb-2">
+                    {{ wish.price }}
                   </div>
 
                   <!-- Description -->

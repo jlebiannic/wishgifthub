@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import {ref, watch} from 'vue'
 import {useWishStore} from '@/stores/wish'
+import {getApiClient} from '@/api/client'
 
 const props = defineProps<{
   groupId: string
@@ -44,16 +45,14 @@ async function fetchMetadataFromUrl() {
   errorMessage.value = ''
 
   try {
-    // Appel au service backend d'extraction de métadonnées
-    const response = await fetch(`/api/metadata?url=${encodeURIComponent(url.value)}`)
+    // Utiliser le client API généré avec authentification automatique
+    const apiClient = getApiClient()
+    const response = await apiClient.extractMetadata({ url: url.value })
 
-    if (!response.ok) {
-      throw new Error('Erreur lors de la récupération des métadonnées')
-    }
-
-    const metadata = await response.json()
+    const metadata = response.data
 
     // Pré-remplir les champs avec les métadonnées extraites
+    // Ne pas écraser si l'utilisateur a déjà saisi quelque chose
     if (metadata.title && !title.value) {
       title.value = metadata.title
     }
@@ -74,7 +73,7 @@ async function fetchMetadataFromUrl() {
     if (metadata.error) {
       console.warn('Avertissement lors de l\'extraction:', metadata.error)
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error('Erreur lors de la récupération des métadonnées:', error)
     // Ne pas bloquer l'utilisateur, il peut saisir manuellement
   } finally {
@@ -83,7 +82,7 @@ async function fetchMetadataFromUrl() {
 }
 
 // Watch l'URL pour déclencher la récupération des métadonnées avec debounce
-let debounceTimer: NodeJS.Timeout | null = null
+let debounceTimer: number | null = null
 watch(url, () => {
   // Annuler le timer précédent
   if (debounceTimer) {
@@ -111,7 +110,9 @@ async function handleSubmit() {
     await wishStore.addWish(props.groupId, {
       giftName: title.value,
       description: description.value || null,
-      url: url.value || null
+      url: url.value || null,
+      imageUrl: imageUrl.value || null,
+      price: price.value || null
     })
 
     // Réinitialiser le formulaire

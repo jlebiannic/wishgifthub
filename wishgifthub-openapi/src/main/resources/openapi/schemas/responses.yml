@@ -147,6 +147,17 @@ WishResponse:
       description: Lien vers le produit
       example: "https://example.com/livre"
       nullable: true
+    imageUrl:
+      type: string
+      format: uri
+      description: URL de l'image du produit
+      example: "https://example.com/image.jpg"
+      nullable: true
+    price:
+      type: string
+      description: Prix estimé du produit
+      example: "29.99 €"
+      nullable: true
     reservedBy:
       type: string
       format: uuid
@@ -186,4 +197,34 @@ UserResponse:
       format: date-time
       description: Date de création du compte
       example: "2025-11-01T10:00:00Z"
+
+MetadataResponse:
+  type: object
+  required:
+    - title
+    - description
+    - image
+    - price
+  properties:
+    title:
+      type: string
+      description: Titre extrait de la page (og:title ou title tag)
+      example: "MacBook Pro 16 pouces"
+    description:
+      type: string
+      description: Description extraite de la page (og:description ou meta description)
+      example: "Ordinateur portable Apple avec puce M3 Pro"
+    image:
+      type: string
+      description: URL de l'image du produit (og:image ou première image)
+      example: "https://example.com/image.jpg"
+    price:
+      type: string
+      description: Prix extrait de la page (si disponible)
+      example: "2499.00 €"
+    error:
+      type: string
+      description: Message d'erreur si l'extraction a partiellement échoué
+      example: null
+      nullable: true
 

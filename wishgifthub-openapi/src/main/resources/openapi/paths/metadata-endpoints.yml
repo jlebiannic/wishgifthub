@@ -1,0 +1,41 @@
+/api/metadata:
+  get:
+    tags:
+      - Metadata
+    summary: Extraire les métadonnées d'une URL
+    description: |
+      Extrait les métadonnées d'une URL de produit (titre, description, image, prix).
+      Utilise les tags OpenGraph, meta tags, et analyse le contenu HTML.
+      
+      **Utilisation** : Permet de pré-remplir automatiquement un formulaire d'ajout de souhait
+      en analysant la page web du produit souhaité.
+    operationId: extractMetadata
+    security:
+      - bearerAuth: []
+    parameters:
+      - name: url
+        in: query
+        required: true
+        description: URL de la page à analyser
+        schema:
+          type: string
+          format: uri
+          example: "https://www.amazon.fr/produit-exemple"
+    responses:
+      '200':
+        description: Métadonnées extraites avec succès
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/responses.yml/#/MetadataResponse'
+            example:
+              title: "MacBook Pro 16 pouces"
+              description: "Ordinateur portable Apple avec puce M3 Pro"
+              image: "https://example.com/image.jpg"
+              price: "2499.00 €"
+              error: null
+      '400':
+        $ref: '../schemas/errors.yml/#/BadRequestError'
+      '401':
+        $ref: '../schemas/errors.yml/#/UnauthorizedError'
+
