@@ -50,6 +50,53 @@
             schema:
               $ref: '../schemas/errors.yml/#/components/schemas/ErrorResponse'
 
+/api/groups/{groupId}/invitations:
+  get:
+    tags:
+      - Invitations
+    summary: Lister les invitations d'un groupe
+    description: |
+      Retourne la liste de toutes les invitations d'un groupe (acceptées et en attente).
+      Seul l'administrateur du groupe peut consulter cette liste.
+    operationId: getInvitations
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '../schemas/parameters.yml/#/GroupIdParam'
+    responses:
+      '200':
+        description: Liste des invitations récupérée avec succès
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '../schemas/responses.yml/#/InvitationResponse'
+            example:
+              - id: "123e4567-e89b-12d3-a456-426614174000"
+                email: "user1@example.com"
+                groupId: "987e6543-e21b-12d3-a456-426614174999"
+                token: "abc12345-def6-7890-ghij-klmnopqrstuv"
+                accepted: false
+                createdAt: "2025-11-10T10:00:00Z"
+                invitationLink: "http://localhost:8080/api/invite/abc12345-def6-7890-ghij-klmnopqrstuv"
+              - id: "223e4567-e89b-12d3-a456-426614174001"
+                email: "user2@example.com"
+                groupId: "987e6543-e21b-12d3-a456-426614174999"
+                token: "bcd23456-efg7-8901-hijk-lmnopqrstuv"
+                accepted: true
+                createdAt: "2025-11-05T14:30:00Z"
+      '401':
+        $ref: '../schemas/errors.yml/#/UnauthorizedError'
+      '403':
+        $ref: '../schemas/errors.yml/#/ForbiddenError'
+      '404':
+        description: Groupe non trouvé
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/errors.yml/#/components/schemas/ErrorResponse'
+
 /api/invite/{token}:
   get:
     tags:

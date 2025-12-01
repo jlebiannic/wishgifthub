@@ -1,78 +1,260 @@
 <script setup lang="ts">
-import type {GroupMember} from '@/stores/group'
+import {computed, ref} from 'vue'
+import type {GroupMember, Invitation} from '@/stores/group'
+import {useGroupStore} from '@/stores/group'
 
-defineProps<{
+const props = defineProps<{
+  groupId: string
   members: GroupMember[]
+  invitations: Invitation[]
+  isAdmin: boolean
   isLoading: boolean
 }>()
 
-defineEmits<{
+const emit = defineEmits<{
   close: []
+  invitationSent: []
 }>()
+
+const groupStore = useGroupStore()
+
+// Formulaire d'invitation
+const inviteEmail = ref('')
+const inviteEmailError = ref('')
+const isSendingInvite = ref(false)
+
+// Membres acceptés (ceux qui ont un compte)
+const acceptedMembers = computed(() => props.members)
+
+// Invitations en attente (non acceptées)
+const pendingInvitations = computed(() =>
+  props.invitations.filter(inv => !inv.accepted)
+)
+
+// Validation de l'email
+function validateEmail(email: string): boolean {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  return emailRegex.test(email)
+}
+
+// Envoi d'une invitation
+async function handleSendInvite() {
+  inviteEmailError.value = ''
+
+  if (!inviteEmail.value) {
+    inviteEmailError.value = 'Veuillez entrer une adresse email'
+    return
+  }
+
+  if (!validateEmail(inviteEmail.value)) {
+    inviteEmailError.value = 'Adresse email invalide'
+    return
+  }
+
+  // Vérifier si l'email est déjà membre
+  const alreadyMember = props.members.some(m => m.email === inviteEmail.value)
+  if (alreadyMember) {
+    inviteEmailError.value = 'Cet utilisateur est déjà membre du groupe'
+    return
+  }
+
+  // Vérifier si une invitation est déjà en attente
+  const alreadyInvited = props.invitations.some(
+    inv => inv.email === inviteEmail.value && !inv.accepted
+  )
+  if (alreadyInvited) {
+    inviteEmailError.value = 'Une invitation est déjà en attente pour cet email'
+    return
+  }
+
+  isSendingInvite.value = true
+
+  try {
+    const invitation = await groupStore.inviteUser(props.groupId, inviteEmail.value)
+
+    if (invitation) {
+      inviteEmail.value = ''
+      emit('invitationSent')
+    }
+  } catch (err: any) {
+    inviteEmailError.value = err.response?.data?.message || 'Erreur lors de l\'envoi de l\'invitation'
+  } finally {
+    isSendingInvite.value = false
+  }
+}
+
+function copyInvitationLink(link: string) {
+  navigator.clipboard.writeText(link)
+}
 </script>
 
 <template>
-  <v-card>
+  <v-card max-width="800">
     <v-card-title class="d-flex align-center justify-space-between pa-4">
       <div class="text-h6">
         <v-icon class="mr-2">mdi-account-multiple</v-icon>
-        Membres du groupe
+        Gestion des membres et invitations
       </div>
     </v-card-title>
 
     <v-divider />
 
-    <v-card-text class="pa-4" style="max-height: 500px">
-      <v-progress-linear v-if="isLoading" indeterminate color="primary" class="mb-4" />
+    <v-card-text class="pa-4" style="max-height: 600px; overflow-y: auto">
+      <!-- Formulaire d'invitation (Admin uniquement) -->
+      <div v-if="isAdmin" class="mb-6">
+        <div class="text-subtitle-1 font-weight-bold mb-3">
+          <v-icon class="mr-2" color="primary">mdi-email-plus</v-icon>
+          Inviter un nouveau membre
+        </div>
 
-      <div v-if="!isLoading && members.length === 0" class="text-center py-8">
-        <v-icon size="64" color="grey-lighten-1">mdi-account-outline</v-icon>
-        <div class="text-h6 text-medium-emphasis mt-4">Aucun membre</div>
+        <v-form @submit.prevent="handleSendInvite">
+          <v-row align="center">
+            <v-col cols="12" md="8">
+              <v-text-field
+                v-model="inviteEmail"
+                label="Adresse email"
+                placeholder="exemple@email.com"
+                prepend-inner-icon="mdi-email"
+                :error-messages="inviteEmailError"
+                :disabled="isSendingInvite"
+                variant="outlined"
+                density="comfortable"
+                type="email"
+              />
+            </v-col>
+            <v-col cols="12" md="4">
+              <v-btn
+                type="submit"
+                color="primary"
+                :loading="isSendingInvite"
+                :disabled="isSendingInvite"
+                block
+                prepend-icon="mdi-send"
+              >
+                Envoyer l'invitation
+              </v-btn>
+            </v-col>
+          </v-row>
+        </v-form>
+
+        <v-divider class="my-4" />
       </div>
 
-      <v-list v-else lines="two">
-        <v-list-item
-          v-for="member in members"
-          :key="member.id"
-          class="mb-2 rounded border"
+      <!-- Invitations en attente -->
+      <div v-if="isAdmin && pendingInvitations.length > 0" class="mb-6">
+        <div class="text-subtitle-1 font-weight-bold mb-3">
+          <v-icon class="mr-2" color="warning">mdi-clock-outline</v-icon>
+          Invitations en attente ({{ pendingInvitations.length }})
+        </div>
+
+        <v-list lines="two" class="bg-grey-lighten-5 rounded">
+          <v-list-item
+            v-for="invitation in pendingInvitations"
+            :key="invitation.id"
+            class="mb-2 bg-white rounded"
+          >
+            <template v-slot:prepend>
+              <v-avatar color="warning">
+                <v-icon icon="mdi-email-clock" color="white" />
+              </v-avatar>
+            </template>
+
+            <v-list-item-title>
+              {{ invitation.email }}
+            </v-list-item-title>
+
+            <v-list-item-subtitle>
+              Invitation envoyée le {{ new Date(invitation.createdAt).toLocaleDateString('fr-FR') }}
+            </v-list-item-subtitle>
+
+            <template v-slot:append>
+              <v-tooltip text="Copier le lien d'invitation" location="left">
+                <template v-slot:activator="{ props: tooltipProps }">
+                  <v-btn
+                    v-if="invitation.invitationLink"
+                    icon
+                    variant="text"
+                    size="small"
+                    v-bind="tooltipProps"
+                    @click="copyInvitationLink(invitation.invitationLink)"
+                  >
+                    <v-icon>mdi-content-copy</v-icon>
+                  </v-btn>
+                </template>
+              </v-tooltip>
+            </template>
+          </v-list-item>
+        </v-list>
+
+        <v-divider class="my-4" />
+      </div>
+
+      <!-- Membres acceptés -->
+      <div>
+        <div class="text-subtitle-1 font-weight-bold mb-3">
+          <v-icon class="mr-2" color="success">mdi-check-circle</v-icon>
+          Membres actifs ({{ acceptedMembers.length }})
+        </div>
+
+        <v-progress-linear
+          v-if="isLoading"
+          indeterminate
+          color="primary"
+          class="mb-4"
+        />
+
+        <div
+          v-else-if="acceptedMembers.length === 0"
+          class="text-center py-8"
         >
-          <template v-slot:prepend>
-            <v-avatar :color="member.isAdmin ? 'primary' : 'grey'">
-              <v-icon
-                :icon="member.isAdmin ? 'mdi-shield-crown' : 'mdi-account'"
-                color="white"
-              />
-            </v-avatar>
-          </template>
+          <v-icon size="64" color="grey-lighten-1">mdi-account-outline</v-icon>
+          <div class="text-h6 text-medium-emphasis mt-4">Aucun membre actif</div>
+        </div>
 
-          <v-list-item-title>
-            {{ member.email }}
-          </v-list-item-title>
+        <v-list v-else lines="two">
+          <v-list-item
+            v-for="member in acceptedMembers"
+            :key="member.id"
+            class="mb-2 rounded border"
+          >
+            <template v-slot:prepend>
+              <v-avatar :color="member.isAdmin ? 'primary' : 'success'">
+                <v-icon
+                  :icon="member.isAdmin ? 'mdi-shield-crown' : 'mdi-account-check'"
+                  color="white"
+                />
+              </v-avatar>
+            </template>
 
-          <v-list-item-subtitle>
-            Membre depuis {{ new Date(member.createdAt).toLocaleDateString('fr-FR') }}
-          </v-list-item-subtitle>
+            <v-list-item-title>
+              {{ member.email }}
+            </v-list-item-title>
 
-          <template v-slot:append>
-            <v-chip
-              v-if="member.isAdmin"
-              color="primary"
-              size="small"
-              variant="flat"
-            >
-              Administrateur
-            </v-chip>
-            <v-chip
-              v-else
-              color="grey"
-              size="small"
-              variant="flat"
-            >
-              Membre
-            </v-chip>
-          </template>
-        </v-list-item>
-      </v-list>
+            <v-list-item-subtitle>
+              Membre depuis {{ new Date(member.createdAt).toLocaleDateString('fr-FR') }}
+            </v-list-item-subtitle>
+
+            <template v-slot:append>
+              <v-chip
+                v-if="member.isAdmin"
+                color="primary"
+                size="small"
+                variant="flat"
+              >
+                Administrateur
+              </v-chip>
+              <v-chip
+                v-else
+                color="success"
+                size="small"
+                variant="flat"
+              >
+                Membre
+              </v-chip>
+            </template>
+          </v-list-item>
+        </v-list>
+      </div>
     </v-card-text>
 
     <v-divider />

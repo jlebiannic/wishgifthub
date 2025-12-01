@@ -40,11 +40,20 @@ async function handleShowMembers(groupId: string) {
   selectedGroupId.value = groupId
   showMembersDialog.value = true
   await groupStore.fetchGroupMembers(groupId)
+  await groupStore.fetchGroupInvitations(groupId)
 }
 
 function handleCloseMembers() {
   showMembersDialog.value = false
   selectedGroupId.value = null
+}
+
+async function handleInvitationSent() {
+  // L'invitation a déjà été ajoutée au store par inviteUser()
+  // On recharge uniquement les membres au cas où l'utilisateur invité existe déjà
+  if (selectedGroupId.value) {
+    await groupStore.fetchGroupMembers(selectedGroupId.value)
+  }
 }
 
 function handleLogout() {
@@ -168,12 +177,17 @@ function handleLogout() {
       </v-row>
     </div>
 
-    <!-- Dialog des membres -->
-    <v-dialog v-model="showMembersDialog" max-width="700">
+    <!-- Dialog des membres et invitations -->
+    <v-dialog v-model="showMembersDialog" max-width="900">
       <InvitationsDialog
+        v-if="selectedGroupId"
+        :group-id="selectedGroupId"
         :members="groupStore.members"
+        :invitations="groupStore.invitations"
+        :is-admin="authStore.isAdmin"
         :is-loading="groupStore.isLoading"
         @close="handleCloseMembers"
+        @invitation-sent="handleInvitationSent"
       />
     </v-dialog>
   </v-container>

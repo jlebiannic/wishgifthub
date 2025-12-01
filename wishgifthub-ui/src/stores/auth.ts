@@ -154,6 +154,30 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  /**
+   * Met à jour le token JWT (par exemple après création d'un groupe)
+   */
+  function updateToken(newToken: string) {
+    token.value = newToken
+
+    // Mettre à jour le localStorage
+    localStorage.setItem('auth_token', newToken)
+
+    // Mettre à jour le client API avec le nouveau token
+    updateApiToken(newToken)
+
+    // Décoder le nouveau token pour mettre à jour les groupIds de l'utilisateur
+    try {
+      const decodedToken = jwtDecode<JwtPayload>(newToken)
+      if (user.value) {
+        user.value.groupIds = decodedToken.groupIds || []
+        localStorage.setItem('user', JSON.stringify(user.value))
+      }
+    } catch (err) {
+      console.error('Erreur lors du décodage du nouveau token:', err)
+    }
+  }
+
   return {
     user,
     token,
@@ -164,6 +188,7 @@ export const useAuthStore = defineStore('auth', () => {
     login,
     logout,
     restoreSession,
+    updateToken,
   }
 })
 

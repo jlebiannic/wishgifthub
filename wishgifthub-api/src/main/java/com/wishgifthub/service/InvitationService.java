@@ -106,5 +106,33 @@ public class InvitationService {
         resp.setJwtToken(jwt);
         return resp;
     }
+
+    /**
+     * Récupère toutes les invitations d'un groupe
+     */
+    public java.util.List<InvitationResponse> getInvitationsByGroup(UUID groupId, UUID adminId) {
+        // Vérifier que l'admin a accès au groupe
+        groupRepository.findByIdAndAdminId(groupId, adminId)
+                .orElseThrow(() -> new AccessDeniedException("Groupe non trouvé ou vous n'êtes pas le propriétaire"));
+
+        return invitationRepository.findByGroupId(groupId)
+                .stream()
+                .map(invitation -> {
+                    InvitationResponse resp = new InvitationResponse();
+                    resp.setId(invitation.getId());
+                    resp.setEmail(invitation.getEmail());
+                    resp.setGroupId(invitation.getGroup().getId());
+                    resp.setToken(invitation.getToken());
+                    resp.setAccepted(invitation.isAccepted());
+                    resp.setCreatedAt(invitation.getCreatedAt());
+                    try {
+                        resp.setInvitationLink(new URI(invitationBaseUrl + invitation.getToken()));
+                    } catch (Exception e) {
+                        // Log error
+                    }
+                    return resp;
+                })
+                .collect(java.util.stream.Collectors.toList());
+    }
 }
 

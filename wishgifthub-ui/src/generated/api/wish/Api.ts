@@ -21,7 +21,8 @@ import type {
   WishRequest,
   WishResponse,
 } from "./data-contracts";
-import {ContentType, HttpClient, type RequestParams} from "./http-client";
+import type {RequestParams} from "./http-client";
+import {ContentType, HttpClient} from "./http-client";
 
 export class Api<
   SecurityDataType = unknown,
@@ -155,6 +156,23 @@ export class Api<
       body: data,
       secure: true,
       type: ContentType.Json,
+      format: "json",
+      ...params,
+    });
+  /**
+   * @description Retourne la liste de toutes les invitations d'un groupe (acceptées et en attente). Seul l'administrateur du groupe peut consulter cette liste.
+   *
+   * @tags Invitations
+   * @name GetInvitations
+   * @summary Lister les invitations d'un groupe
+   * @request GET:/api/groups/{groupId}/invitations
+   * @secure
+   */
+  getInvitations = (groupId: string, params: RequestParams = {}) =>
+    this.request<InvitationResponse[], ErrorResponse>({
+      path: `/api/groups/${groupId}/invitations`,
+      method: "GET",
+      secure: true,
       format: "json",
       ...params,
     });

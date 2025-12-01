@@ -22,10 +22,11 @@
             *   Chaque groupe affiché sous forme de **carte ou ligne** avec :
                 *   Nom du groupe
                 *   **Icône “œil”** à droite → *Action : Afficher les invitations (acceptées / en attente / refusées)*
-        *   **Section Invitations** (pop-up ou panneau latéral) :
-            *   Liste des membres invités avec statut :
-                *   Accepté
-                *   En attente
+          *   **Section Invitations** (pop-up ou panneau latéral) :
+                *   Possibilité d'inviter un user par son adresse email 
+                *   Liste des membres invités avec statut :
+                    *   Accepté
+                    *   En attente
 
 ***
 

@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -22,6 +23,13 @@ public class InvitationController implements InvitationsApi {
     public ResponseEntity<InvitationResponse> invite(UUID groupId, InvitationRequest invitationRequest) {
         User admin = getCurrentUser();
         return ResponseEntity.ok(invitationService.createInvitation(groupId, invitationRequest, admin.getId()));
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @Override
+    public ResponseEntity<List<InvitationResponse>> getInvitations(UUID groupId) {
+        User admin = getCurrentUser();
+        return ResponseEntity.ok(invitationService.getInvitationsByGroup(groupId, admin.getId()));
     }
 
     @Override

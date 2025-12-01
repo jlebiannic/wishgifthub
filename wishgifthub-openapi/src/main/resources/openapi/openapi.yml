@@ -56,6 +56,8 @@ paths:
   # Invitation endpoints
   /api/groups/{groupId}/invite:
     $ref: './paths/invitation-endpoints.yml#/~1api~1groups~1{groupId}~1invite'
+  /api/groups/{groupId}/invitations:
+    $ref: './paths/invitation-endpoints.yml#/~1api~1groups~1{groupId}~1invitations'
   /api/invite/{token}:
     $ref: './paths/invitation-endpoints.yml#/~1api~1invite~1{token}'
 
