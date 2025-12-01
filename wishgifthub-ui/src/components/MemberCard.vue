@@ -21,6 +21,7 @@ const wishStore = useWishStore()
 
 const expanded = ref(false)
 const isReserving = ref<string | null>(null)
+const isDeleting = ref<string | null>(null)
 
 // Récupérer les informations de l'utilisateur qui a réservé
 function getReservedByName(wish: WishResponse): string {
@@ -78,6 +79,24 @@ async function handleUnreserve(wish: WishResponse) {
     console.error('Erreur lors de l\'annulation:', error)
   } finally {
     isReserving.value = null
+  }
+}
+
+async function handleDelete(wish: WishResponse) {
+  if (!confirm('Êtes-vous sûr de vouloir supprimer ce souhait ?')) {
+    return
+  }
+
+  isDeleting.value = wish.id
+
+  try {
+    await wishStore.deleteWish(props.groupId, wish.id)
+    emit('wishUpdated')
+  } catch (error) {
+    console.error('Erreur lors de la suppression:', error)
+    alert('Erreur lors de la suppression du souhait')
+  } finally {
+    isDeleting.value = null
   }
 }
 
@@ -236,6 +255,22 @@ function toggleExpand() {
                   </v-chip>
 
                   <v-spacer />
+
+                  <!-- Bouton Supprimer (uniquement pour mes propres souhaits) -->
+                  <v-btn
+                    v-if="isCurrentUser"
+                    color="error"
+                    size="small"
+                    variant="text"
+                    icon="mdi-delete"
+                    @click="handleDelete(wish)"
+                    :loading="isDeleting === wish.id"
+                  >
+                    <v-icon>mdi-delete</v-icon>
+                    <v-tooltip activator="parent" location="top">
+                      Supprimer
+                    </v-tooltip>
+                  </v-btn>
 
                   <!-- Bouton Réserver -->
                   <v-btn
