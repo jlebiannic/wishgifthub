@@ -33,7 +33,16 @@ const rules = {
     (v: string) => (v && v.length >= 1 && v.length <= 255) || 'Le titre doit contenir entre 1 et 255 caractères'
   ],
   description: [
-    (v: string) => !v || v.length <= 1000 || 'La description ne peut pas dépasser 1000 caractères'
+    (v: string) => !v || v.length <= 10000 || 'La description ne peut pas dépasser 10 000 caractères'
+  ],
+  url: [
+    (v: string) => !v || v.length <= 2048 || 'L\'URL ne peut pas dépasser 2048 caractères'
+  ],
+  imageUrl: [
+    (v: string) => !v || v.length <= 2048 || 'L\'URL de l\'image ne peut pas dépasser 2048 caractères'
+  ],
+  price: [
+    (v: string) => !v || v.length <= 100 || 'Le prix ne peut pas dépasser 100 caractères'
   ]
 }
 
@@ -167,9 +176,11 @@ function handleClose() {
             variant="outlined"
             density="comfortable"
             class="mb-3"
-            hint="Si renseignée, l'URL peut pré-remplir les autres champs"
+            :hint="`Si renseignée, l'URL peut pré-remplir les autres champs (${url.length}/2048)`"
             persistent-hint
             :loading="isLoadingMetadata"
+            :rules="rules.url"
+            counter="2048"
           />
 
           <!-- Champ Image URL -->
@@ -181,6 +192,8 @@ function handleClose() {
             variant="outlined"
             density="comfortable"
             class="mb-3"
+            :rules="rules.imageUrl"
+            counter="2048"
           />
 
           <!-- Prévisualisation de l'image -->
@@ -229,6 +242,7 @@ function handleClose() {
             rows="3"
             class="mb-3"
             :rules="rules.description"
+            counter="10000"
           />
 
           <!-- Champ Prix -->
@@ -242,6 +256,8 @@ function handleClose() {
             class="mb-3"
             hint="Information indicative uniquement"
             persistent-hint
+            :rules="rules.price"
+            counter="100"
           />
 
           <!-- Message d'erreur -->

@@ -36,16 +36,16 @@ public class Wish {
     @Column(name = "gift_name", nullable = false)
     private String giftName;
 
-    @Column
+    @Column(length = 10000)
     private String description;
 
-    @Column
+    @Column(length = 2048)
     private String url;
 
-    @Column(name = "image_url")
+    @Column(name = "image_url", length = 2048)
     private String imageUrl;
 
-    @Column
+    @Column(length = 100)
     private String price;
 
     @ManyToOne

@@ -127,9 +127,10 @@
 - `MetadataController.java` - Endpoint REST
 - `V1__initial_schema.sql` - Migration Flyway initiale
 - `V2__add_wish_image_price.sql` - Migration prix + image
+- `V3__increase_varchar_sizes.sql` - Migration tailles VARCHAR
 
 **Fichiers modifiés** :
-- `Wish.java` - Ajout colonnes imageUrl, price
+- `Wish.java` - Ajout colonnes imageUrl, price + tailles VARCHAR
 - `WishService.java` - Gestion nouveaux champs + logs SLF4J
 - `application.properties` - Configuration Flyway
 - `pom.xml` - Dépendances Flyway + Jsoup
