@@ -55,8 +55,8 @@ function canReserve(wish: WishResponse): boolean {
     return false
   }
 
-  // Je ne peux pas réserver un souhait déjà réservé par quelqu'un d'autre
-  if (wish.reservedBy && wish.reservedBy !== authStore.user?.id) {
+  // Je ne peux pas réserver un souhait déjà réservé (par moi ou quelqu'un d'autre)
+  if (wish.reservedBy) {
     return false
   }
 
@@ -307,7 +307,7 @@ function toggleExpand() {
                     @click="handleUnreserve(wish)"
                     :loading="isReserving === wish.id"
                   >
-                    Annuler
+                    Annuler la réservation
                   </v-btn>
                 </v-card-actions>
               </v-card>
