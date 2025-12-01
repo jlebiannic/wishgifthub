@@ -10,6 +10,11 @@ const router = createRouter({
       component: HomeView,
     },
     {
+      path: '/invite/:token',
+      name: 'accept-invite',
+      component: () => import('../views/AcceptInviteView.vue'),
+    },
+    {
       path: '/test-input',
       name: 'test-input',
       component: () => import('../views/TestInputView.vue'),

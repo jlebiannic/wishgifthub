@@ -58,7 +58,7 @@ export const useAuthStore = defineStore('auth', () => {
       // Construire l'objet User à partir de la réponse
       user.value = {
         id: authData.userId,
-        username: email.split('@')[0] || email, // Utiliser la partie avant @ comme username
+        username: email.split('@')[0] || email,
         email: email,
         roles: authData.isAdmin ? ['ADMIN'] : ['USER'],
         groupIds: groupIds
@@ -87,6 +87,51 @@ export const useAuthStore = defineStore('auth', () => {
       } else {
         error.value = err.response?.data?.message || 'Erreur de connexion'
       }
+      return false
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  /**
+   * Connexion automatique avec un token JWT (par exemple après acceptation d'invitation)
+   */
+  async function loginWithToken(jwtToken: string, email: string) {
+    isLoading.value = true
+    error.value = null
+
+    try {
+      // Décoder le token JWT pour extraire les informations
+      const decodedToken = jwtDecode<JwtPayload>(jwtToken)
+      const groupIds = decodedToken.groupIds || []
+      const userId = decodedToken.sub
+
+      // Construire l'objet User
+      user.value = {
+        id: userId,
+        username: email.split('@')[0] || email,
+        email: email,
+        roles: decodedToken.isAdmin ? ['ADMIN'] : ['USER'],
+        groupIds: groupIds
+      }
+      token.value = jwtToken
+
+      // Mettre à jour le client API avec le nouveau token
+      updateApiToken(jwtToken)
+
+      // Stocker le token dans localStorage
+      localStorage.setItem('auth_token', jwtToken)
+      localStorage.setItem('user', JSON.stringify(user.value))
+
+      // Récupérer les groupes de l'utilisateur
+      if (groupIds.length > 0) {
+        const groupStore = useGroupStore()
+        await groupStore.fetchMyGroups()
+      }
+
+      return true
+    } catch (err: any) {
+      error.value = err.message || 'Erreur lors de la connexion automatique'
       return false
     } finally {
       isLoading.value = false
@@ -186,9 +231,9 @@ export const useAuthStore = defineStore('auth', () => {
     isAuthenticated,
     isAdmin,
     login,
+    loginWithToken,
     logout,
     restoreSession,
     updateToken,
   }
 })
-

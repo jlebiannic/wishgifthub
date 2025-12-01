@@ -35,6 +35,7 @@
 *   **Pas de bouton “Créer un groupe”**
 *   **Liste des groupes** auxquels il appartient (même présentation que pour admin, mais sans icône “œil”)
 *   **Pas d’accès aux statuts des invitations**
+*   **Lorqu'un user entre l'url avec le token de l'invitation alors ce token est pris et l'api invitation acceptée est appelée** Il n'y alors pas de mire de connexion et seulement l'affichage classique pour un user standard non admin 
 
 ***
 
