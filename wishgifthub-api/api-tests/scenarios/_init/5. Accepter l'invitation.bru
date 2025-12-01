@@ -1,0 +1,38 @@
+meta {
+  name: 5. Accepter l'invitation
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{base_url}}/api/invite/{{invitation_token}}
+  body: none
+  auth: none
+}
+
+script:post-response {
+  if (res.status === 200 && res.body.jwtToken) {
+    bru.setEnvVar("user_token", res.body.jwtToken);
+    console.log("✅ ÉTAPE 5: Invitation acceptée - User token obtenu");
+  } else {
+    console.log("❌ ÉTAPE 5 ÉCHOUÉE: Acceptation invitation");
+  }
+}
+
+tests {
+  test("Étape 5: Acceptation invitation - Status 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+  
+  test("Étape 5: JWT user généré", function() {
+    expect(res.body.jwtToken).to.be.a('string');
+  });
+  
+  test("Étape 5: Invitation marquée comme acceptée", function() {
+    expect(res.body.accepted).to.equal(true);
+  });
+  
+  test("Étape 5: JWT contient les bonnes informations", function() {
+    expect(res.body.jwtToken.split('.')).to.have.lengthOf(3);
+  });
+}

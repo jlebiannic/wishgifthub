@@ -1,0 +1,53 @@
+meta {
+  name: 4. Créer une invitation
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{base_url}}/api/groups/{{group_id}}/invite
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{admin_token}}
+}
+
+body:json {
+  {
+    "email": "user.invite@example.com"
+  }
+}
+
+script:post-response {
+  if (res.status === 200 && res.body.token) {
+    bru.setEnvVar("invitation_token", res.body.token);
+    console.log("✅ ÉTAPE 4: Invitation créée - Token: " + res.body.token);
+  } else {
+    console.log("❌ ÉTAPE 4 ÉCHOUÉE: Création invitation");
+  }
+}
+
+tests {
+  test("Étape 4: Création invitation - Status 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+  
+  test("Étape 4: Token d'invitation généré", function() {
+    expect(res.body.token).to.be.a('string');
+  });
+  
+  test("Étape 4: Email correct", function() {
+    expect(res.body.email).to.equal("user.invite@example.com");
+  });
+  
+  test("Étape 4: Lien d'invitation généré", function() {
+    expect(res.body.invitationLink).to.be.a('string');
+    expect(res.body.invitationLink).to.include(res.body.token);
+  });
+  
+  test("Étape 4: Invitation non acceptée", function() {
+    expect(res.body.accepted).to.equal(false);
+  });
+}

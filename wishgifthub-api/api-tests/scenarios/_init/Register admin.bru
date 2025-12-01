@@ -1,0 +1,51 @@
+meta {
+  name: Register admin
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{base_url}}/api/auth/register
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "email": "admin.test@example.com",
+    "password": "Password123!"
+  }
+}
+
+script:pre-request {
+  // Nettoyage des variables d'environnement
+  bru.setEnvVar("admin_token", "");
+  bru.setEnvVar("group_id", "");
+  bru.setEnvVar("invitation_token", "");
+  bru.setEnvVar("user_token", "");
+  bru.setEnvVar("wish_id", "");
+}
+
+script:post-response {
+  if (res.status === 200 && res.body.token) {
+    bru.setEnvVar("admin_token", res.body.token);
+    bru.setEnvVar("admin_email", req.body.email);
+    console.log("✅ ÉTAPE 1: Inscription admin réussie");
+  } else {
+    console.log("❌ ÉTAPE 1 ÉCHOUÉE: Inscription admin");
+  }
+}
+
+tests {
+  test("Étape 1: Inscription admin - Status 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+  
+  test("Étape 1: Token JWT reçu", function() {
+    expect(res.body.token).to.be.a('string');
+  });
+  
+  test("Étape 1: isAdmin = true", function() {
+    expect(res.body.isAdmin).to.equal(true);
+  });
+}
