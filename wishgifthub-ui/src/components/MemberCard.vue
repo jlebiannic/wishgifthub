@@ -9,17 +9,19 @@ const props = defineProps<{
   wishes: WishResponse[]
   groupId: string
   isCurrentUser: boolean
+  initiallyExpanded?: boolean
 }>()
 
 const emit = defineEmits<{
   addWish: []
   wishUpdated: []
+  expansionChanged: [memberId: string, expanded: boolean]
 }>()
 
 const authStore = useAuthStore()
 const wishStore = useWishStore()
 
-const expanded = ref(false)
+const expanded = ref(props.initiallyExpanded || false)
 const isReserving = ref<string | null>(null)
 const isDeleting = ref<string | null>(null)
 

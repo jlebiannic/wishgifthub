@@ -43,6 +43,17 @@ onMounted(async () => {
     return
   }
 
+  // Restaurer la session si elle existe (pour les favoris/rafraîchissement)
+  if (!authStore.isAuthenticated) {
+    await authStore.restoreSession()
+  }
+
+  // Si toujours pas authentifié après restauration, rediriger vers accueil
+  if (!authStore.isAuthenticated) {
+    router.push('/')
+    return
+  }
+
   try {
     // Récupérer les informations du groupe
     // Utiliser fetchMyGroups() pour les non-admins
@@ -65,6 +76,8 @@ onMounted(async () => {
     await wishStore.fetchGroupWishes(groupId.value)
   } catch (error) {
     console.error('Erreur lors du chargement:', error)
+    // En cas d'erreur (ex: groupe non accessible), retourner à l'accueil
+    router.push('/')
   } finally {
     isLoading.value = false
   }
