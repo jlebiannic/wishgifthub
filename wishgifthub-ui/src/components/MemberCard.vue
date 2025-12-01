@@ -74,8 +74,22 @@ async function handleReserve(wish: WishResponse) {
   try {
     await wishStore.reserveWish(props.groupId, wish.id)
     emit('wishUpdated')
-  } catch (error) {
+  } catch (error: any) {
     console.error('Erreur lors de la réservation:', error)
+
+    // Vérifier si c'est une erreur de concurrence (déjà réservé)
+    const errorMessage = error.response?.data?.message || error.message || ''
+
+    if (errorMessage.includes('déjà réservé') || errorMessage.includes('already reserved') || error.response?.status === 409) {
+      // Afficher un message d'erreur explicite
+      alert('⚠️ Ce souhait a déjà été réservé par quelqu\'un d\'autre.\n\nLa liste va être rafraîchie.')
+
+      // Rafraîchir les données pour mettre à jour l'interface
+      emit('wishUpdated')
+    } else {
+      // Autre type d'erreur
+      alert('Erreur lors de la réservation du souhait. Veuillez réessayer.')
+    }
   } finally {
     isReserving.value = null
   }
@@ -87,8 +101,18 @@ async function handleUnreserve(wish: WishResponse) {
   try {
     await wishStore.unreserveWish(props.groupId, wish.id)
     emit('wishUpdated')
-  } catch (error) {
+  } catch (error: any) {
     console.error('Erreur lors de l\'annulation:', error)
+
+    // Vérifier si c'est une erreur de concurrence
+    const errorMessage = error.response?.data?.message || error.message || ''
+
+    if (errorMessage.includes('réservé') || error.response?.status === 409) {
+      alert('⚠️ Ce souhait a été modifié entre temps.\n\nLa liste va être rafraîchie.')
+      emit('wishUpdated')
+    } else {
+      alert('Erreur lors de l\'annulation de la réservation. Veuillez réessayer.')
+    }
   } finally {
     isReserving.value = null
   }

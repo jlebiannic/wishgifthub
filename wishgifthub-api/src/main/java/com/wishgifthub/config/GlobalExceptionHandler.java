@@ -48,17 +48,18 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * Gère les exceptions BusinessRuleException et retourne un code 400.
+     * Gère les exceptions BusinessRuleException et retourne un code 409.
+     * Utilisé pour les conflits métier (ex: souhait déjà réservé)
      */
     @ExceptionHandler(BusinessRuleException.class)
     public ResponseEntity<ErrorResponse> handleBusinessRuleException(BusinessRuleException ex) {
         logger.warn("Règle métier violée : {}", ex.getMessage());
         ErrorResponse error = new ErrorResponse(
-                HttpStatus.BAD_REQUEST.value(),
+                HttpStatus.CONFLICT.value(),
                 ex.getMessage(),
                 "BUSINESS_RULE_VIOLATION"
         );
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
     }
 
     /**
