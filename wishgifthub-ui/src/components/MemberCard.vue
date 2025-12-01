@@ -168,14 +168,14 @@ function toggleExpand() {
     :class="{'border-primary': isCurrentUser}"
   >
     <v-card-text
-      class="d-flex align-center pa-4 cursor-pointer"
+      class="d-flex align-center pa-4 cursor-pointer flex-wrap"
       @click="toggleExpand"
     >
       <!-- Avatar -->
       <v-avatar
         :color="isCurrentUser ? 'primary' : 'secondary'"
         size="56"
-        class="mr-4"
+        class="mr-4 flex-shrink-0"
       >
         <v-icon size="32" color="white">
           {{ isCurrentUser ? 'mdi-account' : 'mdi-account-outline' }}
@@ -183,7 +183,7 @@ function toggleExpand() {
       </v-avatar>
 
       <!-- Nom du membre -->
-      <div class="flex-grow-1">
+      <div class="flex-grow-1" style="min-width: 150px;">
         <div class="text-h6">
           <span v-if="isCurrentUser" class="font-weight-bold">Moi</span>
           <span v-if="isCurrentUser && member.email"> ({{ member.email }})</span>
@@ -195,19 +195,22 @@ function toggleExpand() {
       </div>
 
       <!-- Bouton Ajouter (seulement pour l'utilisateur connecté) -->
+      <!-- Sur mobile : passe en dessous grâce au flex-wrap -->
       <v-btn
         v-if="isCurrentUser"
         color="primary"
         variant="elevated"
         prepend-icon="mdi-plus"
         @click.stop="emit('addWish')"
-        class="mr-2"
+        size="small"
+        class="mr-2 mt-2 mt-sm-0"
       >
-        Ajouter un souhait
+        <span class="d-none d-sm-inline">Ajouter un souhait</span>
+        <span class="d-inline d-sm-none">Ajouter</span>
       </v-btn>
 
       <!-- Icône expand -->
-      <v-icon>
+      <v-icon class="flex-shrink-0">
         {{ expanded ? 'mdi-chevron-up' : 'mdi-chevron-down' }}
       </v-icon>
     </v-card-text>

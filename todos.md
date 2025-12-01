@@ -1,11 +1,12 @@
 # Fonc
 - ajouter pseudo et avatar à la création de l'invitation
 - possibilité de modifier le pseudo et l'avatar
+- possibilité de se déconnecter sur l'icone user en haut à droite
 - liens amazon à revoir (images)
-- bouton ajouter un souhait tronqué/peu visible sur smartphone
 - si url ou url image invalide afficher une erreur 
 - ajout d'un bouton pour rafraichir le groupe
 - remplacer les alerts par qq chose de plus user friendly
+- reserré l'écran (bandes à droite et à gauche)
 
 # Tech
 - Les apis générées coté front ont été modifiées, il faut trouver un moyen de les générer un fois pour toute sna modif manuelle
@@ -15,4 +16,5 @@
 # Fait
 - si déjà réservé et possibilité de réserver alors afficher une erreur au moment du clique et mettre à jour le bouton
 - bouton réservé par moi tronqué sur smartphone
+- bouton ajouter un souhait tronqué/peu visible sur smartphone
 
