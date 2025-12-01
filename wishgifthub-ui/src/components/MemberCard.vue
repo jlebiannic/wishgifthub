@@ -48,6 +48,26 @@ function getReservedByName(wish: WishResponse): string {
   return 'Réservé'
 }
 
+// Version courte pour mobile
+function getReservedByNameShort(wish: WishResponse): string {
+  if (!wish.reservedBy) return ''
+
+  // Si c'est moi qui ai réservé
+  if (wish.reservedBy === authStore.user?.id) {
+    return 'Moi'
+  }
+
+  // Chercher la personne dans la liste des membres
+  const reserver = props.allMembers.find(m => m.id === wish.reservedBy)
+  if (reserver) {
+    const emailParts = reserver.email.split('@')
+    const name = emailParts[0] || reserver.email
+    return `Réservé par ${name}`
+  }
+
+  return 'Réservé'
+}
+
 // Vérifier si je peux réserver ce souhait
 function canReserve(wish: WishResponse): boolean {
   // Je ne peux pas réserver mes propres souhaits
@@ -287,7 +307,10 @@ function toggleExpand() {
                     <v-icon start size="small">
                       {{ wish.reservedBy === authStore.user?.id ? 'mdi-check' : 'mdi-lock' }}
                     </v-icon>
-                    {{ getReservedByName(wish) }}
+                    <!-- Texte complet sur desktop -->
+                    <span class="d-none d-sm-inline">{{ getReservedByName(wish) }}</span>
+                    <!-- Texte court sur mobile -->
+                    <span class="d-inline d-sm-none">{{ getReservedByNameShort(wish) }}</span>
                   </v-chip>
 
                   <v-spacer />
