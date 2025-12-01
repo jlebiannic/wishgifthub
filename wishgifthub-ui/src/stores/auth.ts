@@ -180,9 +180,14 @@ export const useAuthStore = defineStore('auth', () => {
           const decodedToken = jwtDecode<JwtPayload>(storedToken)
           const groupIds = decodedToken.groupIds || []
 
-          if (decodedToken.isAdmin && groupIds.length > 0) {
+          // Récupérer les groupes pour tous les utilisateurs (admin ou non)
+          if (groupIds.length > 0) {
             const groupStore = useGroupStore()
-            await groupStore.fetchGroups()
+            if (decodedToken.isAdmin) {
+              await groupStore.fetchGroups()
+            } else {
+              await groupStore.fetchMyGroups()
+            }
           }
         } catch (decodeError) {
           console.error('Erreur lors du décodage du token:', decodeError)

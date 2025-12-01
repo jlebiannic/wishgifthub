@@ -1,5 +1,8 @@
 <script setup lang="ts">
+import {useRouter} from 'vue-router'
 import type {Group} from '@/stores/group'
+
+const router = useRouter()
 
 const props = defineProps<{
   group: Group
@@ -10,7 +13,13 @@ const emit = defineEmits<{
   showMembers: [groupId: string]
 }>()
 
-function handleShowMembers() {
+function handleCardClick() {
+  // Naviguer vers la page du groupe
+  router.push(`/group/${props.group.id}`)
+}
+
+function handleShowMembers(event: Event) {
+  event.stopPropagation()
   emit('showMembers', props.group.id)
 }
 
@@ -24,7 +33,7 @@ function formatDate(dateString: string) {
 </script>
 
 <template>
-  <v-card elevation="2" class="mb-3" hover>
+  <v-card elevation="2" class="mb-3" hover @click="handleCardClick" style="cursor: pointer">
     <v-card-text class="d-flex align-center justify-space-between">
       <div class="flex-grow-1">
         <div class="d-flex align-center mb-1">
@@ -39,7 +48,8 @@ function formatDate(dateString: string) {
         </div>
       </div>
 
-      <v-tooltip text="Voir les membres" location="left">
+      <!-- Icône voir les membres (admin uniquement) -->
+      <v-tooltip v-if="isAdmin" text="Gérer les invitations" location="left">
         <template v-slot:activator="{ props: tooltipProps }">
           <v-btn
             icon
@@ -48,7 +58,7 @@ function formatDate(dateString: string) {
             v-bind="tooltipProps"
             @click="handleShowMembers"
           >
-            <v-icon>mdi-account-group</v-icon>
+            <v-icon>mdi-account-multiple</v-icon>
           </v-btn>
         </template>
       </v-tooltip>

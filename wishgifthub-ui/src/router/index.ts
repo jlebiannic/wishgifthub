@@ -10,6 +10,11 @@ const router = createRouter({
       component: HomeView,
     },
     {
+      path: '/group/:groupId',
+      name: 'group-members',
+      component: () => import('../views/GroupMembersView.vue'),
+    },
+    {
       path: '/invite/:token',
       name: 'accept-invite',
       component: () => import('../views/AcceptInviteView.vue'),
