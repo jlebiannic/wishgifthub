@@ -36,7 +36,7 @@ const rules = {
   ]
 }
 
-// Fonction pour extraire les métadonnées d'une URL (simulation)
+// Fonction pour extraire les métadonnées d'une URL
 async function fetchMetadataFromUrl() {
   if (!url.value) return
 
@@ -44,31 +44,57 @@ async function fetchMetadataFromUrl() {
   errorMessage.value = ''
 
   try {
-    // TODO: Implémenter un service backend pour extraire les métadonnées
-    // Pour l'instant, on simule juste avec un délai
-    await new Promise(resolve => setTimeout(resolve, 500))
+    // Appel au service backend d'extraction de métadonnées
+    const response = await fetch(`/api/metadata?url=${encodeURIComponent(url.value)}`)
 
-    // Simulation - à remplacer par un vrai appel API
-    // const response = await fetch(`/api/metadata?url=${encodeURIComponent(url.value)}`)
-    // const data = await response.json()
-
-    // Pour l'instant, on peut juste utiliser l'URL comme image si c'est une image
-    if (url.value.match(/\.(jpg|jpeg|png|gif|webp)$/i)) {
-      imageUrl.value = url.value
+    if (!response.ok) {
+      throw new Error('Erreur lors de la récupération des métadonnées')
     }
 
-    // Les autres champs restent modifiables manuellement
+    const metadata = await response.json()
+
+    // Pré-remplir les champs avec les métadonnées extraites
+    if (metadata.title && !title.value) {
+      title.value = metadata.title
+    }
+
+    if (metadata.description && !description.value) {
+      description.value = metadata.description
+    }
+
+    if (metadata.image && !imageUrl.value) {
+      imageUrl.value = metadata.image
+    }
+
+    if (metadata.price && !price.value) {
+      price.value = metadata.price
+    }
+
+    // Afficher un message si une erreur est présente mais continuer
+    if (metadata.error) {
+      console.warn('Avertissement lors de l\'extraction:', metadata.error)
+    }
   } catch (error) {
     console.error('Erreur lors de la récupération des métadonnées:', error)
+    // Ne pas bloquer l'utilisateur, il peut saisir manuellement
   } finally {
     isLoadingMetadata.value = false
   }
 }
 
-// Watch l'URL pour déclencher la récupération des métadonnées
+// Watch l'URL pour déclencher la récupération des métadonnées avec debounce
+let debounceTimer: NodeJS.Timeout | null = null
 watch(url, () => {
+  // Annuler le timer précédent
+  if (debounceTimer) {
+    clearTimeout(debounceTimer)
+  }
+
+  // Attendre 1 seconde après la dernière frappe avant de déclencher l'extraction
   if (url.value) {
-    fetchMetadataFromUrl()
+    debounceTimer = setTimeout(() => {
+      fetchMetadataFromUrl()
+    }, 1000)
   }
 })
 
