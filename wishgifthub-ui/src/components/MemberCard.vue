@@ -10,6 +10,7 @@ const props = defineProps<{
   groupId: string
   isCurrentUser: boolean
   initiallyExpanded?: boolean
+  allMembers: UserResponse[]
 }>()
 
 const emit = defineEmits<{
@@ -31,10 +32,19 @@ function getReservedByName(wish: WishResponse): string {
 
   // Si c'est moi qui ai réservé
   if (wish.reservedBy === authStore.user?.id) {
-    return 'Moi'
+    return 'Réservé par moi'
   }
 
-  // Sinon, on affiche juste "Réservé"
+  // Chercher la personne dans la liste des membres
+  const reserver = props.allMembers.find(m => m.id === wish.reservedBy)
+  if (reserver) {
+    // Afficher le prénom de l'email (avant le @) ou l'email complet si pas de @
+    const emailParts = reserver.email.split('@')
+    const name = emailParts[0] || reserver.email
+    return `Réservé par ${name}`
+  }
+
+  // Fallback si on ne trouve pas (ne devrait pas arriver)
   return 'Réservé'
 }
 

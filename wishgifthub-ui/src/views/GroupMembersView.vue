@@ -158,6 +158,7 @@ function goBack() {
           :wishes="getMemberWishes(member.id)"
           :group-id="groupId"
           :is-current-user="member.id === authStore.user?.id"
+          :all-members="members"
           @add-wish="handleAddWish"
           @wish-updated="handleWishUpdated"
         />
