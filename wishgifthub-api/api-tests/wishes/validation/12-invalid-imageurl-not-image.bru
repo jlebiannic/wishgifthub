@@ -1,0 +1,37 @@
+meta {
+  name: 12 - Image URL invalide - extension non-image
+  type: http
+  seq: 12
+}
+
+post {
+  url: {{base_url}}/api/wishes
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{admin_token}}
+}
+
+body:json {
+  {
+    "giftName": "Test image URL invalide",
+    "description": "Test avec une URL d'image invalide (pas d'extension image)",
+    "url": "https://example.com/produit",
+    "imageUrl": "https://example.com/document.pdf",
+    "price": "29.99 €"
+  }
+}
+
+assert {
+  res.status: eq 400
+}
+
+tests {
+  test("Le souhait ne doit pas être créé avec une image URL pointant vers un fichier non-image", function() {
+    expect(res.status).to.equal(400);
+    expect(res.body.message).to.include("image");
+  });
+}
+

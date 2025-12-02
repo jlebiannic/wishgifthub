@@ -76,7 +76,7 @@ WishRequest:
       description: URL de l'image du produit (optionnel, max 2048 caractères)
       example: "https://example.com/image.jpg"
       nullable: true
-      x-field-extra-annotation: "@com.wishgifthub.validation.ValidUrl"
+      x-field-extra-annotation: "@com.wishgifthub.validation.ValidImageUrl"
     price:
       type: string
       maxLength: 100

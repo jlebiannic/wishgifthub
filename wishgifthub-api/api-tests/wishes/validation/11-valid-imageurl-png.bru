@@ -1,0 +1,37 @@
+meta {
+  name: 11 - Image URL valide avec extension png
+  type: http
+  seq: 11
+}
+
+post {
+  url: {{base_url}}/api/wishes
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{admin_token}}
+}
+
+body:json {
+  {
+    "giftName": "Test image URL valide png",
+    "description": "Test avec une URL d'image valide se terminant par .png",
+    "url": "https://example.com/produit",
+    "imageUrl": "https://example.com/image.png",
+    "price": "29.99 €"
+  }
+}
+
+assert {
+  res.status: eq 201
+}
+
+tests {
+  test("Le souhait doit être créé avec une image URL valide (.png)", function() {
+    expect(res.status).to.equal(201);
+    expect(res.body.imageUrl).to.equal("https://example.com/image.png");
+  });
+}
+
