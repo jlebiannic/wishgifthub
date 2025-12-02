@@ -45,15 +45,13 @@ public class MetadataExtractionService {
         }
         metadata.put("description", description != null ? description : "");
 
-        // Extraire l'image (priorité: og:image, puis twitter:image)
+        // Extraire l'image (priorité: og:image, puis twitter:image, puis sélecteurs spécifiques)
         String image = extractOpenGraphTag(doc, "og:image");
         if (image == null || image.isEmpty()) {
             image = extractMetaTag(doc, "twitter:image");
         }
         if (image == null || image.isEmpty()) {
-            // Chercher la première image dans le contenu
-            Element imgElement = doc.selectFirst("img[src]");
-            image = imgElement != null ? imgElement.attr("abs:src") : "";
+            image = extractProductImage(doc);
         }
         metadata.put("image", image != null ? image : "");
 
@@ -78,6 +76,95 @@ public class MetadataExtractionService {
     private String extractMetaTag(Document doc, String name) {
         Element element = doc.selectFirst("meta[name=" + name + "]");
         return element != null ? element.attr("content") : null;
+    }
+
+    /**
+     * Extrait l'image d'un produit en cherchant dans les sélecteurs courants des sites e-commerce
+     */
+    private String extractProductImage(Document doc) {
+        // Amazon - chercher l'image principale du produit
+        Element amazonImg = doc.selectFirst("#landingImage, #imgBlkFront, #main-image, .a-dynamic-image");
+        if (amazonImg != null) {
+            // Amazon peut stocker l'URL de la grande image dans data-old-hires ou data-a-dynamic-image
+            String dataHires = amazonImg.attr("data-old-hires");
+            if (dataHires != null && !dataHires.isEmpty()) {
+                return dataHires;
+            }
+
+            String dataDynamic = amazonImg.attr("data-a-dynamic-image");
+            if (dataDynamic != null && !dataDynamic.isEmpty()) {
+                // data-a-dynamic-image contient un JSON avec plusieurs URLs, prendre la première
+                try {
+                    String firstUrl = dataDynamic.substring(dataDynamic.indexOf("\"") + 1, dataDynamic.indexOf("\"", dataDynamic.indexOf("\"") + 1));
+                    if (firstUrl.startsWith("http")) {
+                        return firstUrl;
+                    }
+                } catch (Exception e) {
+                    // Ignorer les erreurs de parsing
+                }
+            }
+
+            // Fallback sur l'attribut src
+            String src = amazonImg.attr("abs:src");
+            if (src != null && !src.isEmpty()) {
+                return src;
+            }
+        }
+
+        // Chercher dans les sélecteurs courants des sites e-commerce
+        String[] selectors = {
+            "img.product-image",
+            "img[itemprop=image]",
+            ".product-main-image img",
+            ".product-image-wrapper img",
+            "#product-image",
+            ".gallery-image img",
+            "[data-testid=product-image]",
+            "img[class*=product]",
+            "img[class*=Product]"
+        };
+
+        for (String selector : selectors) {
+            Element img = doc.selectFirst(selector);
+            if (img != null) {
+                // Chercher d'abord dans data-src (lazy loading)
+                String dataSrc = img.attr("data-src");
+                if (dataSrc != null && !dataSrc.isEmpty() && dataSrc.startsWith("http")) {
+                    return dataSrc;
+                }
+
+                // Puis dans src
+                String src = img.attr("abs:src");
+                if (src != null && !src.isEmpty() && !src.contains("placeholder") && !src.contains("loading")) {
+                    return src;
+                }
+            }
+        }
+
+        // Fallback : chercher la première image qui semble être une image de produit (pas trop petite)
+        for (Element img : doc.select("img[src]")) {
+            String src = img.attr("abs:src");
+            String width = img.attr("width");
+            String height = img.attr("height");
+
+            // Ignorer les petites images (icônes, logos, etc.)
+            if (src != null && !src.isEmpty() && !src.contains("logo") && !src.contains("icon")) {
+                try {
+                    int w = width.isEmpty() ? 0 : Integer.parseInt(width);
+                    int h = height.isEmpty() ? 0 : Integer.parseInt(height);
+
+                    // Prendre l'image si elle est assez grande ou si on n'a pas les dimensions
+                    if ((w == 0 && h == 0) || (w > 100 && h > 100)) {
+                        return src;
+                    }
+                } catch (NumberFormatException e) {
+                    // Si on ne peut pas parser les dimensions, on prend l'image
+                    return src;
+                }
+            }
+        }
+
+        return null;
     }
 
     /**
