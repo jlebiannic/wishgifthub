@@ -63,6 +63,52 @@ function isValidImageUrl(urlString: string): boolean {
   }
 }
 
+// Fonction pour nettoyer une URL en supprimant les paramètres de tracking
+function cleanUrl(urlString: string): string {
+  if (!urlString || !urlString.trim()) return urlString
+
+  try {
+    const url = new URL(urlString)
+
+    // Liste des paramètres de tracking courants à supprimer
+    const trackingParams = [
+      // Google Analytics & Ads
+      'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content',
+      'gclid', 'gclsrc', 'dclid',
+      'gad_source', 'gad_campaignid', // Google Ads (nouveaux paramètres)
+      'gbraid', 'wbraid', // Google cross-device tracking
+      // Facebook & Social
+      'fbclid', 'fb_action_ids', 'fb_action_types', 'fb_source', 'fb_ref',
+      // Amazon
+      'ref', 'ref_', 'pf_rd_r', 'pf_rd_p', 'pf_rd_m', 'pf_rd_s', 'pf_rd_t', 'pf_rd_i',
+      'pd_rd_r', 'pd_rd_w', 'pd_rd_wg',
+      '_encoding', 'psc', 'refRID', 'qid', 'sr',
+      // Retail / E-commerce tracking
+      'loopcd', // Loop Commerce / Dior et autres retailers
+      // Autres
+      'mc_cid', 'mc_eid', '_hsenc', '_hsmi', 'mkt_tok',
+      'msclkid', 'igshid'
+    ]
+
+    // Créer une nouvelle URLSearchParams sans les paramètres de tracking
+    const cleanedParams = new URLSearchParams()
+    url.searchParams.forEach((value, key) => {
+      // Garder le paramètre seulement s'il n'est pas dans la liste de tracking
+      if (!trackingParams.includes(key) && !key.startsWith('utm_')) {
+        cleanedParams.append(key, value)
+      }
+    })
+
+    // Reconstruire l'URL
+    url.search = cleanedParams.toString()
+
+    return url.toString()
+  } catch {
+    // Si l'URL n'est pas valide, la retourner telle quelle
+    return urlString
+  }
+}
+
 // Règles de validation
 const rules = {
   title: [
@@ -164,11 +210,15 @@ async function handleSubmit() {
   errorMessage.value = ''
 
   try {
+    // Nettoyer les URLs avant l'envoi
+    const cleanedUrl = url.value ? cleanUrl(url.value) : null
+    const cleanedImageUrl = imageUrl.value ? cleanUrl(imageUrl.value) : null
+
     await wishStore.addWish(props.groupId, {
       giftName: title.value,
       description: description.value || null,
-      url: url.value || null,
-      imageUrl: imageUrl.value || null,
+      url: cleanedUrl,
+      imageUrl: cleanedImageUrl,
       price: price.value || null
     })
 
@@ -202,6 +252,26 @@ function handleClose() {
   resetForm()
   emit('update:modelValue', false)
 }
+
+// Nettoyer l'URL principale quand l'utilisateur quitte le champ
+function handleUrlBlur() {
+  if (url.value) {
+    const cleaned = cleanUrl(url.value)
+    if (cleaned !== url.value) {
+      url.value = cleaned
+    }
+  }
+}
+
+// Nettoyer l'URL de l'image quand l'utilisateur quitte le champ
+function handleImageUrlBlur() {
+  if (imageUrl.value) {
+    const cleaned = cleanUrl(imageUrl.value)
+    if (cleaned !== imageUrl.value) {
+      imageUrl.value = cleaned
+    }
+  }
+}
 </script>
 
 <template>
@@ -233,6 +303,7 @@ function handleClose() {
             :loading="isLoadingMetadata"
             :rules="rules.url"
             counter="2048"
+            @blur="handleUrlBlur"
           />
 
           <!-- Champ Image URL -->
@@ -247,6 +318,7 @@ function handleClose() {
             :rules="rules.imageUrl"
             counter="2048"
             @update:model-value="imageLoadError = false"
+            @blur="handleImageUrlBlur"
           />
 
           <!-- Message d'erreur si l'image ne peut pas être chargée -->
