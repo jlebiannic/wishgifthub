@@ -15,6 +15,9 @@ const emit = defineEmits<{
 
 const wishStore = useWishStore()
 
+// Référence au formulaire
+const form = ref<any>(null)
+
 // Formulaire
 const url = ref('')
 const imageUrl = ref('')
@@ -25,6 +28,19 @@ const price = ref('')
 const isLoadingMetadata = ref(false)
 const isSaving = ref(false)
 const errorMessage = ref('')
+const imageLoadError = ref(false)
+
+// Fonction de validation d'URL
+function isValidUrl(urlString: string): boolean {
+  if (!urlString) return true // URL vide est valide (optionnel)
+  try {
+    const url = new URL(urlString)
+    // Vérifier que le protocole est http ou https
+    return url.protocol === 'http:' || url.protocol === 'https:'
+  } catch {
+    return false
+  }
+}
 
 // Règles de validation
 const rules = {
@@ -36,10 +52,12 @@ const rules = {
     (v: string) => !v || v.length <= 10000 || 'La description ne peut pas dépasser 10 000 caractères'
   ],
   url: [
-    (v: string) => !v || v.length <= 2048 || 'L\'URL ne peut pas dépasser 2048 caractères'
+    (v: string) => !v || v.length <= 2048 || 'L\'URL ne peut pas dépasser 2048 caractères',
+    (v: string) => isValidUrl(v) || 'L\'URL n\'est pas valide (doit commencer par http:// ou https://)'
   ],
   imageUrl: [
-    (v: string) => !v || v.length <= 2048 || 'L\'URL de l\'image ne peut pas dépasser 2048 caractères'
+    (v: string) => !v || v.length <= 2048 || 'L\'URL de l\'image ne peut pas dépasser 2048 caractères',
+    (v: string) => isValidUrl(v) || 'L\'URL de l\'image n\'est pas valide (doit commencer par http:// ou https://)'
   ],
   price: [
     (v: string) => !v || v.length <= 100 || 'Le prix ne peut pas dépasser 100 caractères'
@@ -107,6 +125,15 @@ watch(url, () => {
 })
 
 async function handleSubmit() {
+  // Valider le formulaire
+  if (form.value) {
+    const { valid } = await form.value.validate()
+    if (!valid) {
+      errorMessage.value = 'Veuillez corriger les erreurs dans le formulaire'
+      return
+    }
+  }
+
   if (!title.value) {
     errorMessage.value = 'Le titre est requis'
     return
@@ -144,6 +171,10 @@ function resetForm() {
   description.value = ''
   price.value = ''
   errorMessage.value = ''
+  imageLoadError.value = false
+  if (form.value) {
+    form.value.resetValidation()
+  }
 }
 
 function handleClose() {
@@ -166,7 +197,7 @@ function handleClose() {
       </v-card-title>
 
       <v-card-text class="pa-4">
-        <v-form @submit.prevent="handleSubmit">
+        <v-form ref="form" @submit.prevent="handleSubmit">
           <!-- Champ URL -->
           <v-text-field
             v-model="url"
@@ -194,15 +225,27 @@ function handleClose() {
             class="mb-3"
             :rules="rules.imageUrl"
             counter="2048"
+            @update:model-value="imageLoadError = false"
           />
 
+          <!-- Message d'erreur si l'image ne peut pas être chargée -->
+          <v-alert
+            v-if="imageLoadError"
+            type="warning"
+            variant="tonal"
+            class="mb-3"
+            density="compact"
+          >
+            L'image ne peut pas être chargée. Vérifiez que l'URL est correcte et accessible.
+          </v-alert>
+
           <!-- Prévisualisation de l'image -->
-          <v-card v-if="imageUrl" variant="outlined" class="mb-3">
+          <v-card v-if="imageUrl && !imageLoadError" variant="outlined" class="mb-3">
             <v-img
               :src="imageUrl"
               height="200"
               cover
-              @error="imageUrl = ''"
+              @error="imageLoadError = true"
             >
               <template v-slot:placeholder>
                 <v-row

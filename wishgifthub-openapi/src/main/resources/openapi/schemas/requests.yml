@@ -59,24 +59,29 @@ WishRequest:
       example: "Livre de cuisine"
     description:
       type: string
-      maxLength: 1000
+      maxLength: 10000
       description: Description détaillée du cadeau (optionnel)
       example: "Livre de recettes italiennes avec photos"
       nullable: true
     url:
       type: string
       format: uri
+      maxLength: 2048
       description: Lien vers le produit (optionnel)
       example: "https://example.com/livre"
       nullable: true
+      x-field-extra-annotation: "@com.wishgifthub.validation.ValidUrl"
     imageUrl:
       type: string
       format: uri
+      maxLength: 2048
       description: URL de l'image du produit (optionnel)
       example: "https://example.com/image.jpg"
       nullable: true
+      x-field-extra-annotation: "@com.wishgifthub.validation.ValidUrl"
     price:
       type: string
+      maxLength: 100
       description: Prix estimé du produit (optionnel)
       example: "29.99 €"
       nullable: true

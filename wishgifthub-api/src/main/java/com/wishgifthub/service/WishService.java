@@ -43,6 +43,28 @@ public class WishService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Utilisateur", userId));
 
+        // Validation des champs
+        if (request.getGiftName() == null || request.getGiftName().trim().isEmpty()) {
+            throw new BusinessRuleException("Le nom du cadeau est requis");
+        }
+        if (request.getGiftName().length() > 255) {
+            throw new BusinessRuleException("Le nom du cadeau ne peut pas dépasser 255 caractères");
+        }
+        if (request.getDescription() != null && request.getDescription().length() > 10000) {
+            throw new BusinessRuleException("La description ne peut pas dépasser 10 000 caractères");
+        }
+        if (request.getPrice() != null && request.getPrice().length() > 100) {
+            throw new BusinessRuleException("Le prix ne peut pas dépasser 100 caractères");
+        }
+
+        // Validation de la longueur des URLs (la validation du format est faite par @ValidUrl)
+        if (request.getUrl() != null && request.getUrl().toString().length() > 2048) {
+            throw new BusinessRuleException("L'URL du produit ne peut pas dépasser 2048 caractères");
+        }
+        if (request.getImageUrl() != null && request.getImageUrl().toString().length() > 2048) {
+            throw new BusinessRuleException("L'URL de l'image ne peut pas dépasser 2048 caractères");
+        }
+
         Wish wish = new Wish();
         wish.setUser(user);
         wish.setGroup(group);

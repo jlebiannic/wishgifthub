@@ -271,24 +271,27 @@ export interface WishRequest {
   giftName: string;
   /**
    * Description détaillée du cadeau (optionnel)
-   * @maxLength 1000
+   * @maxLength 10000
    * @example "Livre de recettes italiennes avec photos"
    */
   description?: string | null;
   /**
    * Lien vers le produit (optionnel)
    * @format uri
+   * @maxLength 2048
    * @example "https://example.com/livre"
    */
   url?: string | null;
   /**
    * URL de l'image du produit (optionnel)
    * @format uri
+   * @maxLength 2048
    * @example "https://example.com/image.jpg"
    */
   imageUrl?: string | null;
   /**
    * Prix estimé du produit (optionnel)
+   * @maxLength 100
    * @example "29.99 €"
    */
   price?: string | null;

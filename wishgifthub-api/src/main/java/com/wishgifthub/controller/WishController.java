@@ -8,12 +8,14 @@ import com.wishgifthub.service.WishService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.UUID;
 
 @RestController
+@Validated
 public class WishController implements SouhaitsApi {
     @Autowired
     private WishService wishService;
