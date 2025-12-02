@@ -1,0 +1,69 @@
+meta {
+  name: Valid URL - HTTPS
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{base_url}}/api/groups/{{group_id}}/wishes
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{user_token}}
+}
+
+body:json {
+  {
+    "giftName": "Produit avec URL HTTPS valide",
+    "description": "Test de validation d'URL HTTPS",
+    "url": "https://www.amazon.fr/product/B0DZDQ7SQK",
+    "imageUrl": "https://images.example.com/product.jpg",
+    "price": "29.99 €"
+  }
+}
+
+script:post-response {
+  if (res.body.id) {
+    // Nettoyer en supprimant le souhait créé
+    const axios = require('axios');
+    axios.delete(
+      `${bru.getEnvVar("base_url")}/api/groups/${bru.getEnvVar("group_id")}/wishes/${res.body.id}`,
+      {
+        headers: {
+          'Authorization': `Bearer ${bru.getEnvVar("user_token")}`
+        }
+      }
+    ).catch(() => {});
+  }
+}
+
+tests {
+  test("Status 200 - URL HTTPS acceptée", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+  
+  test("Wish créé avec URL HTTPS", function() {
+    expect(res.body.id).to.be.a('string');
+    expect(res.body.giftName).to.equal("Produit avec URL HTTPS valide");
+  });
+  
+  test("URL HTTPS bien enregistrée", function() {
+    expect(res.body.url).to.equal("https://www.amazon.fr/product/B0DZDQ7SQK");
+  });
+  
+  test("Image URL HTTPS bien enregistrée", function() {
+    expect(res.body.imageUrl).to.equal("https://images.example.com/product.jpg");
+  });
+  
+  test("Prix bien enregistré", function() {
+    expect(res.body.price).to.equal("29.99 €");
+  });
+}
+
+docs {
+  Teste qu'une URL avec protocole HTTPS est acceptée.
+  
+  Les URLs HTTPS sont valides selon @ValidUrl.
+}

@@ -1,0 +1,64 @@
+meta {
+  name: Valid URL - HTTP
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{base_url}}/api/groups/{{group_id}}/wishes
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{user_token}}
+}
+
+body:json {
+  {
+    "giftName": "Produit avec URL HTTP valide",
+    "description": "Test de validation d'URL HTTP",
+    "url": "http://example.com/product",
+    "imageUrl": "http://example.com/image.jpg"
+  }
+}
+
+script:post-response {
+  if (res.body.id) {
+    // Nettoyer en supprimant le souhait créé
+    const axios = require('axios');
+    axios.delete(
+      `${bru.getEnvVar("base_url")}/api/groups/${bru.getEnvVar("group_id")}/wishes/${res.body.id}`,
+      {
+        headers: {
+          'Authorization': `Bearer ${bru.getEnvVar("user_token")}`
+        }
+      }
+    ).catch(() => {});
+  }
+}
+
+tests {
+  test("Status 200 - URL HTTP acceptée", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+  
+  test("Wish créé avec URL HTTP", function() {
+    expect(res.body.id).to.be.a('string');
+    expect(res.body.giftName).to.equal("Produit avec URL HTTP valide");
+  });
+  
+  test("URL HTTP bien enregistrée", function() {
+    expect(res.body.url).to.equal("http://example.com/product");
+  });
+  
+  test("Image URL HTTP bien enregistrée", function() {
+    expect(res.body.imageUrl).to.equal("http://example.com/image.jpg");
+  });
+}
+
+docs {
+  Teste qu'une URL avec protocole HTTP est acceptée.
+  
+  Les URLs HTTP sont valides selon @ValidUrl.
+}

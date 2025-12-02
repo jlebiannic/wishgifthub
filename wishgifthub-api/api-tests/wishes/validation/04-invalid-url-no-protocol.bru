@@ -1,0 +1,47 @@
+meta {
+  name: Invalid - URL sans protocole
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{base_url}}/api/groups/{{group_id}}/wishes
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{user_token}}
+}
+
+body:json {
+  {
+    "giftName": "Produit avec URL invalide",
+    "url": "example.com/product"
+  }
+}
+
+tests {
+  test("Status 400 - URL sans protocole rejetée", function() {
+    expect(res.getStatus()).to.equal(400);
+  });
+  
+  test("Message d'erreur présent", function() {
+    expect(res.body).to.have.property('message');
+  });
+  
+  test("Message indique une validation d'URL", function() {
+    const message = res.body.message || res.body.error || JSON.stringify(res.body);
+    const containsUrlError = message.toLowerCase().includes('url') ||
+                             message.toLowerCase().includes('valide') ||
+                             message.toLowerCase().includes('valid');
+    expect(containsUrlError).to.be.true;
+  });
+}
+
+docs {
+  Teste qu'une URL sans protocole est rejetée par @ValidUrl.
+  
+  L'URL "example.com/product" ne contient pas de protocole (http:// ou https://)
+  et doit être rejetée.
+}
