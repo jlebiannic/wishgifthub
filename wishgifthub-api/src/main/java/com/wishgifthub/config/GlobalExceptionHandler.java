@@ -8,8 +8,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.util.stream.Collectors;
 
 /**
  * Gestionnaire global des exceptions pour l'application.
@@ -72,6 +75,27 @@ public class GlobalExceptionHandler {
                 HttpStatus.BAD_REQUEST.value(),
                 ex.getMessage(),
                 "INVALID_INVITATION"
+        );
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
+
+    /**
+     * Gère les erreurs de validation Bean Validation et retourne un code 400.
+     * Utilisé pour les erreurs @Valid (ex: @ValidUrl, @NotNull, @Size, etc.)
+     */
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
+        // Récupérer tous les messages d'erreur de validation
+        String errorMessages = ex.getBindingResult().getFieldErrors().stream()
+                .map(error -> error.getDefaultMessage())
+                .collect(Collectors.joining(", "));
+
+        logger.warn("Erreur de validation : {}", errorMessages);
+
+        ErrorResponse error = new ErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                errorMessages.isEmpty() ? "Erreur de validation des données" : errorMessages,
+                "VALIDATION_ERROR"
         );
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }

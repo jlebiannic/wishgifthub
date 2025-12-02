@@ -57,13 +57,7 @@ public class WishService {
             throw new BusinessRuleException("Le prix ne peut pas dépasser 100 caractères");
         }
 
-        // Validation de la longueur des URLs (la validation du format est faite par @ValidUrl)
-        if (request.getUrl() != null && request.getUrl().toString().length() > 2048) {
-            throw new BusinessRuleException("L'URL du produit ne peut pas dépasser 2048 caractères");
-        }
-        if (request.getImageUrl() != null && request.getImageUrl().toString().length() > 2048) {
-            throw new BusinessRuleException("L'URL de l'image ne peut pas dépasser 2048 caractères");
-        }
+        // La validation des URLs (format et longueur) est faite automatiquement par @ValidUrl
 
         Wish wish = new Wish();
         wish.setUser(user);

@@ -7,6 +7,7 @@
 - ajout d'un bouton pour rafraichir le groupe
 - remplacer les alerts par qq chose de plus user friendly
 - reserré l'écran (bandes à droite et à gauche)
+- Pouvoir modifier un souhait
 
 # Tech
 - Les apis générées coté front ont été modifiées, il faut trouver un moyen de les générer un fois pour toute sna modif manuelle

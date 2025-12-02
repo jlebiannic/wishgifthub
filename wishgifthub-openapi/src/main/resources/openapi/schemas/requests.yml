@@ -66,16 +66,14 @@ WishRequest:
     url:
       type: string
       format: uri
-      maxLength: 2048
-      description: Lien vers le produit (optionnel)
+      description: Lien vers le produit (optionnel, max 2048 caractères)
       example: "https://example.com/livre"
       nullable: true
       x-field-extra-annotation: "@com.wishgifthub.validation.ValidUrl"
     imageUrl:
       type: string
       format: uri
-      maxLength: 2048
-      description: URL de l'image du produit (optionnel)
+      description: URL de l'image du produit (optionnel, max 2048 caractères)
       example: "https://example.com/image.jpg"
       nullable: true
       x-field-extra-annotation: "@com.wishgifthub.validation.ValidUrl"
