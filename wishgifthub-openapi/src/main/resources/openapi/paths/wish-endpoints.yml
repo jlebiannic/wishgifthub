@@ -149,6 +149,73 @@
               $ref: '../schemas/errors.yml/#/components/schemas/ErrorResponse'
 
 /api/groups/{groupId}/wishes/{wishId}:
+  put:
+    tags:
+      - Souhaits
+    summary: Modifier un souhait
+    description: |
+      Modifie un souhait existant.
+      Seul le créateur du souhait peut le modifier.
+      Le souhait ne doit pas être réservé pour être modifié.
+    operationId: updateWish
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '../schemas/parameters.yml/#/GroupIdParam'
+      - $ref: '../schemas/parameters.yml/#/WishIdParam'
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/requests.yml/#/WishRequest'
+          example:
+            giftName: "Livre de cuisine italienne"
+            description: "Livre de recettes italiennes avec photos"
+            url: "https://example.com/livre-italien"
+            imageUrl: "https://example.com/livre-italien.jpg"
+            price: "29.99 €"
+    responses:
+      '200':
+        description: Souhait modifié avec succès
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/responses.yml/#/WishResponse'
+            example:
+              id: "111e2222-e33b-44d5-a666-777888999000"
+              userId: "987e6543-e21b-12d3-a456-426614174999"
+              groupId: "123e4567-e89b-12d3-a456-426614174000"
+              giftName: "Livre de cuisine italienne"
+              description: "Livre de recettes italiennes avec photos"
+              url: "https://example.com/livre-italien"
+              imageUrl: "https://example.com/livre-italien.jpg"
+              price: "29.99 €"
+              reservedBy: null
+              createdAt: "2025-11-10T10:00:00Z"
+      '400':
+        description: Règle métier violée ou validation échouée
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/errors.yml/#/components/schemas/ErrorResponse'
+            examples:
+              reserved:
+                summary: Souhait réservé
+                value:
+                  message: "Impossible de modifier un souhait déjà réservé"
+                  timestamp: "2025-11-10T17:30:00Z"
+      '401':
+        $ref: '../schemas/errors.yml/#/UnauthorizedError'
+      '403':
+        description: Accès refusé - Vous n'êtes pas le créateur de ce souhait
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/errors.yml/#/components/schemas/ErrorResponse'
+      '404':
+        $ref: '../schemas/errors.yml/#/NotFoundError'
+
   delete:
     tags:
       - Souhaits

@@ -3,6 +3,9 @@ import {ref} from 'vue'
 import type {UserResponse, WishResponse} from '@/generated/api/wish/data-contracts'
 import {useAuthStore} from '@/stores/auth'
 import {useWishStore} from '@/stores/wish'
+import {useNotificationStore} from '@/stores/notification'
+import {useConfirmStore} from '@/stores/confirm'
+import EditWishDialog from './EditWishDialog.vue'
 
 const props = defineProps<{
   member: UserResponse
@@ -21,10 +24,14 @@ const emit = defineEmits<{
 
 const authStore = useAuthStore()
 const wishStore = useWishStore()
+const notificationStore = useNotificationStore()
+const confirmStore = useConfirmStore()
 
 const expanded = ref(props.initiallyExpanded || false)
 const isReserving = ref<string | null>(null)
 const isDeleting = ref<string | null>(null)
+const editingWish = ref<WishResponse | null>(null)
+const showEditDialog = ref(false)
 
 // Récupérer les informations de l'utilisateur qui a réservé
 function getReservedByName(wish: WishResponse): string {
@@ -93,22 +100,18 @@ async function handleReserve(wish: WishResponse) {
 
   try {
     await wishStore.reserveWish(props.groupId, wish.id)
+    notificationStore.showSuccess('Souhait réservé avec succès !')
     emit('wishUpdated')
   } catch (error: any) {
     console.error('Erreur lors de la réservation:', error)
 
-    // Vérifier si c'est une erreur de concurrence (déjà réservé)
     const errorMessage = error.response?.data?.message || error.message || ''
 
     if (errorMessage.includes('déjà réservé') || errorMessage.includes('already reserved') || error.response?.status === 409) {
-      // Afficher un message d'erreur explicite
-      alert('⚠️ Ce souhait a déjà été réservé par quelqu\'un d\'autre.\n\nLa liste va être rafraîchie.')
-
-      // Rafraîchir les données pour mettre à jour l'interface
+      notificationStore.showWarning('Ce souhait a déjà été réservé par quelqu\'un d\'autre')
       emit('wishUpdated')
     } else {
-      // Autre type d'erreur
-      alert('Erreur lors de la réservation du souhait. Veuillez réessayer.')
+      notificationStore.showError('Erreur lors de la réservation du souhait')
     }
   } finally {
     isReserving.value = null
@@ -120,18 +123,18 @@ async function handleUnreserve(wish: WishResponse) {
 
   try {
     await wishStore.unreserveWish(props.groupId, wish.id)
+    notificationStore.showSuccess('Réservation annulée')
     emit('wishUpdated')
   } catch (error: any) {
     console.error('Erreur lors de l\'annulation:', error)
 
-    // Vérifier si c'est une erreur de concurrence
     const errorMessage = error.response?.data?.message || error.message || ''
 
     if (errorMessage.includes('réservé') || error.response?.status === 409) {
-      alert('⚠️ Ce souhait a été modifié entre temps.\n\nLa liste va être rafraîchie.')
+      notificationStore.showWarning('Ce souhait a été modifié entre temps')
       emit('wishUpdated')
     } else {
-      alert('Erreur lors de l\'annulation de la réservation. Veuillez réessayer.')
+      notificationStore.showError('Erreur lors de l\'annulation de la réservation')
     }
   } finally {
     isReserving.value = null
@@ -139,7 +142,8 @@ async function handleUnreserve(wish: WishResponse) {
 }
 
 async function handleDelete(wish: WishResponse) {
-  if (!confirm('Êtes-vous sûr de vouloir supprimer ce souhait ?')) {
+  const confirmed = await confirmStore.confirmDelete('ce souhait')
+  if (!confirmed) {
     return
   }
 
@@ -147,13 +151,25 @@ async function handleDelete(wish: WishResponse) {
 
   try {
     await wishStore.deleteWish(props.groupId, wish.id)
+    notificationStore.showSuccess('Souhait supprimé')
     emit('wishUpdated')
-  } catch (error) {
+  } catch (error: any) {
     console.error('Erreur lors de la suppression:', error)
-    alert('Erreur lors de la suppression du souhait')
+    notificationStore.showError(error.response?.data?.message || 'Erreur lors de la suppression du souhait')
   } finally {
     isDeleting.value = null
   }
+}
+
+function handleEdit(wish: WishResponse) {
+  editingWish.value = wish
+  showEditDialog.value = true
+}
+
+function handleWishUpdated() {
+  showEditDialog.value = false
+  editingWish.value = null
+  emit('wishUpdated')
 }
 
 function toggleExpand() {
@@ -318,6 +334,22 @@ function toggleExpand() {
 
                   <v-spacer />
 
+                  <!-- Bouton Modifier (uniquement pour mes propres souhaits non réservés) -->
+                  <v-btn
+                    v-if="isCurrentUser && !wish.reservedBy"
+                    color="primary"
+                    size="small"
+                    variant="text"
+                    icon="mdi-pencil"
+                    @click="handleEdit(wish)"
+                    class="mr-2"
+                  >
+                    <v-icon>mdi-pencil</v-icon>
+                    <v-tooltip activator="parent" location="top">
+                      Modifier
+                    </v-tooltip>
+                  </v-btn>
+
                   <!-- Bouton Supprimer (uniquement pour mes propres souhaits) -->
                   <v-btn
                     v-if="isCurrentUser"
@@ -367,6 +399,14 @@ function toggleExpand() {
       </div>
     </v-expand-transition>
   </v-card>
+
+  <!-- Dialogue de modification -->
+  <EditWishDialog
+    v-model="showEditDialog"
+    :group-id="groupId"
+    :wish="editingWish"
+    @wish-updated="handleWishUpdated"
+  />
 </template>
 
 <style scoped>

@@ -317,6 +317,30 @@ export class Api<
       ...params,
     });
   /**
+   * @description Modifie un souhait existant. Seul le créateur du souhait peut le modifier. Le souhait ne doit pas être réservé pour être modifié.
+   *
+   * @tags Souhaits
+   * @name UpdateWish
+   * @summary Modifier un souhait
+   * @request PUT:/api/groups/{groupId}/wishes/{wishId}
+   * @secure
+   */
+  updateWish = (
+    groupId: string,
+    wishId: string,
+    data: WishRequest,
+    params: RequestParams = {},
+  ) =>
+    this.request<WishResponse, ErrorResponse>({
+      path: `/api/groups/${groupId}/wishes/${wishId}`,
+      method: "PUT",
+      body: data,
+      secure: true,
+      type: ContentType.Json,
+      format: "json",
+      ...params,
+    });
+  /**
    * @description Annule la réservation d'un cadeau. Seul l'utilisateur qui a réservé le cadeau peut annuler sa réservation.
    *
    * @tags Souhaits

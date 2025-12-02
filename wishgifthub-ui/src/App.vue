@@ -2,6 +2,8 @@
 import {useTheme} from 'vuetify'
 import {RouterView} from 'vue-router'
 import {useAuthStore} from '@/stores/auth'
+import NotificationManager from '@/components/NotificationManager.vue'
+import ConfirmDialog from '@/components/ConfirmDialog.vue'
 
 const theme = useTheme()
 const authStore = useAuthStore()
@@ -35,6 +37,12 @@ function toggleTheme() {
     <v-main>
       <RouterView />
     </v-main>
+
+    <!-- Gestionnaire de notifications -->
+    <NotificationManager />
+
+    <!-- Dialogue de confirmation -->
+    <ConfirmDialog />
   </v-app>
 </template>
 

@@ -146,6 +146,51 @@ public class WishService {
         wishRepository.delete(wish);
     }
 
+    /**
+     * Modifie un souhait existant
+     */
+    public WishResponse updateWish(UUID groupId, UUID wishId, WishRequest request, UUID userId) {
+        Wish wish = wishRepository.findById(wishId)
+                .orElseThrow(() -> new ResourceNotFoundException("Souhait", wishId));
+
+        if (!wish.getGroup().getId().equals(groupId)) {
+            throw new BusinessRuleException("Le souhait n'appartient pas à ce groupe");
+        }
+
+        if (!wish.getUser().getId().equals(userId)) {
+            throw new AccessDeniedException("Vous ne pouvez modifier que vos propres souhaits");
+        }
+
+        if (wish.getReservedBy() != null) {
+            throw new BusinessRuleException("Impossible de modifier un souhait déjà réservé");
+        }
+
+        // Validation des champs
+        if (request.getGiftName() == null || request.getGiftName().trim().isEmpty()) {
+            throw new BusinessRuleException("Le nom du cadeau est requis");
+        }
+        if (request.getGiftName().length() > 255) {
+            throw new BusinessRuleException("Le nom du cadeau ne peut pas dépasser 255 caractères");
+        }
+        if (request.getDescription() != null && request.getDescription().length() > 10000) {
+            throw new BusinessRuleException("La description ne peut pas dépasser 10 000 caractères");
+        }
+        if (request.getPrice() != null && request.getPrice().length() > 100) {
+            throw new BusinessRuleException("Le prix ne peut pas dépasser 100 caractères");
+        }
+
+        // Mise à jour des champs
+        wish.setGiftName(request.getGiftName());
+        wish.setDescription(request.getDescription());
+        wish.setUrl(request.getUrl() != null ? request.getUrl().toString() : null);
+        wish.setImageUrl(request.getImageUrl() != null ? request.getImageUrl().toString() : null);
+        wish.setPrice(request.getPrice());
+
+        wish = wishRepository.save(wish);
+
+        return toResponse(wish);
+    }
+
     public List<WishResponse> getWishesByUserInGroup(UUID groupId, UUID targetUserId, UUID requestingUserId) {
         if (!userGroupRepository.existsByUserIdAndGroupId(targetUserId, groupId)) {
             throw new BusinessRuleException("L'utilisateur cible n'appartient pas à ce groupe");

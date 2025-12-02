@@ -276,16 +276,14 @@ export interface WishRequest {
    */
   description?: string | null;
   /**
-   * Lien vers le produit (optionnel)
+   * Lien vers le produit (optionnel, max 2048 caractères)
    * @format uri
-   * @maxLength 2048
    * @example "https://example.com/livre"
    */
   url?: string | null;
   /**
-   * URL de l'image du produit (optionnel)
+   * URL de l'image du produit (optionnel, max 2048 caractères)
    * @format uri
-   * @maxLength 2048
    * @example "https://example.com/image.jpg"
    */
   imageUrl?: string | null;

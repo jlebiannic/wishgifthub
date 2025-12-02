@@ -118,6 +118,34 @@ export const useWishStore = defineStore('wish', () => {
   }
 
   /**
+   * Modifie un souhait existant
+   */
+  async function updateWish(groupId: string, wishId: string, wish: WishRequest) {
+    isLoading.value = true
+    error.value = null
+
+    try {
+      const apiClient = getApiClient()
+      const response = await apiClient.updateWish(groupId, wishId, wish)
+
+      // Mettre à jour le souhait dans la liste locale
+      if (response.data) {
+        const index = wishes.value.findIndex(w => w.id === wishId)
+        if (index !== -1) {
+          wishes.value[index] = response.data
+        }
+      }
+
+      return response.data
+    } catch (err: any) {
+      error.value = err.response?.data?.message || 'Erreur lors de la modification du souhait'
+      throw err
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  /**
    * Réserve un souhait
    */
   async function reserveWish(groupId: string, wishId: string) {
@@ -190,6 +218,7 @@ export const useWishStore = defineStore('wish', () => {
     fetchUserWishes,
     fetchMyWishes,
     addWish,
+    updateWish,
     deleteWish,
     reserveWish,
     unreserveWish,

@@ -3,15 +3,17 @@ import {ref, watch} from 'vue'
 import {useWishStore} from '@/stores/wish'
 import {useNotificationStore} from '@/stores/notification'
 import {getApiClient} from '@/api/client'
+import type {WishResponse} from '@/generated/api/wish/data-contracts'
 
 const props = defineProps<{
   groupId: string
+  wish: WishResponse | null
   modelValue: boolean
 }>()
 
 const emit = defineEmits<{
   'update:modelValue': [value: boolean]
-  wishAdded: []
+  wishUpdated: []
 }>()
 
 const wishStore = useWishStore()
@@ -31,12 +33,22 @@ const isLoadingMetadata = ref(false)
 const isSaving = ref(false)
 const imageLoadError = ref(false)
 
+// Charger les données du souhait quand il change
+watch(() => props.wish, (newWish) => {
+  if (newWish) {
+    title.value = newWish.giftName || ''
+    description.value = newWish.description || ''
+    url.value = newWish.url?.toString() || ''
+    imageUrl.value = newWish.imageUrl?.toString() || ''
+    price.value = newWish.price || ''
+  }
+}, { immediate: true })
+
 // Fonction de validation d'URL
 function isValidUrl(urlString: string): boolean {
-  if (!urlString) return true // URL vide est valide (optionnel)
+  if (!urlString) return true
   try {
     const url = new URL(urlString)
-    // Vérifier que le protocole est http ou https
     return url.protocol === 'http:' || url.protocol === 'https:'
   } catch {
     return false
@@ -45,67 +57,51 @@ function isValidUrl(urlString: string): boolean {
 
 // Fonction de validation d'URL d'image
 function isValidImageUrl(urlString: string): boolean {
-  if (!urlString) return true // URL vide est valide (optionnel)
-
-  // Vérifier d'abord que c'est une URL valide
+  if (!urlString) return true
   if (!isValidUrl(urlString)) return false
 
-  // Extensions d'images valides
   const validExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg', '.bmp', '.ico']
 
   try {
     const url = new URL(urlString)
     const path = url.pathname.toLowerCase()
-
-    // Vérifier que le chemin se termine par une extension d'image valide
     return validExtensions.some(ext => path.endsWith(ext))
   } catch {
     return false
   }
 }
 
-// Fonction pour nettoyer une URL en supprimant les paramètres de tracking
+// Fonction pour nettoyer une URL
 function cleanUrl(urlString: string): string {
   if (!urlString || !urlString.trim()) return urlString
 
   try {
     const url = new URL(urlString)
 
-    // Liste des paramètres de tracking courants à supprimer
     const trackingParams = [
-      // Google Analytics & Ads
       'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content',
       'gclid', 'gclsrc', 'dclid',
-      'gad_source', 'gad_campaignid', // Google Ads (nouveaux paramètres)
-      'gbraid', 'wbraid', // Google cross-device tracking
-      // Facebook & Social
+      'gad_source', 'gad_campaignid',
+      'gbraid', 'wbraid',
       'fbclid', 'fb_action_ids', 'fb_action_types', 'fb_source', 'fb_ref',
-      // Amazon
       'ref', 'ref_', 'pf_rd_r', 'pf_rd_p', 'pf_rd_m', 'pf_rd_s', 'pf_rd_t', 'pf_rd_i',
       'pd_rd_r', 'pd_rd_w', 'pd_rd_wg',
       '_encoding', 'psc', 'refRID', 'qid', 'sr',
-      // Retail / E-commerce tracking
-      'loopcd', // Loop Commerce / Dior et autres retailers
-      // Autres
+      'loopcd',
       'mc_cid', 'mc_eid', '_hsenc', '_hsmi', 'mkt_tok',
       'msclkid', 'igshid'
     ]
 
-    // Créer une nouvelle URLSearchParams sans les paramètres de tracking
     const cleanedParams = new URLSearchParams()
     url.searchParams.forEach((value, key) => {
-      // Garder le paramètre seulement s'il n'est pas dans la liste de tracking
       if (!trackingParams.includes(key) && !key.startsWith('utm_')) {
         cleanedParams.append(key, value)
       }
     })
 
-    // Reconstruire l'URL
     url.search = cleanedParams.toString()
-
     return url.toString()
   } catch {
-    // Si l'URL n'est pas valide, la retourner telle quelle
     return urlString
   }
 }
@@ -139,51 +135,39 @@ async function fetchMetadataFromUrl() {
   isLoadingMetadata.value = true
 
   try {
-    // Utiliser le client API généré avec authentification automatique
     const apiClient = getApiClient()
     const response = await apiClient.extractMetadata({ url: url.value })
-
     const metadata = response.data
 
-    // Pré-remplir les champs avec les métadonnées extraites
-    // Ne pas écraser si l'utilisateur a déjà saisi quelque chose
     if (metadata.title && !title.value) {
       title.value = metadata.title
     }
-
     if (metadata.description && !description.value) {
       description.value = metadata.description
     }
-
     if (metadata.image && !imageUrl.value) {
       imageUrl.value = metadata.image
     }
-
     if (metadata.price && !price.value) {
       price.value = metadata.price
     }
 
-    // Afficher un message si une erreur est présente mais continuer
     if (metadata.error) {
       console.warn('Avertissement lors de l\'extraction:', metadata.error)
     }
   } catch (error: any) {
     console.error('Erreur lors de la récupération des métadonnées:', error)
-    // Ne pas bloquer l'utilisateur, il peut saisir manuellement
   } finally {
     isLoadingMetadata.value = false
   }
 }
 
-// Watch l'URL pour déclencher la récupération des métadonnées avec debounce
+// Watch l'URL avec debounce
 let debounceTimer: number | null = null
 watch(url, () => {
-  // Annuler le timer précédent
   if (debounceTimer) {
     clearTimeout(debounceTimer)
   }
-
-  // Attendre 1 seconde après la dernière frappe avant de déclencher l'extraction
   if (url.value) {
     debounceTimer = setTimeout(() => {
       fetchMetadataFromUrl()
@@ -192,7 +176,8 @@ watch(url, () => {
 })
 
 async function handleSubmit() {
-  // Valider le formulaire
+  if (!props.wish) return
+
   if (form.value) {
     const { valid } = await form.value.validate()
     if (!valid) {
@@ -209,11 +194,10 @@ async function handleSubmit() {
   isSaving.value = true
 
   try {
-    // Nettoyer les URLs avant l'envoi
     const cleanedUrl = url.value ? cleanUrl(url.value) : null
     const cleanedImageUrl = imageUrl.value ? cleanUrl(imageUrl.value) : null
 
-    await wishStore.addWish(props.groupId, {
+    await wishStore.updateWish(props.groupId, props.wish.id!, {
       giftName: title.value,
       description: description.value || null,
       url: cleanedUrl,
@@ -221,39 +205,20 @@ async function handleSubmit() {
       price: price.value || null
     })
 
-    notificationStore.showSuccess('Souhait ajouté avec succès !')
-
-    // Réinitialiser le formulaire
-    resetForm()
-
-    // Fermer le dialog
+    notificationStore.showSuccess('Souhait modifié avec succès !')
     emit('update:modelValue', false)
-    emit('wishAdded')
+    emit('wishUpdated')
   } catch (error: any) {
-    notificationStore.showError(error.response?.data?.message || 'Erreur lors de l\'ajout du souhait')
+    notificationStore.showError(error.response?.data?.message || 'Erreur lors de la modification du souhait')
   } finally {
     isSaving.value = false
   }
 }
 
-function resetForm() {
-  url.value = ''
-  imageUrl.value = ''
-  title.value = ''
-  description.value = ''
-  price.value = ''
-  imageLoadError.value = false
-  if (form.value) {
-    form.value.resetValidation()
-  }
-}
-
 function handleClose() {
-  resetForm()
   emit('update:modelValue', false)
 }
 
-// Nettoyer l'URL principale quand l'utilisateur quitte le champ
 function handleUrlBlur() {
   if (url.value) {
     const cleaned = cleanUrl(url.value)
@@ -263,7 +228,6 @@ function handleUrlBlur() {
   }
 }
 
-// Nettoyer l'URL de l'image quand l'utilisateur quitte le champ
 function handleImageUrlBlur() {
   if (imageUrl.value) {
     const cleaned = cleanUrl(imageUrl.value)
@@ -283,8 +247,8 @@ function handleImageUrlBlur() {
   >
     <v-card>
       <v-card-title class="pa-4 bg-primary">
-        <v-icon class="mr-2">mdi-gift-outline</v-icon>
-        Ajouter un souhait
+        <v-icon class="mr-2">mdi-pencil</v-icon>
+        Modifier le souhait
       </v-card-title>
 
       <v-card-text class="pa-4">
@@ -341,15 +305,8 @@ function handleImageUrlBlur() {
               @error="imageLoadError = true"
             >
               <template v-slot:placeholder>
-                <v-row
-                  class="fill-height ma-0"
-                  align="center"
-                  justify="center"
-                >
-                  <v-progress-circular
-                    indeterminate
-                    color="grey-lighten-5"
-                  />
+                <v-row class="fill-height ma-0" align="center" justify="center">
+                  <v-progress-circular indeterminate color="grey-lighten-5" />
                 </v-row>
               </template>
             </v-img>
@@ -389,9 +346,6 @@ function handleImageUrlBlur() {
             prepend-inner-icon="mdi-currency-eur"
             variant="outlined"
             density="comfortable"
-            class="mb-3"
-            hint="Information indicative uniquement"
-            persistent-hint
             :rules="rules.price"
             counter="100"
           />
@@ -414,9 +368,8 @@ function handleImageUrlBlur() {
           variant="elevated"
           @click="handleSubmit"
           :loading="isSaving"
-          :disabled="!title"
         >
-          Ajouter
+          Enregistrer
         </v-btn>
       </v-card-actions>
     </v-card>

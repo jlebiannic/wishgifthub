@@ -13,6 +13,10 @@
 - Les apis générées coté front ont été modifiées, il faut trouver un moyen de les générer un fois pour toute sna modif manuelle
 - ajouter la gestion des erreurs globales
 - refresh auto des souhaits
+- renouvellement de la clé de chiffrement jwt
+- gestion des erreurs 401/403 globalement
+- gestion globale des erreurs front
+- gestion de l'expiration du token jwt 
 
 # Fait
 - si déjà réservé et possibilité de réserver alors afficher une erreur au moment du clique et mettre à jour le bouton

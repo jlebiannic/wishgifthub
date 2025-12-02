@@ -44,6 +44,13 @@ public class WishController implements SouhaitsApi {
 
     @PreAuthorize("hasAuthority('GROUP_' + #groupId)")
     @Override
+    public ResponseEntity<WishResponse> updateWish(UUID groupId, UUID wishId, WishRequest wishRequest) {
+        User user = getCurrentUser();
+        return ResponseEntity.ok(wishService.updateWish(groupId, wishId, wishRequest, user.getId()));
+    }
+
+    @PreAuthorize("hasAuthority('GROUP_' + #groupId)")
+    @Override
     public ResponseEntity<WishResponse> reserveWish(UUID groupId, UUID wishId) {
         User user = getCurrentUser();
         return ResponseEntity.ok(wishService.reserveWish(groupId, wishId, user.getId()));
