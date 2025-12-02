@@ -179,12 +179,69 @@ public class MetadataExtractionService {
             return priceFromMeta + (currency != null ? " " + currency : "");
         }
 
+        // Sélecteurs spécifiques Amazon
+        String[] amazonSelectors = {
+            ".a-price .a-offscreen",           // Prix principal Amazon
+            "#priceblock_ourprice",             // Ancien sélecteur Amazon
+            "#priceblock_dealprice",            // Prix en promotion
+            ".a-price-whole",                   // Partie entière du prix
+            "span.priceToPay",                  // Nouveau format Amazon
+            ".a-section.a-spacing-small .a-price .a-offscreen",  // Prix dans la section prix
+            "#corePrice_feature_div .a-offscreen",  // Nouvelle structure Amazon
+            "[data-a-color=price] .a-offscreen"
+        };
+
+        for (String selector : amazonSelectors) {
+            Element priceElement = doc.selectFirst(selector);
+            if (priceElement != null) {
+                String priceText = priceElement.text();
+                if (priceText != null && !priceText.isEmpty()) {
+                    String cleaned = cleanPrice(priceText);
+                    if (cleaned != null && !cleaned.isEmpty()) {
+                        return cleaned;
+                    }
+                }
+            }
+        }
+
+        // Chercher dans les balises avec itemprop=price (standard Schema.org)
+        Element itemPropPrice = doc.selectFirst("[itemprop=price]");
+        if (itemPropPrice != null) {
+            String content = itemPropPrice.attr("content");
+            if (content != null && !content.isEmpty()) {
+                String currency = extractMetaTag(doc, "priceCurrency");
+                if (currency == null) {
+                    Element currencyElement = doc.selectFirst("[itemprop=priceCurrency]");
+                    currency = currencyElement != null ? currencyElement.attr("content") : null;
+                }
+                return content + (currency != null ? " " + currency : "");
+            }
+
+            String priceText = itemPropPrice.text();
+            if (priceText != null && !priceText.isEmpty()) {
+                return cleanPrice(priceText);
+            }
+        }
+
         // Chercher dans les balises avec classes/attributs courants
-        Element priceElement = doc.selectFirst("[class*=price], [itemprop=price], .price, .product-price");
-        if (priceElement != null) {
-            String priceText = priceElement.text();
-            // Nettoyer et extraire le prix numérique
-            return cleanPrice(priceText);
+        String[] genericSelectors = {
+            ".price",
+            ".product-price",
+            "[class*=price]",
+            "[data-price]",
+            ".sale-price",
+            ".current-price"
+        };
+
+        for (String selector : genericSelectors) {
+            Element priceElement = doc.selectFirst(selector);
+            if (priceElement != null) {
+                String priceText = priceElement.text();
+                String cleaned = cleanPrice(priceText);
+                if (cleaned != null && !cleaned.isEmpty()) {
+                    return cleaned;
+                }
+            }
         }
 
         // Chercher dans le texte avec regex (patterns de prix communs)
@@ -193,7 +250,7 @@ public class MetadataExtractionService {
         java.util.regex.Pattern pattern = java.util.regex.Pattern.compile(pricePattern);
         java.util.regex.Matcher matcher = pattern.matcher(bodyText);
         if (matcher.find()) {
-            return matcher.group();
+            return cleanPrice(matcher.group());
         }
 
         return null;
@@ -207,8 +264,22 @@ public class MetadataExtractionService {
             return null;
         }
 
-        // Garder seulement les chiffres, virgules, points et symboles de devise
-        String cleaned = priceText.replaceAll("[^0-9.,€$£¥]", "").trim();
+        // Supprimer les espaces invisibles et normaliser
+        priceText = priceText.trim().replaceAll("\\s+", " ");
+
+        // Garder seulement les chiffres, virgules, points, espaces et symboles de devise
+        String cleaned = priceText.replaceAll("[^0-9.,€$£¥\\s]", "").trim();
+
+        // Si le prix ne contient pas de symbole de devise, essayer de le trouver dans le texte original
+        if (!cleaned.matches(".*[€$£¥].*")) {
+            if (priceText.contains("EUR") || priceText.contains("€")) {
+                cleaned += " €";
+            } else if (priceText.contains("USD") || priceText.contains("$")) {
+                cleaned += " $";
+            } else if (priceText.contains("GBP") || priceText.contains("£")) {
+                cleaned += " £";
+            }
+        }
 
         return cleaned.isEmpty() ? null : cleaned;
     }
