@@ -19,6 +19,7 @@ const groupName = ref('')
 const members = ref<UserResponse[]>([])
 const showAddWishDialog = ref(false)
 const isLoading = ref(true)
+const expandedMembers = ref<Map<string, boolean>>(new Map())
 
 // Trier les membres : l'utilisateur connecté en premier
 const sortedMembers = computed(() => {
@@ -35,6 +36,34 @@ const sortedMembers = computed(() => {
 // Récupérer les souhaits d'un membre spécifique
 function getMemberWishes(memberId: string) {
   return wishStore.wishes.filter(w => w.userId === memberId)
+}
+
+// Vérifier si un membre est déplié
+function isMemberExpanded(memberId: string): boolean {
+  return expandedMembers.value.get(memberId) ?? false
+}
+
+// Gérer le changement d'expansion d'un membre
+function handleExpansionChanged(memberId: string, expanded: boolean) {
+  expandedMembers.value.set(memberId, expanded)
+}
+
+// Tout déplier
+function expandAll() {
+  sortedMembers.value.forEach(member => {
+    expandedMembers.value.set(member.id, true)
+  })
+  // Forcer la réactivité
+  expandedMembers.value = new Map(expandedMembers.value)
+}
+
+// Tout replier
+function collapseAll() {
+  sortedMembers.value.forEach(member => {
+    expandedMembers.value.set(member.id, false)
+  })
+  // Forcer la réactivité
+  expandedMembers.value = new Map(expandedMembers.value)
 }
 
 onMounted(async () => {
@@ -116,13 +145,37 @@ function goBack() {
           Retour aux groupes
         </v-btn>
 
-        <div class="d-flex align-center">
-          <v-icon size="large" color="primary" class="mr-3">mdi-account-group</v-icon>
-          <div>
-            <h1 class="text-h4 font-weight-bold">{{ groupName || 'Groupe' }}</h1>
-            <p class="text-body-1 text-medium-emphasis">
-              {{ members.length }} membre{{ members.length > 1 ? 's' : '' }}
-            </p>
+        <div class="d-flex flex-column flex-sm-row align-start align-sm-center">
+          <div class="d-flex align-center mb-3 mb-sm-0">
+            <v-icon size="large" color="primary" class="mr-3">mdi-account-group</v-icon>
+            <div class="flex-grow-1">
+              <h1 class="text-h4 font-weight-bold">{{ groupName || 'Groupe' }}</h1>
+              <p class="text-body-1 text-medium-emphasis">
+                {{ members.length }} membre{{ members.length > 1 ? 's' : '' }}
+              </p>
+            </div>
+          </div>
+
+          <!-- Boutons tout déplier/replier -->
+          <div v-if="members.length > 0" class="ml-sm-auto d-flex gap-2">
+            <v-btn
+              variant="outlined"
+              size="small"
+              prepend-icon="mdi-chevron-down"
+              @click="expandAll"
+            >
+              <span class="d-none d-sm-inline">Tout déplier</span>
+              <span class="d-inline d-sm-none">Déplier</span>
+            </v-btn>
+            <v-btn
+              variant="outlined"
+              size="small"
+              prepend-icon="mdi-chevron-up"
+              @click="collapseAll"
+            >
+              <span class="d-none d-sm-inline">Tout replier</span>
+              <span class="d-inline d-sm-none">Replier</span>
+            </v-btn>
           </div>
         </div>
       </v-col>
@@ -159,8 +212,10 @@ function goBack() {
           :group-id="groupId"
           :is-current-user="member.id === authStore.user?.id"
           :all-members="members"
+          :initially-expanded="isMemberExpanded(member.id)"
           @add-wish="handleAddWish"
           @wish-updated="handleWishUpdated"
+          @expansion-changed="handleExpansionChanged"
         />
       </v-col>
     </v-row>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {ref} from 'vue'
+import {ref, watch} from 'vue'
 import type {UserResponse, WishResponse} from '@/generated/api/wish/data-contracts'
 import {useAuthStore} from '@/stores/auth'
 import {useWishStore} from '@/stores/wish'
@@ -32,6 +32,18 @@ const isReserving = ref<string | null>(null)
 const isDeleting = ref<string | null>(null)
 const editingWish = ref<WishResponse | null>(null)
 const showEditDialog = ref(false)
+
+// Surveiller les changements de la prop initiallyExpanded (pour tout déplier/replier)
+watch(() => props.initiallyExpanded, (newValue) => {
+  if (newValue !== undefined) {
+    expanded.value = newValue
+  }
+})
+
+// Émettre l'événement quand l'état d'expansion change
+watch(expanded, (newValue) => {
+  emit('expansionChanged', props.member.id, newValue)
+})
 
 // Récupérer les informations de l'utilisateur qui a réservé
 function getReservedByName(wish: WishResponse): string {
