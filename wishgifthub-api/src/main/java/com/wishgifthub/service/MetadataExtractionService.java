@@ -21,27 +21,56 @@ public class MetadataExtractionService {
     public Map<String, String> extractMetadata(String url) throws IOException {
         Map<String, String> metadata = new HashMap<>();
 
-        // Télécharger et parser la page HTML
+        // Télécharger et parser la page HTML avec des headers plus complets pour éviter les blocages
         Document doc = Jsoup.connect(url)
-                .userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
-                .timeout(10000)
+                .userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36")
+                .header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8")
+                .header("Accept-Language", "fr-FR,fr;q=0.9,en-US;q=0.8,en;q=0.7")
+                .header("Accept-Encoding", "gzip, deflate, br")
+                .header("Connection", "keep-alive")
+                .header("Upgrade-Insecure-Requests", "1")
+                .referrer("https://www.google.com/")
+                .timeout(15000)
+                .followRedirects(true)
                 .get();
 
-        // Extraire le titre (priorité: og:title, puis title tag)
+        // Extraire le titre (priorité: og:title, puis title tag, puis sélecteurs spécifiques)
         String title = extractOpenGraphTag(doc, "og:title");
-        if (title == null || title.isEmpty()) {
+        if (title == null || title.isEmpty() || title.equals("Amazon.fr")) {
+            // Essayer les sélecteurs spécifiques Amazon
+            Element amazonTitle = doc.selectFirst("#productTitle, h1.product-title, #title");
+            if (amazonTitle != null) {
+                title = amazonTitle.text().trim();
+            }
+        }
+        if (title == null || title.isEmpty() || title.equals("Amazon.fr")) {
             Element titleElement = doc.selectFirst("title");
             title = titleElement != null ? titleElement.text() : "";
+            // Nettoyer le titre Amazon (enlever " : Amazon.fr" à la fin)
+            if (title.contains(" : Amazon")) {
+                title = title.substring(0, title.indexOf(" : Amazon")).trim();
+            }
         }
         metadata.put("title", title);
 
-        // Extraire la description (priorité: og:description, puis meta description)
+        // Extraire la description (priorité: og:description, puis meta description, puis contenu de la page)
         String description = extractOpenGraphTag(doc, "og:description");
         if (description == null || description.isEmpty()) {
             description = extractMetaTag(doc, "description");
         }
         if (description == null || description.isEmpty()) {
             description = extractMetaTag(doc, "twitter:description");
+        }
+        if (description == null || description.isEmpty()) {
+            // Essayer les sélecteurs spécifiques Amazon
+            Element amazonDesc = doc.selectFirst("#feature-bullets, #productDescription, .product-description, [data-feature-name='featurebullets']");
+            if (amazonDesc != null) {
+                description = amazonDesc.text().trim();
+                // Limiter la longueur de la description
+                if (description.length() > 500) {
+                    description = description.substring(0, 497) + "...";
+                }
+            }
         }
         metadata.put("description", description != null ? description : "");
 
@@ -82,32 +111,41 @@ public class MetadataExtractionService {
      * Extrait l'image d'un produit en cherchant dans les sélecteurs courants des sites e-commerce
      */
     private String extractProductImage(Document doc) {
-        // Amazon - chercher l'image principale du produit
-        Element amazonImg = doc.selectFirst("#landingImage, #imgBlkFront, #main-image, .a-dynamic-image");
-        if (amazonImg != null) {
-            // Amazon peut stocker l'URL de la grande image dans data-old-hires ou data-a-dynamic-image
-            String dataHires = amazonImg.attr("data-old-hires");
-            if (dataHires != null && !dataHires.isEmpty()) {
-                return dataHires;
-            }
+        // 1. Essayer les sélecteurs Amazon spécifiques avec data-old-hires (meilleure qualité)
+        String[] amazonSelectorsWithData = {
+            "#landingImage",
+            "#imgBlkFront",
+            "#main-image",
+            ".a-dynamic-image"
+        };
 
-            String dataDynamic = amazonImg.attr("data-a-dynamic-image");
-            if (dataDynamic != null && !dataDynamic.isEmpty()) {
-                // data-a-dynamic-image contient un JSON avec plusieurs URLs, prendre la première
-                try {
-                    String firstUrl = dataDynamic.substring(dataDynamic.indexOf("\"") + 1, dataDynamic.indexOf("\"", dataDynamic.indexOf("\"") + 1));
-                    if (firstUrl.startsWith("http")) {
-                        return firstUrl;
-                    }
-                } catch (Exception e) {
-                    // Ignorer les erreurs de parsing
+        for (String selector : amazonSelectorsWithData) {
+            Element amazonImg = doc.selectFirst(selector);
+            if (amazonImg != null) {
+                // Amazon peut stocker l'URL de la grande image dans data-old-hires
+                String dataHires = amazonImg.attr("data-old-hires");
+                if (dataHires != null && !dataHires.isEmpty() && isValidImageUrl(dataHires)) {
+                    return dataHires;
                 }
-            }
 
-            // Fallback sur l'attribut src
-            String src = amazonImg.attr("abs:src");
-            if (src != null && !src.isEmpty()) {
-                return src;
+                // Ou dans data-a-dynamic-image (JSON avec plusieurs URLs)
+                String dataDynamic = amazonImg.attr("data-a-dynamic-image");
+                if (dataDynamic != null && !dataDynamic.isEmpty()) {
+                    try {
+                        String firstUrl = dataDynamic.substring(dataDynamic.indexOf("\"") + 1, dataDynamic.indexOf("\"", dataDynamic.indexOf("\"") + 1));
+                        if (firstUrl.startsWith("http") && isValidImageUrl(firstUrl)) {
+                            return firstUrl;
+                        }
+                    } catch (Exception e) {
+                        // Ignorer les erreurs de parsing
+                    }
+                }
+
+                // Fallback sur l'attribut src
+                String src = amazonImg.attr("abs:src");
+                if (src != null && !src.isEmpty() && isValidImageUrl(src)) {
+                    return src;
+                }
             }
         }
 
@@ -129,13 +167,13 @@ public class MetadataExtractionService {
             if (img != null) {
                 // Chercher d'abord dans data-src (lazy loading)
                 String dataSrc = img.attr("data-src");
-                if (dataSrc != null && !dataSrc.isEmpty() && dataSrc.startsWith("http")) {
+                if (dataSrc != null && !dataSrc.isEmpty() && dataSrc.startsWith("http") && isValidImageUrl(dataSrc)) {
                     return dataSrc;
                 }
 
                 // Puis dans src
                 String src = img.attr("abs:src");
-                if (src != null && !src.isEmpty() && !src.contains("placeholder") && !src.contains("loading")) {
+                if (src != null && !src.isEmpty() && !src.contains("placeholder") && !src.contains("loading") && isValidImageUrl(src)) {
                     return src;
                 }
             }
@@ -148,7 +186,7 @@ public class MetadataExtractionService {
             String height = img.attr("height");
 
             // Ignorer les petites images (icônes, logos, etc.)
-            if (src != null && !src.isEmpty() && !src.contains("logo") && !src.contains("icon")) {
+            if (src != null && !src.isEmpty() && !src.contains("logo") && !src.contains("icon") && isValidImageUrl(src)) {
                 try {
                     int w = width.isEmpty() ? 0 : Integer.parseInt(width);
                     int h = height.isEmpty() ? 0 : Integer.parseInt(height);
@@ -165,6 +203,41 @@ public class MetadataExtractionService {
         }
 
         return null;
+    }
+
+    /**
+     * Vérifie qu'une URL se termine par une extension d'image valide
+     */
+    private boolean isValidImageUrl(String url) {
+        if (url == null || url.isEmpty()) {
+            return false;
+        }
+
+        // Exclure les URLs de tracking, analytics, CSI, etc.
+        String lowerUrl = url.toLowerCase();
+        if (lowerUrl.contains("/oc-csi/") ||
+            lowerUrl.contains("/analytics") ||
+            lowerUrl.contains("/track") ||
+            lowerUrl.contains("/beacon") ||
+            lowerUrl.contains("/pixel") ||
+            lowerUrl.contains("data:image") ||
+            lowerUrl.startsWith("data:")) {
+            return false;
+        }
+
+        // Enlever les paramètres de requête pour vérifier l'extension
+        String urlWithoutParams = url.split("\\?")[0];
+
+        // Extensions d'images valides
+        String[] validExtensions = {".jpg", ".jpeg", ".png", ".gif", ".webp", ".svg", ".bmp", ".ico", ".avif"};
+
+        for (String ext : validExtensions) {
+            if (urlWithoutParams.toLowerCase().endsWith(ext)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
