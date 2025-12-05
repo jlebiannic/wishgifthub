@@ -91,6 +91,11 @@ InvitationResponse:
       type: boolean
       description: Indique si l'invitation a été acceptée
       example: false
+    avatarId:
+      type: string
+      description: Identifiant de l'avatar associé à l'invitation
+      example: "avatar-1"
+      nullable: true
     createdAt:
       type: string
       format: date-time
@@ -192,6 +197,11 @@ UserResponse:
       type: boolean
       description: Indique si l'utilisateur est administrateur
       example: true
+    avatarId:
+      type: string
+      description: Identifiant de l'avatar de l'utilisateur
+      example: "avatar-1"
+      nullable: true
     createdAt:
       type: string
       format: date-time

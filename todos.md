@@ -23,6 +23,7 @@
 # Fait
 
 ## Fonc fait
+- avatars plus jolis et variés (48 avatars thématiques: animaux, nature, objets, etc.)
 - si déjà réservé et possibilité de réserver alors afficher une erreur au moment du clique et mettre à jour le bouton
 - bouton réservé par moi tronqué sur smartphone
 - bouton ajouter un souhait tronqué/peu visible sur smartphone

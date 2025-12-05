@@ -34,6 +34,9 @@ public class User {
     @Column(name = "is_admin", nullable = false)
     private boolean isAdmin = false;
 
+    @Column(name = "avatar_id")
+    private String avatarId;
+
     @Column(name = "created_at", nullable = false)
     private OffsetDateTime createdAt = OffsetDateTime.now();
 }

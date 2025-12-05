@@ -113,7 +113,7 @@ export interface GroupRequest {
   type: "noël";
 }
 
-/** @example {"email":"user@example.com"} */
+/** @example {"avatarId":"avatar-1","email":"user@example.com"} */
 export interface InvitationRequest {
   /**
    * Adresse email de la personne à inviter
@@ -121,9 +121,14 @@ export interface InvitationRequest {
    * @example "user@example.com"
    */
   email: string;
+  /**
+   * Identifiant de l'avatar à associer à l'invitation (optionnel)
+   * @example "avatar-1"
+   */
+  avatarId?: string | null;
 }
 
-/** @example {"createdAt":"2025-11-10T10:00:00Z","groupId":"987e6543-e21b-12d3-a456-426614174999","accepted":false,"jwtToken":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...","id":"123e4567-e89b-12d3-a456-426614174000","email":"user@example.com","token":"046b6c7f-0b8a-43b9-b35d-6489e6daee91","invitationLink":"http://localhost:8080/api/invite/abc12345-def6-7890-ghij-klmnopqrstuv"} */
+/** @example {"createdAt":"2025-11-10T10:00:00Z","avatarId":"avatar-1","groupId":"987e6543-e21b-12d3-a456-426614174999","accepted":false,"jwtToken":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...","id":"123e4567-e89b-12d3-a456-426614174000","email":"user@example.com","token":"046b6c7f-0b8a-43b9-b35d-6489e6daee91","invitationLink":"http://localhost:8080/api/invite/abc12345-def6-7890-ghij-klmnopqrstuv"} */
 export interface InvitationResponse {
   /**
    * Identifiant unique de l'invitation
@@ -154,6 +159,11 @@ export interface InvitationResponse {
    */
   accepted: boolean;
   /**
+   * Identifiant de l'avatar associé à l'invitation
+   * @example "avatar-1"
+   */
+  avatarId?: string | null;
+  /**
    * Date de création de l'invitation
    * @format date-time
    * @example "2025-11-10T10:00:00Z"
@@ -172,7 +182,7 @@ export interface InvitationResponse {
   jwtToken?: string | null;
 }
 
-/** @example {"createdAt":"2025-11-01T10:00:00Z","id":"987e6543-e21b-12d3-a456-426614174999","isAdmin":true,"email":"admin@example.com"} */
+/** @example {"createdAt":"2025-11-01T10:00:00Z","avatarId":"avatar-1","id":"987e6543-e21b-12d3-a456-426614174999","isAdmin":true,"email":"admin@example.com"} */
 export interface UserResponse {
   /**
    * Identifiant unique de l'utilisateur
@@ -191,6 +201,11 @@ export interface UserResponse {
    * @example true
    */
   isAdmin?: boolean;
+  /**
+   * Identifiant de l'avatar de l'utilisateur
+   * @example "avatar-1"
+   */
+  avatarId?: string | null;
   /**
    * Date de création du compte
    * @format date-time

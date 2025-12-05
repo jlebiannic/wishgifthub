@@ -44,6 +44,7 @@ public class InvitationService {
         invitation.setEmail(request.getEmail());
         invitation.setToken(UUID.randomUUID());
         invitation.setAccepted(false);
+        invitation.setAvatarId(request.getAvatarId());
         invitationRepository.save(invitation);
 
         InvitationResponse resp = new InvitationResponse();
@@ -52,6 +53,7 @@ public class InvitationService {
         resp.setGroupId(group.getId());
         resp.setToken(invitation.getToken());
         resp.setAccepted(false);
+        resp.setAvatarId(invitation.getAvatarId());
         resp.setCreatedAt(invitation.getCreatedAt());
         try {
             resp.setInvitationLink(new URI(invitationBaseUrl + invitation.getToken()));
@@ -71,9 +73,16 @@ public class InvitationService {
             User u = new User();
             u.setEmail(invitation.getEmail());
             u.setAdmin(false);
+            u.setAvatarId(invitation.getAvatarId()); // Transférer l'avatar de l'invitation vers l'utilisateur
             u.setCreatedAt(java.time.OffsetDateTime.now());
             return userRepository.save(u);
         });
+
+        // Si l'utilisateur existe déjà mais n'a pas d'avatar, mettre celui de l'invitation
+        if (user.getAvatarId() == null && invitation.getAvatarId() != null) {
+            user.setAvatarId(invitation.getAvatarId());
+            userRepository.save(user);
+        }
 
         // Ajout dans user_groups
         if (!userGroupRepository.existsByUserIdAndGroupId(user.getId(), invitation.getGroup().getId())) {
@@ -102,6 +111,7 @@ public class InvitationService {
         resp.setGroupId(invitation.getGroup().getId());
         resp.setToken(invitation.getToken());
         resp.setAccepted(true);
+        resp.setAvatarId(invitation.getAvatarId());
         resp.setCreatedAt(invitation.getCreatedAt());
         resp.setJwtToken(jwt);
         return resp;
@@ -124,6 +134,7 @@ public class InvitationService {
                     resp.setGroupId(invitation.getGroup().getId());
                     resp.setToken(invitation.getToken());
                     resp.setAccepted(invitation.isAccepted());
+                    resp.setAvatarId(invitation.getAvatarId());
                     resp.setCreatedAt(invitation.getCreatedAt());
                     try {
                         resp.setInvitationLink(new URI(invitationBaseUrl + invitation.getToken()));

@@ -6,6 +6,7 @@ import {useWishStore} from '@/stores/wish'
 import {useNotificationStore} from '@/stores/notification'
 import {useConfirmStore} from '@/stores/confirm'
 import EditWishDialog from './EditWishDialog.vue'
+import UserAvatar from './UserAvatar.vue'
 
 const props = defineProps<{
   member: UserResponse
@@ -200,15 +201,11 @@ function toggleExpand() {
       @click="toggleExpand"
     >
       <!-- Avatar -->
-      <v-avatar
-        :color="isCurrentUser ? 'primary' : 'secondary'"
-        size="56"
+      <UserAvatar
+        :avatar-id="member.avatarId"
+        :size="56"
         class="mr-4 flex-shrink-0"
-      >
-        <v-icon size="32" color="white">
-          {{ isCurrentUser ? 'mdi-account' : 'mdi-account-outline' }}
-        </v-icon>
-      </v-avatar>
+      />
 
       <!-- Nom du membre -->
       <div class="flex-grow-1" style="min-width: 150px;">

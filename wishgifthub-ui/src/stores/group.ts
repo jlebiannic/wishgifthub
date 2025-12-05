@@ -150,13 +150,16 @@ export const useGroupStore = defineStore('group', () => {
   /**
    * Invite un utilisateur à rejoindre un groupe par email
    */
-  async function inviteUser(groupId: string, email: string) {
+  async function inviteUser(groupId: string, email: string, avatarId?: string | null) {
     isLoading.value = true
     error.value = null
 
     try {
       const apiClient = getApiClient()
-      const response = await apiClient.invite(groupId, {email})
+      const response = await apiClient.invite(groupId, {
+        email,
+        avatarId: avatarId || undefined
+      })
 
       // Ajouter l'invitation à la liste
       if (response.data) {

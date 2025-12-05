@@ -48,6 +48,7 @@ public class UserGroupController implements UtilisateursApi {
         response.setId(user.getId());
         response.setEmail(user.getEmail());
         response.setIsAdmin(user.isAdmin());
+        response.setAvatarId(user.getAvatarId());
         response.setCreatedAt(user.getCreatedAt());
         return response;
     }

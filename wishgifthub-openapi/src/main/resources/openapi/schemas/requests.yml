@@ -45,6 +45,11 @@ InvitationRequest:
       format: email
       description: Adresse email de la personne à inviter
       example: "user@example.com"
+    avatarId:
+      type: string
+      description: Identifiant de l'avatar à associer à l'invitation (optionnel)
+      example: "avatar-1"
+      nullable: true
 
 WishRequest:
   type: object

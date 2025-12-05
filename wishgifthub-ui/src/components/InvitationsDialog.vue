@@ -2,6 +2,8 @@
 import {computed, ref} from 'vue'
 import type {GroupMember, Invitation} from '@/stores/group'
 import {useGroupStore} from '@/stores/group'
+import AvatarSelector from './AvatarSelector.vue'
+import UserAvatar from './UserAvatar.vue'
 
 const props = defineProps<{
   groupId: string
@@ -22,6 +24,7 @@ const groupStore = useGroupStore()
 const inviteEmail = ref('')
 const inviteEmailError = ref('')
 const isSendingInvite = ref(false)
+const selectedAvatarId = ref<string | null>(null)
 
 // Membres acceptés (ceux qui ont un compte)
 const acceptedMembers = computed(() => props.members)
@@ -70,10 +73,11 @@ async function handleSendInvite() {
   isSendingInvite.value = true
 
   try {
-    const invitation = await groupStore.inviteUser(props.groupId, inviteEmail.value)
+    const invitation = await groupStore.inviteUser(props.groupId, inviteEmail.value, selectedAvatarId.value)
 
     if (invitation) {
       inviteEmail.value = ''
+      selectedAvatarId.value = null
       emit('invitationSent')
     }
   } catch (err: any) {
@@ -108,8 +112,8 @@ function copyInvitationLink(link: string) {
         </div>
 
         <v-form @submit.prevent="handleSendInvite">
-          <v-row align="center">
-            <v-col cols="12" md="8">
+          <v-row>
+            <v-col cols="12">
               <v-text-field
                 v-model="inviteEmail"
                 label="Adresse email"
@@ -122,13 +126,18 @@ function copyInvitationLink(link: string) {
                 type="email"
               />
             </v-col>
-            <v-col cols="12" md="4">
+            <v-col cols="12">
+              <div class="text-caption text-medium-emphasis mb-2">Avatar du membre</div>
+              <AvatarSelector v-model="selectedAvatarId" />
+            </v-col>
+            <v-col cols="12">
               <v-btn
                 type="submit"
                 color="primary"
                 :loading="isSendingInvite"
                 :disabled="isSendingInvite"
                 block
+                size="large"
                 prepend-icon="mdi-send"
               >
                 Envoyer l'invitation
@@ -154,9 +163,7 @@ function copyInvitationLink(link: string) {
             class="mb-2 bg-white rounded"
           >
             <template v-slot:prepend>
-              <v-avatar color="warning">
-                <v-icon icon="mdi-email-clock" color="white" />
-              </v-avatar>
+              <UserAvatar :avatar-id="invitation.avatarId" :size="40" />
             </template>
 
             <v-list-item-title>
@@ -218,12 +225,7 @@ function copyInvitationLink(link: string) {
             class="mb-2 rounded border"
           >
             <template v-slot:prepend>
-              <v-avatar :color="member.isAdmin ? 'primary' : 'success'">
-                <v-icon
-                  :icon="member.isAdmin ? 'mdi-shield-crown' : 'mdi-account-check'"
-                  color="white"
-                />
-              </v-avatar>
+              <UserAvatar :avatar-id="member.avatarId" :size="40" />
             </template>
 
             <v-list-item-title>
@@ -267,4 +269,14 @@ function copyInvitationLink(link: string) {
     </v-card-actions>
   </v-card>
 </template>
+
+<style scoped>
+:deep(.v-list-item__prepend) {
+  margin-right: 16px !important;
+}
+
+:deep(.v-list-item) {
+  padding: 12px 16px !important;
+}
+</style>
 
