@@ -89,6 +89,14 @@ function formatPrice(price: string | number | null | undefined): string {
   const numPrice = typeof price === 'string' ? parseFloat(price) : price
   return numPrice.toFixed(2)
 }
+
+// Naviguer vers la page du groupe avec le membre sélectionné
+function goToMember(memberId: string) {
+  router.push({
+    path: `/group/${groupId.value}`,
+    hash: `#member-${memberId}`
+  })
+}
 </script>
 
 <template>
@@ -107,7 +115,7 @@ function formatPrice(price: string | number | null | undefined): string {
           </v-btn>
           <v-icon size="large" class="mr-3" color="primary">mdi-view-dashboard</v-icon>
           <div>
-            <h1 class="text-h4">Mes souhaits</h1>
+            <h1 class="text-h4">Mon tableau de bord</h1>
             <div v-if="currentGroup" class="text-subtitle-1 text-medium-emphasis">{{ currentGroup.name }}</div>
           </div>
         </div>
@@ -308,7 +316,13 @@ function formatPrice(price: string | number | null | undefined): string {
                 md="6"
                 lg="4"
               >
-                <v-card variant="outlined" class="h-100">
+                <v-card
+                  variant="outlined"
+                  class="h-100 member-card"
+                  hover
+                  @click="goToMember(summary.member.id)"
+                  style="cursor: pointer;"
+                >
                   <v-card-text>
                     <!-- En-tête du membre -->
                     <div class="d-flex align-center mb-3">
@@ -412,6 +426,15 @@ export default {
 <style scoped>
 .border-b {
   border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+.member-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.member-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
 }
 </style>
 

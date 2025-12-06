@@ -103,6 +103,21 @@ onMounted(async () => {
 
     // Récupérer tous les souhaits du groupe
     await wishStore.fetchGroupWishes(groupId.value)
+
+    // Si un hash est présent dans l'URL, déplier le membre correspondant
+    if (route.hash) {
+      const memberId = route.hash.replace('#member-', '')
+      if (memberId) {
+        expandedMembers.value.set(memberId, true)
+        // Scroll vers le membre après un court délai pour laisser le temps au rendu
+        setTimeout(() => {
+          const element = document.getElementById(`member-${memberId}`)
+          if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'start' })
+          }
+        }, 300)
+      }
+    }
   } catch (error) {
     console.error('Erreur lors du chargement:', error)
     // En cas d'erreur (ex: groupe non accessible), retourner à l'accueil
@@ -165,7 +180,7 @@ function goBack() {
               prepend-icon="mdi-view-dashboard"
               @click="router.push(`/group/${groupId}/dashboard`)"
             >
-              <span class="d-none d-sm-inline">Tableau de bord</span>
+              <span class="d-none d-sm-inline">Mon tableau de bord</span>
               <span class="d-inline d-sm-none">Dashboard</span>
             </v-btn>
             <v-btn
@@ -217,6 +232,7 @@ function goBack() {
         <MemberCard
           v-for="member in sortedMembers"
           :key="member.id"
+          :id="`member-${member.id}`"
           :member="member"
           :wishes="getMemberWishes(member.id)"
           :group-id="groupId"
