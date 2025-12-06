@@ -1,13 +1,9 @@
 # A faire
 
 ## Fonc à faire
-- ajouter pseudo et avatar à la création de l'invitation
-- possibilité de modifier le pseudo et l'avatar
-- possibilité de se déconnecter sur l'icone user en haut à droite
 - ajout d'un bouton pour rafraichir le groupe
 - reserré l'écran (bandes à droite et à gauche)
 - formulaire de contact
-- tout déplier/replier
 - page tableau de bord notamment pour voir les souhaits réservés de qui et mes souhaits réservés par qui
 - Un membre peu créer un membre enfant ou autre.
 - Réserver à plusieurs (ex: 2 personnes réservent un cadeau commun)
@@ -31,6 +27,10 @@
 - remplacer les alerts par qq chose de plus user friendly
 - Pouvoir modifier un souhait
 - si url ou url image invalide afficher une erreur
+- ajouter pseudo et avatar à la création de l'invitation
+- possibilité de modifier le pseudo et l'avatar
+- possibilité de se déconnecter sur l'icone user en haut à droite
+- tout déplier/replier
 
 ## Tech fait
 - Les apis générées coté front ont été modifiées, il faut trouver un moyen de les générer une fois pour toute sans modif manuelle

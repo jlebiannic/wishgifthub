@@ -15,6 +15,11 @@ const router = createRouter({
       component: () => import('../views/GroupMembersView.vue'),
     },
     {
+      path: '/group/:groupId/dashboard',
+      name: 'dashboard',
+      component: () => import('../views/DashboardView.vue'),
+    },
+    {
       path: '/invite/:token',
       name: 'accept-invite',
       component: () => import('../views/AcceptInviteView.vue'),

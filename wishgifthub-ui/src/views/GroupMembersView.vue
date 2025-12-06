@@ -156,8 +156,18 @@ function goBack() {
             </div>
           </div>
 
-          <!-- Boutons tout déplier/replier -->
-          <div v-if="members.length > 0" class="ml-sm-auto d-flex gap-2">
+          <!-- Boutons d'actions -->
+          <div v-if="members.length > 0" class="ml-sm-auto d-flex align-center gap-2">
+            <v-btn
+              color="primary"
+              variant="tonal"
+              size="small"
+              prepend-icon="mdi-view-dashboard"
+              @click="router.push(`/group/${groupId}/dashboard`)"
+            >
+              <span class="d-none d-sm-inline">Tableau de bord</span>
+              <span class="d-inline d-sm-none">Dashboard</span>
+            </v-btn>
             <v-btn
               variant="outlined"
               size="small"
