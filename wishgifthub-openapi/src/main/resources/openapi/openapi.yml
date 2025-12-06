@@ -69,6 +69,10 @@ paths:
   /api/groups/{groupId}/users:
     $ref: './paths/user-group-endpoints.yml#/~1api~1groups~1{groupId}~1users'
 
+  # User endpoints
+  /api/users/me/avatar:
+    $ref: './paths/user-endpoints.yml#/~1api~1users~1me~1avatar'
+
   # Wish endpoints
   /api/groups/{groupId}/wishes:
     $ref: './paths/wish-endpoints.yml#/~1api~1groups~1{groupId}~1wishes'

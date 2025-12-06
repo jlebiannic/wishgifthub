@@ -13,6 +13,7 @@ export interface User {
   email: string
   roles: string[]
   groupIds?: string[]
+  avatarId?: string | null
 }
 
 /**
@@ -61,7 +62,8 @@ export const useAuthStore = defineStore('auth', () => {
         username: email.split('@')[0] || email,
         email: email,
         roles: authData.isAdmin ? ['ADMIN'] : ['USER'],
-        groupIds: groupIds
+        groupIds: groupIds,
+        avatarId: authData.avatarId
       }
       token.value = authData.token
 
@@ -228,6 +230,27 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  /**
+   * Met à jour l'avatar de l'utilisateur
+   */
+  async function updateAvatar(avatarId: string | null) {
+    try {
+      const apiClient = getApiClient()
+      const response = await apiClient.updateUserAvatar({ avatarId })
+
+      // Mettre à jour l'avatarId dans l'objet user
+      if (user.value) {
+        user.value.avatarId = response.data.avatarId
+        localStorage.setItem('user', JSON.stringify(user.value))
+      }
+
+      return true
+    } catch (err: any) {
+      error.value = err.response?.data?.message || 'Erreur lors de la mise à jour de l\'avatar'
+      return false
+    }
+  }
+
   return {
     user,
     token,
@@ -240,5 +263,6 @@ export const useAuthStore = defineStore('auth', () => {
     logout,
     restoreSession,
     updateToken,
+    updateAvatar,
   }
 })

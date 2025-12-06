@@ -18,6 +18,7 @@ import type {
   InvitationRequest,
   InvitationResponse,
   MetadataResponse,
+  UpdateAvatarRequest,
   UserResponse,
   WishRequest,
   WishResponse,
@@ -223,6 +224,25 @@ export class Api<
       path: `/api/groups/${groupId}/users`,
       method: "GET",
       secure: true,
+      format: "json",
+      ...params,
+    });
+  /**
+   * @description Permet à un utilisateur authentifié de modifier son avatar. L'avatar sélectionné doit être l'un des avatars prédéfinis disponibles.
+   *
+   * @tags Utilisateurs
+   * @name UpdateUserAvatar
+   * @summary Mettre à jour l'avatar de l'utilisateur
+   * @request PUT:/api/users/me/avatar
+   * @secure
+   */
+  updateUserAvatar = (data: UpdateAvatarRequest, params: RequestParams = {}) =>
+    this.request<UserResponse, ErrorResponse>({
+      path: `/api/users/me/avatar`,
+      method: "PUT",
+      body: data,
+      secure: true,
+      type: ContentType.Json,
       format: "json",
       ...params,
     });

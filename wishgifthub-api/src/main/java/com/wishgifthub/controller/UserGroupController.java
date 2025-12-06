@@ -1,10 +1,13 @@
 package com.wishgifthub.controller;
 
+import com.wishgifthub.dto.UserDto;
 import com.wishgifthub.entity.User;
 import com.wishgifthub.openapi.api.UtilisateursApi;
 import com.wishgifthub.openapi.model.GroupResponse;
+import com.wishgifthub.openapi.model.UpdateAvatarRequest;
 import com.wishgifthub.openapi.model.UserResponse;
 import com.wishgifthub.service.UserGroupService;
+import com.wishgifthub.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -18,6 +21,9 @@ import java.util.stream.Collectors;
 public class UserGroupController implements UtilisateursApi {
     @Autowired
     private UserGroupService userGroupService;
+
+    @Autowired
+    private UserService userService;
 
     @PreAuthorize("hasAuthority('GROUP_' + #groupId)")
     @Override
@@ -36,6 +42,21 @@ public class UserGroupController implements UtilisateursApi {
     public ResponseEntity<List<GroupResponse>> getUserGroups() {
         User user = getCurrentUser();
         return ResponseEntity.ok(userGroupService.getGroupsByUser(user.getId()));
+    }
+
+    @Override
+    public ResponseEntity<UserResponse> updateUserAvatar(UpdateAvatarRequest updateAvatarRequest) {
+        User user = getCurrentUser();
+        UserDto updatedUser = userService.updateUserAvatar(user.getEmail(), updateAvatarRequest.getAvatarId());
+
+        UserResponse response = new UserResponse();
+        response.setId(UUID.fromString(updatedUser.getId()));
+        response.setEmail(updatedUser.getEmail());
+        response.setIsAdmin(updatedUser.getIsAdmin());
+        response.setAvatarId(updatedUser.getAvatarId());
+        response.setCreatedAt(updatedUser.getCreatedAt().atOffset(java.time.ZoneOffset.UTC));
+
+        return ResponseEntity.ok(response);
     }
 
     private User getCurrentUser() {

@@ -39,6 +39,7 @@ public class AuthService {
         AuthResponse response = new AuthResponse();
         response.setUserId(user.getId());
         response.setIsAdmin(true);
+        response.setAvatarId(user.getAvatarId());
         response.setToken(token);
         return response;
     }

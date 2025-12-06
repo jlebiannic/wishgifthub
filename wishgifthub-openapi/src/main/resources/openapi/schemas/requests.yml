@@ -51,6 +51,17 @@ InvitationRequest:
       example: "avatar-1"
       nullable: true
 
+UpdateAvatarRequest:
+  type: object
+  required:
+    - avatarId
+  properties:
+    avatarId:
+      type: string
+      description: Identifiant de l'avatar à associer à l'utilisateur
+      example: "avatar-1"
+      nullable: true
+
 WishRequest:
   type: object
   required:

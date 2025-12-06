@@ -14,6 +14,11 @@ AuthResponse:
       type: boolean
       description: Indique si l'utilisateur est administrateur
       example: true
+    avatarId:
+      type: string
+      description: Identifiant de l'avatar de l'utilisateur (optionnel)
+      example: "avatar-1"
+      nullable: true
     token:
       type: string
       description: Token JWT pour l'authentification

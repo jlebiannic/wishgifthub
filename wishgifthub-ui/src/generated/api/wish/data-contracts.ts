@@ -26,7 +26,7 @@ export interface AuthRequest {
   password: string;
 }
 
-/** @example {"isAdmin":true,"userId":"123e4567-e89b-12d3-a456-426614174000","token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxMjNlNDU2Ny1lODliLTEyZDMtYTQ1Ni00MjY2MTQxNzQwMDAiLCJpc0FkbWluIjp0cnVlLCJncm91cElkcyI6W10sImlhdCI6MTYzMTcwMDAwMCwiZXhwIjoxNjMxNzg2NDAwfQ.signature"} */
+/** @example {"avatarId":"avatar-1","isAdmin":true,"userId":"123e4567-e89b-12d3-a456-426614174000","token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxMjNlNDU2Ny1lODliLTEyZDMtYTQ1Ni00MjY2MTQxNzQwMDAiLCJpc0FkbWluIjp0cnVlLCJncm91cElkcyI6W10sImlhdCI6MTYzMTcwMDAwMCwiZXhwIjoxNjMxNzg2NDAwfQ.signature"} */
 export interface AuthResponse {
   /**
    * Identifiant unique de l'utilisateur
@@ -39,6 +39,11 @@ export interface AuthResponse {
    * @example true
    */
   isAdmin: boolean;
+  /**
+   * Identifiant de l'avatar de l'utilisateur (optionnel)
+   * @example "avatar-1"
+   */
+  avatarId?: string | null;
   /**
    * Token JWT pour l'authentification
    * @example "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxMjNlNDU2Ny1lODliLTEyZDMtYTQ1Ni00MjY2MTQxNzQwMDAiLCJpc0FkbWluIjp0cnVlLCJncm91cElkcyI6W10sImlhdCI6MTYzMTcwMDAwMCwiZXhwIjoxNjMxNzg2NDAwfQ.signature"
@@ -212,6 +217,15 @@ export interface UserResponse {
    * @example "2025-11-01T10:00:00Z"
    */
   createdAt: string;
+}
+
+/** @example {"avatarId":"avatar-1"} */
+export interface UpdateAvatarRequest {
+  /**
+   * Identifiant de l'avatar à associer à l'utilisateur
+   * @example "avatar-1"
+   */
+  avatarId: string | null;
 }
 
 /** @example {"createdAt":"2025-11-10T10:00:00Z","giftName":"Livre de cuisine","price":"29.99 €","groupId":"123e4567-e89b-12d3-a456-426614174000","imageUrl":"https://example.com/image.jpg","reservedBy":"456e7890-e12b-12d3-a456-426614174111","description":"Livre de recettes italiennes avec photos","id":"111e2222-e33b-44d5-a666-777888999000","userId":"987e6543-e21b-12d3-a456-426614174999","url":"https://example.com/livre"} */
