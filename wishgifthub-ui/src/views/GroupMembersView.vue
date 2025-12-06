@@ -147,7 +147,7 @@ function goBack() {
 </script>
 
 <template>
-  <v-container fluid class="py-8 px-6">
+  <v-container fluid class="py-8 px-6 group-container">
     <!-- En-tête -->
     <v-row class="mb-4">
       <v-col cols="12">
@@ -255,3 +255,9 @@ function goBack() {
   </v-container>
 </template>
 
+<style scoped>
+.group-container {
+  max-width: 1600px;
+  margin: 0 auto;
+}
+</style>

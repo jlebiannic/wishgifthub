@@ -2,7 +2,7 @@
 import {useTheme} from 'vuetify'
 import {RouterView, useRouter} from 'vue-router'
 import {useAuthStore} from '@/stores/auth'
-import {ref} from 'vue'
+import {onMounted, onUnmounted, ref} from 'vue'
 import NotificationManager from '@/components/NotificationManager.vue'
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
 import UserAvatar from '@/components/UserAvatar.vue'
@@ -16,6 +16,29 @@ const showAvatarDialog = ref(false)
 const selectedAvatarId = ref<string | null>(null)
 const editingPseudo = ref(false)
 const pseudoValue = ref('')
+const showScrollTop = ref(false)
+
+// Gérer le scroll pour afficher/masquer le bouton "Retour en haut"
+function handleScroll() {
+  showScrollTop.value = window.scrollY > 30
+}
+
+// Scroller en haut de la page
+function scrollToTop() {
+  window.scrollTo({
+    top: 0,
+    behavior: 'smooth'
+  })
+}
+
+// Ajouter l'écouteur de scroll
+onMounted(() => {
+  window.addEventListener('scroll', handleScroll)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('scroll', handleScroll)
+})
 
 function toggleTheme() {
   theme.global.name.value = theme.global.current.value.dark ? 'light' : 'dark'
@@ -168,7 +191,9 @@ async function handleLogout() {
     </v-app-bar>
 
     <v-main>
-      <RouterView />
+      <v-container fluid class="main-container">
+        <RouterView />
+      </v-container>
     </v-main>
 
     <!-- Gestionnaire de notifications -->
@@ -177,7 +202,19 @@ async function handleLogout() {
     <!-- Dialogue de confirmation -->
     <ConfirmDialog />
 
-    <!-- Sélecteur d'avatar -->
+    <!-- Bouton "Retour en haut" -->
+    <v-fab
+      v-show="showScrollTop"
+      icon="mdi-chevron-up"
+      color="primary"
+      size="small"
+      location="bottom end"
+      fixed
+      @click="scrollToTop"
+      class="scroll-top-btn"
+    />
+
+    <!-- Dialogue de sélection d'avatar -->
     <v-dialog v-model="showAvatarDialog" max-width="700px" scrollable>
       <v-card>
         <v-card-title class="d-flex align-center pa-4 bg-primary">
@@ -240,6 +277,23 @@ async function handleLogout() {
 </template>
 
 <style scoped>
+/* Limiter la largeur pour les grands écrans */
+.main-container {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding-left: 16px;
+  padding-right: 16px;
+}
+
+/* Bouton retour en haut */
+.scroll-top-btn {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 1000;
+  transition: opacity 0.3s ease;
+}
+
 .avatar-option-wrapper {
   cursor: pointer;
   padding: 8px;

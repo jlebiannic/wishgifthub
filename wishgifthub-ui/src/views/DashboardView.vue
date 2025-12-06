@@ -101,7 +101,7 @@ function goToMember(memberId: string) {
 </script>
 
 <template>
-  <v-container fluid class="pa-4">
+  <v-container fluid class="pa-4 dashboard-container">
     <v-row>
       <v-col cols="12">
         <!-- En-tête -->
@@ -441,6 +441,11 @@ export default {
 </script>
 
 <style scoped>
+.dashboard-container {
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
 .border-b {
   border-bottom: 1px solid rgba(0, 0, 0, 0.12);
 }

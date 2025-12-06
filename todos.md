@@ -2,9 +2,7 @@
 
 ## Fonc à faire
 - ajout d'un bouton pour rafraichir le groupe
-- reserré l'écran (bandes à droite et à gauche)
 - formulaire de contact
-- page tableau de bord notamment pour voir les souhaits réservés de qui et mes souhaits réservés par qui
 - Un membre peu créer un membre enfant ou autre.
 - Réserver à plusieurs (ex: 2 personnes réservent un cadeau commun)
 
@@ -20,6 +18,7 @@
 # Fait
 
 ## Fonc fait
+- reserrer l'écran pour les grands écrans (largeur max 1600px) avec bouton "Retour en haut" lors du scroll
 - avatars plus jolis et variés (48 avatars thématiques: animaux, nature, objets, etc.)
 - si déjà réservé et possibilité de réserver alors afficher une erreur au moment du clique et mettre à jour le bouton
 - bouton réservé par moi tronqué sur smartphone
@@ -31,7 +30,8 @@
 - possibilité de modifier le pseudo et l'avatar
 - possibilité de se déconnecter sur l'icone user en haut à droite
 - tout déplier/replier
-
+- page tableau de bord notamment pour voir les souhaits réservés de qui et mes souhaits réservés par qui
+- 
 ## Tech fait
 - Les apis générées coté front ont été modifiées, il faut trouver un moyen de les générer une fois pour toute sans modif manuelle
 - liens amazon à revoir (images)
