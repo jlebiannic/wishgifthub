@@ -3,6 +3,7 @@ import {computed, ref} from 'vue'
 import type {GroupMember, Invitation} from '@/stores/group'
 import {useGroupStore} from '@/stores/group'
 import {useAuthStore} from '@/stores/auth'
+import {useNotificationStore} from '@/stores/notification'
 import AvatarSelector from './AvatarSelector.vue'
 import UserAvatar from './UserAvatar.vue'
 
@@ -21,6 +22,7 @@ const emit = defineEmits<{
 
 const groupStore = useGroupStore()
 const authStore = useAuthStore()
+const notificationStore = useNotificationStore()
 
 // Formulaire d'invitation
 const inviteEmail = ref('')
@@ -91,8 +93,17 @@ async function handleSendInvite() {
   }
 }
 
+/**
+ * Génère le lien d'invitation complet avec le domaine actuel
+ */
+function getInvitationLink(token: string): string {
+  const origin = window.location.origin
+  return `${origin}/invite/${token}`
+}
+
 function copyInvitationLink(link: string) {
   navigator.clipboard.writeText(link)
+  notificationStore.success('Lien d\'invitation copié dans le presse-papier')
 }
 </script>
 
@@ -190,18 +201,22 @@ function copyInvitationLink(link: string) {
             <v-list-item-subtitle>
               <div v-if="invitation.pseudo">{{ invitation.email }}</div>
               <div>Invitation envoyée le {{ new Date(invitation.createdAt).toLocaleDateString('fr-FR') }}</div>
+              <div class="text-caption text-primary mt-1">
+                <v-icon size="x-small" class="mr-1">mdi-link</v-icon>
+                {{ getInvitationLink(invitation.token) }}
+              </div>
             </v-list-item-subtitle>
 
             <template v-slot:append>
               <v-tooltip text="Copier le lien d'invitation" location="left">
                 <template v-slot:activator="{ props: tooltipProps }">
                   <v-btn
-                    v-if="invitation.invitationLink"
+                    v-if="invitation.token"
                     icon
                     variant="text"
                     size="small"
                     v-bind="tooltipProps"
-                    @click="copyInvitationLink(invitation.invitationLink)"
+                    @click="copyInvitationLink(getInvitationLink(invitation.token))"
                   >
                     <v-icon>mdi-content-copy</v-icon>
                   </v-btn>
