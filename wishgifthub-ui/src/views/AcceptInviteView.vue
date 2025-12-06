@@ -31,7 +31,12 @@ onMounted(async () => {
 
       // Connecter automatiquement l'utilisateur avec le JWT retourné
       if (response.data.jwtToken) {
-        await authStore.loginWithToken(response.data.jwtToken, response.data.email)
+        await authStore.loginWithToken(
+          response.data.jwtToken,
+          response.data.email,
+          response.data.avatarId,
+          response.data.pseudo
+        )
 
         // Rediriger vers la page d'accueil après un court délai
         setTimeout(() => {

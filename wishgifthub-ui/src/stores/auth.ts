@@ -103,7 +103,7 @@ export const useAuthStore = defineStore('auth', () => {
   /**
    * Connexion automatique avec un token JWT (par exemple après acceptation d'invitation)
    */
-  async function loginWithToken(jwtToken: string, email: string) {
+  async function loginWithToken(jwtToken: string, email: string, avatarId?: string | null, pseudo?: string | null) {
     isLoading.value = true
     error.value = null
 
@@ -113,13 +113,15 @@ export const useAuthStore = defineStore('auth', () => {
       const groupIds = decodedToken.groupIds || []
       const userId = decodedToken.sub
 
-      // Construire l'objet User
+      // Construire l'objet User avec les informations reçues de l'invitation
       user.value = {
         id: userId,
         username: email.split('@')[0] || email,
         email: email,
         roles: decodedToken.isAdmin ? ['ADMIN'] : ['USER'],
-        groupIds: groupIds
+        groupIds: groupIds,
+        avatarId: avatarId || null,
+        pseudo: pseudo || null
       }
       token.value = jwtToken
 
