@@ -40,6 +40,7 @@ public class AuthService {
         response.setUserId(user.getId());
         response.setIsAdmin(true);
         response.setAvatarId(user.getAvatarId());
+        response.setPseudo(user.getPseudo());
         response.setToken(token);
         return response;
     }
@@ -66,6 +67,8 @@ public class AuthService {
         AuthResponse response = new AuthResponse();
         response.setUserId(user.getId());
         response.setIsAdmin(true);
+        response.setAvatarId(user.getAvatarId());
+        response.setPseudo(user.getPseudo());
         response.setToken(token);
         return response;
     }

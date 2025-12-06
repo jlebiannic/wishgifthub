@@ -58,10 +58,7 @@ function getReservedByName(wish: WishResponse): string {
   // Chercher la personne dans la liste des membres
   const reserver = props.allMembers.find(m => m.id === wish.reservedBy)
   if (reserver) {
-    // Afficher le prénom de l'email (avant le @) ou l'email complet si pas de @
-    const emailParts = reserver.email.split('@')
-    const name = emailParts[0] || reserver.email
-    return `Réservé par ${name}`
+    return `Réservé par ${authStore.getMemberDisplayName(reserver)}`
   }
 
   // Fallback si on ne trouve pas (ne devrait pas arriver)
@@ -80,9 +77,7 @@ function getReservedByNameShort(wish: WishResponse): string {
   // Chercher la personne dans la liste des membres
   const reserver = props.allMembers.find(m => m.id === wish.reservedBy)
   if (reserver) {
-    const emailParts = reserver.email.split('@')
-    const name = emailParts[0] || reserver.email
-    return `Réservé par ${name}`
+    return authStore.getMemberDisplayName(reserver)
   }
 
   return 'Réservé'
@@ -211,8 +206,8 @@ function toggleExpand() {
       <div class="flex-grow-1" style="min-width: 150px;">
         <div class="text-h6">
           <span v-if="isCurrentUser" class="font-weight-bold">Moi</span>
-          <span v-if="isCurrentUser && member.email"> ({{ member.email }})</span>
-          <span v-else>{{ member.email }}</span>
+          <span v-if="isCurrentUser"> ({{ authStore.getMemberDisplayName(member) }})</span>
+          <span v-else>{{ authStore.getMemberDisplayName(member) }}</span>
         </div>
         <div class="text-caption text-medium-emphasis">
           {{ wishes.length }} souhait{{ wishes.length > 1 ? 's' : '' }}

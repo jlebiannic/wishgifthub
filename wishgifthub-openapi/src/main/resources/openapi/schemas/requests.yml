@@ -50,16 +50,26 @@ InvitationRequest:
       description: Identifiant de l'avatar à associer à l'invitation (optionnel)
       example: "avatar-1"
       nullable: true
+    pseudo:
+      type: string
+      maxLength: 100
+      description: Pseudo/nom à associer à l'invitation (optionnel)
+      example: "Jean"
+      nullable: true
 
 UpdateAvatarRequest:
   type: object
-  required:
-    - avatarId
   properties:
     avatarId:
       type: string
       description: Identifiant de l'avatar à associer à l'utilisateur
       example: "avatar-1"
+      nullable: true
+    pseudo:
+      type: string
+      maxLength: 100
+      description: Pseudo/nom de l'utilisateur
+      example: "Jean"
       nullable: true
 
 WishRequest:

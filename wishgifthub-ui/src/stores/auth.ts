@@ -3,6 +3,7 @@ import {defineStore} from 'pinia'
 import {jwtDecode} from 'jwt-decode'
 import {getApiClient, updateApiToken} from '@/api/client'
 import {useGroupStore} from './group'
+import type {UserResponse} from '@/generated/api/wish/data-contracts'
 
 /**
  * Interface représentant un utilisateur authentifié
@@ -14,6 +15,7 @@ export interface User {
   roles: string[]
   groupIds?: string[]
   avatarId?: string | null
+  pseudo?: string | null
 }
 
 /**
@@ -56,6 +58,8 @@ export const useAuthStore = defineStore('auth', () => {
       const decodedToken = jwtDecode<JwtPayload>(authData.token)
       const groupIds = decodedToken.groupIds || []
 
+      console.log('Auth data received:', authData) // Debug log
+
       // Construire l'objet User à partir de la réponse
       user.value = {
         id: authData.userId,
@@ -63,7 +67,8 @@ export const useAuthStore = defineStore('auth', () => {
         email: email,
         roles: authData.isAdmin ? ['ADMIN'] : ['USER'],
         groupIds: groupIds,
-        avatarId: authData.avatarId
+        avatarId: authData.avatarId,
+        pseudo: authData.pseudo
       }
       token.value = authData.token
 
@@ -231,24 +236,72 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   /**
-   * Met à jour l'avatar de l'utilisateur
+   * Met à jour l'avatar et/ou le pseudo de l'utilisateur
    */
-  async function updateAvatar(avatarId: string | null) {
+  async function updateAvatar(avatarId: string | null, pseudo: string | null) {
     try {
       const apiClient = getApiClient()
-      const response = await apiClient.updateUserAvatar({ avatarId })
+      const updateData: any = {}
 
-      // Mettre à jour l'avatarId dans l'objet user
+      // Ne mettre à jour que les champs fournis (non null et différents de la valeur actuelle)
+      if (avatarId !== null && avatarId !== user.value?.avatarId) {
+        updateData.avatarId = avatarId
+      }
+      if (pseudo !== null && pseudo !== user.value?.pseudo) {
+        updateData.pseudo = pseudo
+      }
+
+      // Si aucun changement, ne pas appeler l'API
+      if (Object.keys(updateData).length === 0) {
+        return true
+      }
+
+      const response = await apiClient.updateUserAvatar(updateData)
+
+      // Mettre à jour l'avatarId et le pseudo dans l'objet user
       if (user.value) {
         user.value.avatarId = response.data.avatarId
+        user.value.pseudo = response.data.pseudo
         localStorage.setItem('user', JSON.stringify(user.value))
+
+        // Mettre à jour le profil dans le store group si le membre est dans la liste
+        const groupStore = useGroupStore()
+        groupStore.updateMemberProfile(user.value.id, {
+          avatarId: response.data.avatarId,
+          pseudo: response.data.pseudo
+        })
       }
 
       return true
     } catch (err: any) {
-      error.value = err.response?.data?.message || 'Erreur lors de la mise à jour de l\'avatar'
+      error.value = err.response?.data?.message || 'Erreur lors de la mise à jour du profil'
       return false
     }
+  }
+
+  /**
+   * Retourne le nom d'affichage d'un membre selon la priorité suivante :
+   * 1. Pseudo (si défini)
+   * 2. Username extrait de l'email (partie avant le @)
+   * 3. Email complet (fallback)
+   *
+   * @param member - L'objet utilisateur (UserResponse ou User)
+   * @returns Le nom à afficher (string)
+   */
+  function getMemberDisplayName(member: UserResponse | User | null | undefined): string {
+    if (!member) return ''
+
+    // 1. Priorité au pseudo s'il existe
+    if (member.pseudo) {
+      return member.pseudo
+    }
+
+    // 2. Sinon, extraire le username de l'email (partie avant le @)
+    const emailParts = member.email.split('@')
+    const username = emailParts[0]
+
+    // 3. Fallback sur l'email complet si pas de username
+    return username || member.email
   }
 
   return {
@@ -264,5 +317,6 @@ export const useAuthStore = defineStore('auth', () => {
     restoreSession,
     updateToken,
     updateAvatar,
+    getMemberDisplayName,
   }
 })

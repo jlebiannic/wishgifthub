@@ -45,6 +45,7 @@ public class InvitationService {
         invitation.setToken(UUID.randomUUID());
         invitation.setAccepted(false);
         invitation.setAvatarId(request.getAvatarId());
+        invitation.setPseudo(request.getPseudo());
         invitationRepository.save(invitation);
 
         InvitationResponse resp = new InvitationResponse();
@@ -54,6 +55,7 @@ public class InvitationService {
         resp.setToken(invitation.getToken());
         resp.setAccepted(false);
         resp.setAvatarId(invitation.getAvatarId());
+        resp.setPseudo(invitation.getPseudo());
         resp.setCreatedAt(invitation.getCreatedAt());
         try {
             resp.setInvitationLink(new URI(invitationBaseUrl + invitation.getToken()));
@@ -74,13 +76,22 @@ public class InvitationService {
             u.setEmail(invitation.getEmail());
             u.setAdmin(false);
             u.setAvatarId(invitation.getAvatarId()); // Transférer l'avatar de l'invitation vers l'utilisateur
+            u.setPseudo(invitation.getPseudo()); // Transférer le pseudo de l'invitation vers l'utilisateur
             u.setCreatedAt(java.time.OffsetDateTime.now());
             return userRepository.save(u);
         });
 
-        // Si l'utilisateur existe déjà mais n'a pas d'avatar, mettre celui de l'invitation
+        // Si l'utilisateur existe déjà mais n'a pas d'avatar ou de pseudo, mettre ceux de l'invitation
+        boolean needsUpdate = false;
         if (user.getAvatarId() == null && invitation.getAvatarId() != null) {
             user.setAvatarId(invitation.getAvatarId());
+            needsUpdate = true;
+        }
+        if (user.getPseudo() == null && invitation.getPseudo() != null) {
+            user.setPseudo(invitation.getPseudo());
+            needsUpdate = true;
+        }
+        if (needsUpdate) {
             userRepository.save(user);
         }
 
@@ -112,6 +123,7 @@ public class InvitationService {
         resp.setToken(invitation.getToken());
         resp.setAccepted(true);
         resp.setAvatarId(invitation.getAvatarId());
+        resp.setPseudo(invitation.getPseudo());
         resp.setCreatedAt(invitation.getCreatedAt());
         resp.setJwtToken(jwt);
         return resp;
@@ -135,6 +147,7 @@ public class InvitationService {
                     resp.setToken(invitation.getToken());
                     resp.setAccepted(invitation.isAccepted());
                     resp.setAvatarId(invitation.getAvatarId());
+                    resp.setPseudo(invitation.getPseudo());
                     resp.setCreatedAt(invitation.getCreatedAt());
                     try {
                         resp.setInvitationLink(new URI(invitationBaseUrl + invitation.getToken()));

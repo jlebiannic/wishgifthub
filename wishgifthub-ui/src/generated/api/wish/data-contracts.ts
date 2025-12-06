@@ -26,7 +26,7 @@ export interface AuthRequest {
   password: string;
 }
 
-/** @example {"avatarId":"avatar-1","isAdmin":true,"userId":"123e4567-e89b-12d3-a456-426614174000","token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxMjNlNDU2Ny1lODliLTEyZDMtYTQ1Ni00MjY2MTQxNzQwMDAiLCJpc0FkbWluIjp0cnVlLCJncm91cElkcyI6W10sImlhdCI6MTYzMTcwMDAwMCwiZXhwIjoxNjMxNzg2NDAwfQ.signature"} */
+/** @example {"avatarId":"avatar-1","isAdmin":true,"userId":"123e4567-e89b-12d3-a456-426614174000","pseudo":"Jean","token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxMjNlNDU2Ny1lODliLTEyZDMtYTQ1Ni00MjY2MTQxNzQwMDAiLCJpc0FkbWluIjp0cnVlLCJncm91cElkcyI6W10sImlhdCI6MTYzMTcwMDAwMCwiZXhwIjoxNjMxNzg2NDAwfQ.signature"} */
 export interface AuthResponse {
   /**
    * Identifiant unique de l'utilisateur
@@ -44,6 +44,11 @@ export interface AuthResponse {
    * @example "avatar-1"
    */
   avatarId?: string | null;
+  /**
+   * Pseudo/nom de l'utilisateur (optionnel)
+   * @example "Jean"
+   */
+  pseudo?: string | null;
   /**
    * Token JWT pour l'authentification
    * @example "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxMjNlNDU2Ny1lODliLTEyZDMtYTQ1Ni00MjY2MTQxNzQwMDAiLCJpc0FkbWluIjp0cnVlLCJncm91cElkcyI6W10sImlhdCI6MTYzMTcwMDAwMCwiZXhwIjoxNjMxNzg2NDAwfQ.signature"
@@ -118,7 +123,7 @@ export interface GroupRequest {
   type: "noël";
 }
 
-/** @example {"avatarId":"avatar-1","email":"user@example.com"} */
+/** @example {"avatarId":"avatar-1","pseudo":"Jean","email":"user@example.com"} */
 export interface InvitationRequest {
   /**
    * Adresse email de la personne à inviter
@@ -131,9 +136,15 @@ export interface InvitationRequest {
    * @example "avatar-1"
    */
   avatarId?: string | null;
+  /**
+   * Pseudo/nom à associer à l'invitation (optionnel)
+   * @maxLength 100
+   * @example "Jean"
+   */
+  pseudo?: string | null;
 }
 
-/** @example {"createdAt":"2025-11-10T10:00:00Z","avatarId":"avatar-1","groupId":"987e6543-e21b-12d3-a456-426614174999","accepted":false,"jwtToken":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...","id":"123e4567-e89b-12d3-a456-426614174000","email":"user@example.com","token":"046b6c7f-0b8a-43b9-b35d-6489e6daee91","invitationLink":"http://localhost:8080/api/invite/abc12345-def6-7890-ghij-klmnopqrstuv"} */
+/** @example {"createdAt":"2025-11-10T10:00:00Z","avatarId":"avatar-1","groupId":"987e6543-e21b-12d3-a456-426614174999","accepted":false,"jwtToken":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...","id":"123e4567-e89b-12d3-a456-426614174000","pseudo":"Jean","email":"user@example.com","token":"046b6c7f-0b8a-43b9-b35d-6489e6daee91","invitationLink":"http://localhost:8080/api/invite/abc12345-def6-7890-ghij-klmnopqrstuv"} */
 export interface InvitationResponse {
   /**
    * Identifiant unique de l'invitation
@@ -169,6 +180,11 @@ export interface InvitationResponse {
    */
   avatarId?: string | null;
   /**
+   * Pseudo/nom associé à l'invitation
+   * @example "Jean"
+   */
+  pseudo?: string | null;
+  /**
    * Date de création de l'invitation
    * @format date-time
    * @example "2025-11-10T10:00:00Z"
@@ -187,7 +203,7 @@ export interface InvitationResponse {
   jwtToken?: string | null;
 }
 
-/** @example {"createdAt":"2025-11-01T10:00:00Z","avatarId":"avatar-1","id":"987e6543-e21b-12d3-a456-426614174999","isAdmin":true,"email":"admin@example.com"} */
+/** @example {"createdAt":"2025-11-01T10:00:00Z","avatarId":"avatar-1","id":"987e6543-e21b-12d3-a456-426614174999","isAdmin":true,"pseudo":"Jean","email":"admin@example.com"} */
 export interface UserResponse {
   /**
    * Identifiant unique de l'utilisateur
@@ -212,6 +228,11 @@ export interface UserResponse {
    */
   avatarId?: string | null;
   /**
+   * Pseudo/nom de l'utilisateur
+   * @example "Jean"
+   */
+  pseudo?: string | null;
+  /**
    * Date de création du compte
    * @format date-time
    * @example "2025-11-01T10:00:00Z"
@@ -219,13 +240,19 @@ export interface UserResponse {
   createdAt: string;
 }
 
-/** @example {"avatarId":"avatar-1"} */
+/** @example {"avatarId":"avatar-1","pseudo":"Jean"} */
 export interface UpdateAvatarRequest {
   /**
    * Identifiant de l'avatar à associer à l'utilisateur
    * @example "avatar-1"
    */
-  avatarId: string | null;
+  avatarId?: string | null;
+  /**
+   * Pseudo/nom de l'utilisateur
+   * @maxLength 100
+   * @example "Jean"
+   */
+  pseudo?: string | null;
 }
 
 /** @example {"createdAt":"2025-11-10T10:00:00Z","giftName":"Livre de cuisine","price":"29.99 €","groupId":"123e4567-e89b-12d3-a456-426614174000","imageUrl":"https://example.com/image.jpg","reservedBy":"456e7890-e12b-12d3-a456-426614174111","description":"Livre de recettes italiennes avec photos","id":"111e2222-e33b-44d5-a666-777888999000","userId":"987e6543-e21b-12d3-a456-426614174999","url":"https://example.com/livre"} */

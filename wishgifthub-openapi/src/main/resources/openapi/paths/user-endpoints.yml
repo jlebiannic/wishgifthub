@@ -2,10 +2,10 @@
   put:
     tags:
       - Utilisateurs
-    summary: Mettre à jour l'avatar de l'utilisateur
+    summary: Mettre à jour le profil de l'utilisateur
     description: |
-      Permet à un utilisateur authentifié de modifier son avatar.
-      L'avatar sélectionné doit être l'un des avatars prédéfinis disponibles.
+      Permet à un utilisateur authentifié de modifier son avatar et/ou son pseudo.
+      Les champs sont optionnels, seuls les champs fournis seront mis à jour.
     operationId: updateUserAvatar
     security:
       - bearerAuth: []

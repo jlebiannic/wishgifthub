@@ -37,6 +37,9 @@ public class User {
     @Column(name = "avatar_id")
     private String avatarId;
 
+    @Column(name = "pseudo", length = 100)
+    private String pseudo;
+
     @Column(name = "created_at", nullable = false)
     private OffsetDateTime createdAt = OffsetDateTime.now();
 }

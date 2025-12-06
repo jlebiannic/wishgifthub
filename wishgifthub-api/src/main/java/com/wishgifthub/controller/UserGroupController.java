@@ -47,13 +47,18 @@ public class UserGroupController implements UtilisateursApi {
     @Override
     public ResponseEntity<UserResponse> updateUserAvatar(UpdateAvatarRequest updateAvatarRequest) {
         User user = getCurrentUser();
-        UserDto updatedUser = userService.updateUserAvatar(user.getEmail(), updateAvatarRequest.getAvatarId());
+        UserDto updatedUser = userService.updateUserAvatar(
+            user.getEmail(),
+            updateAvatarRequest.getAvatarId(),
+            updateAvatarRequest.getPseudo()
+        );
 
         UserResponse response = new UserResponse();
         response.setId(UUID.fromString(updatedUser.getId()));
         response.setEmail(updatedUser.getEmail());
         response.setIsAdmin(updatedUser.getIsAdmin());
         response.setAvatarId(updatedUser.getAvatarId());
+        response.setPseudo(updatedUser.getPseudo());
         response.setCreatedAt(updatedUser.getCreatedAt().atOffset(java.time.ZoneOffset.UTC));
 
         return ResponseEntity.ok(response);
@@ -70,6 +75,7 @@ public class UserGroupController implements UtilisateursApi {
         response.setEmail(user.getEmail());
         response.setIsAdmin(user.isAdmin());
         response.setAvatarId(user.getAvatarId());
+        response.setPseudo(user.getPseudo());
         response.setCreatedAt(user.getCreatedAt());
         return response;
     }

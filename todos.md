@@ -10,6 +10,7 @@
 - tout déplier/replier
 - page tableau de bord notamment pour voir les souhaits réservés de qui et mes souhaits réservés par qui
 - Un membre peu créer un membre enfant ou autre.
+- Réserver à plusieurs (ex: 2 personnes réservent un cadeau commun)
 
 ## Tech à faire
 - Revoir le mode admin car il est conditionné uniquement par un boolean et donc admin=true veut dire admin de n'importe quel groupe (il faut ajouter une colonne id admin à la table groupe plutôt)!

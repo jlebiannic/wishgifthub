@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {useTheme} from 'vuetify'
-import {RouterView} from 'vue-router'
+import {RouterView, useRouter} from 'vue-router'
 import {useAuthStore} from '@/stores/auth'
 import {ref} from 'vue'
 import NotificationManager from '@/components/NotificationManager.vue'
@@ -10,9 +10,12 @@ import {AVATARS} from '@/utils/avatars'
 
 const theme = useTheme()
 const authStore = useAuthStore()
+const router = useRouter()
 const showAvatarMenu = ref(false)
 const showAvatarDialog = ref(false)
 const selectedAvatarId = ref<string | null>(null)
+const editingPseudo = ref(false)
+const pseudoValue = ref('')
 
 function toggleTheme() {
   theme.global.name.value = theme.global.current.value.dark ? 'light' : 'dark'
@@ -26,14 +29,35 @@ function openAvatarDialog() {
 
 async function selectAvatar(avatarId: string) {
   selectedAvatarId.value = avatarId
-  await authStore.updateAvatar(avatarId)
+  await authStore.updateAvatar(avatarId, null)
   showAvatarDialog.value = false
 }
 
 async function clearAvatar() {
   selectedAvatarId.value = null
-  await authStore.updateAvatar(null)
+  await authStore.updateAvatar(null, null)
   showAvatarDialog.value = false
+}
+
+function startEditingPseudo() {
+  pseudoValue.value = authStore.user?.pseudo || ''
+  editingPseudo.value = true
+}
+
+async function savePseudo() {
+  await authStore.updateAvatar(null, pseudoValue.value || null)
+  editingPseudo.value = false
+}
+
+function cancelEditingPseudo() {
+  editingPseudo.value = false
+  pseudoValue.value = ''
+}
+
+async function handleLogout() {
+  showAvatarMenu.value = false
+  authStore.logout()
+  await router.push('/')
 }
 </script>
 
@@ -54,15 +78,63 @@ async function clearAvatar() {
               />
             </v-btn>
           </template>
-          <v-card min-width="300">
-            <v-card-text>
+          <v-card min-width="320" max-width="320">
+            <v-card-text class="pa-4">
               <div class="text-center mb-3">
                 <UserAvatar
                   :avatar-id="authStore.user?.avatarId"
                   :size="80"
                   class="mx-auto mb-3"
                 />
-                <div class="text-h6">{{ authStore.user?.username }}</div>
+
+                <!-- Affichage/édition du pseudo -->
+                <div v-if="!editingPseudo" class="mb-2">
+                  <div class="text-h6">
+                    {{ authStore.getMemberDisplayName(authStore.user) }}
+                    <v-btn
+                      icon
+                      size="x-small"
+                      variant="text"
+                      @click="startEditingPseudo"
+                    >
+                      <v-icon size="small">mdi-pencil</v-icon>
+                    </v-btn>
+                  </div>
+                </div>
+                <div v-else class="mb-2">
+                  <v-text-field
+                    v-model="pseudoValue"
+                    label="Pseudo"
+                    density="compact"
+                    variant="outlined"
+                    autofocus
+                    hide-details
+                    class="mb-2"
+                  />
+                  <div class="d-flex flex-column gap-2">
+                    <v-btn
+                      size="small"
+                      color="success"
+                      variant="tonal"
+                      prepend-icon="mdi-check"
+                      @click="savePseudo"
+                      block
+                    >
+                      Valider
+                    </v-btn>
+                    <v-btn
+                      size="small"
+                      color="error"
+                      variant="text"
+                      prepend-icon="mdi-close"
+                      @click="cancelEditingPseudo"
+                      block
+                    >
+                      Annuler
+                    </v-btn>
+                  </div>
+                </div>
+
                 <div class="text-caption text-medium-emphasis">{{ authStore.user?.email }}</div>
               </div>
               <v-divider class="my-3" />
@@ -74,6 +146,16 @@ async function clearAvatar() {
                 @click="openAvatarDialog"
               >
                 Changer l'avatar
+              </v-btn>
+              <v-btn
+                color="error"
+                variant="text"
+                block
+                prepend-icon="mdi-logout"
+                class="mt-2"
+                @click="handleLogout"
+              >
+                Se déconnecter
               </v-btn>
             </v-card-text>
           </v-card>

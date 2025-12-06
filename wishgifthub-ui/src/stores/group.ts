@@ -150,7 +150,7 @@ export const useGroupStore = defineStore('group', () => {
   /**
    * Invite un utilisateur à rejoindre un groupe par email
    */
-  async function inviteUser(groupId: string, email: string, avatarId?: string | null) {
+  async function inviteUser(groupId: string, email: string, avatarId?: string | null, pseudo?: string | null) {
     isLoading.value = true
     error.value = null
 
@@ -158,7 +158,8 @@ export const useGroupStore = defineStore('group', () => {
       const apiClient = getApiClient()
       const response = await apiClient.invite(groupId, {
         email,
-        avatarId: avatarId || undefined
+        avatarId: avatarId || undefined,
+        pseudo: pseudo || undefined
       })
 
       // Ajouter l'invitation à la liste
@@ -208,6 +209,20 @@ export const useGroupStore = defineStore('group', () => {
     isLoading.value = false
   }
 
+  /**
+   * Met à jour les informations d'un membre dans la liste des membres
+   * (utilisé lorsqu'un utilisateur met à jour son profil)
+   */
+  function updateMemberProfile(userId: string, updates: Partial<UserResponse>) {
+    const memberIndex = members.value.findIndex(m => m.id === userId)
+    if (memberIndex !== -1) {
+      members.value[memberIndex] = {
+        ...members.value[memberIndex],
+        ...updates
+      }
+    }
+  }
+
   return {
     groups,
     members,
@@ -221,6 +236,7 @@ export const useGroupStore = defineStore('group', () => {
     fetchGroupInvitations,
     createGroup,
     inviteUser,
+    updateMemberProfile,
     reset,
   }
 })

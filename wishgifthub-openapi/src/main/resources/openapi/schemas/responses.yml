@@ -19,6 +19,11 @@ AuthResponse:
       description: Identifiant de l'avatar de l'utilisateur (optionnel)
       example: "avatar-1"
       nullable: true
+    pseudo:
+      type: string
+      description: Pseudo/nom de l'utilisateur (optionnel)
+      example: "Jean"
+      nullable: true
     token:
       type: string
       description: Token JWT pour l'authentification
@@ -100,6 +105,11 @@ InvitationResponse:
       type: string
       description: Identifiant de l'avatar associé à l'invitation
       example: "avatar-1"
+      nullable: true
+    pseudo:
+      type: string
+      description: Pseudo/nom associé à l'invitation
+      example: "Jean"
       nullable: true
     createdAt:
       type: string
@@ -206,6 +216,11 @@ UserResponse:
       type: string
       description: Identifiant de l'avatar de l'utilisateur
       example: "avatar-1"
+      nullable: true
+    pseudo:
+      type: string
+      description: Pseudo/nom de l'utilisateur
+      example: "Jean"
       nullable: true
     createdAt:
       type: string

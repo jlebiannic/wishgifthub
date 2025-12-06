@@ -21,6 +21,7 @@ public class UserDto {
     private String email;
     private Boolean isAdmin;
     private String avatarId;
+    private String pseudo;
     private LocalDateTime createdAt;
 
     /**
@@ -35,6 +36,7 @@ public class UserDto {
                 .email(user.getEmail())
                 .isAdmin(user.isAdmin())
                 .avatarId(user.getAvatarId())
+                .pseudo(user.getPseudo())
                 .createdAt(user.getCreatedAt().toLocalDateTime())
                 .build();
     }

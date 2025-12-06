@@ -2,6 +2,7 @@
 import {computed, ref} from 'vue'
 import type {GroupMember, Invitation} from '@/stores/group'
 import {useGroupStore} from '@/stores/group'
+import {useAuthStore} from '@/stores/auth'
 import AvatarSelector from './AvatarSelector.vue'
 import UserAvatar from './UserAvatar.vue'
 
@@ -19,12 +20,14 @@ const emit = defineEmits<{
 }>()
 
 const groupStore = useGroupStore()
+const authStore = useAuthStore()
 
 // Formulaire d'invitation
 const inviteEmail = ref('')
 const inviteEmailError = ref('')
 const isSendingInvite = ref(false)
 const selectedAvatarId = ref<string | null>(null)
+const invitePseudo = ref('')
 
 // Membres acceptés (ceux qui ont un compte)
 const acceptedMembers = computed(() => props.members)
@@ -73,11 +76,12 @@ async function handleSendInvite() {
   isSendingInvite.value = true
 
   try {
-    const invitation = await groupStore.inviteUser(props.groupId, inviteEmail.value, selectedAvatarId.value)
+    const invitation = await groupStore.inviteUser(props.groupId, inviteEmail.value, selectedAvatarId.value, invitePseudo.value || null)
 
     if (invitation) {
       inviteEmail.value = ''
       selectedAvatarId.value = null
+      invitePseudo.value = ''
       emit('invitationSent')
     }
   } catch (err: any) {
@@ -127,6 +131,19 @@ function copyInvitationLink(link: string) {
               />
             </v-col>
             <v-col cols="12">
+              <v-text-field
+                v-model="invitePseudo"
+                label="Pseudo (optionnel)"
+                placeholder="Jean"
+                prepend-inner-icon="mdi-account"
+                :disabled="isSendingInvite"
+                variant="outlined"
+                density="comfortable"
+                hint="Le nom/pseudo à afficher pour ce membre"
+                persistent-hint
+              />
+            </v-col>
+            <v-col cols="12">
               <div class="text-caption text-medium-emphasis mb-2">Avatar du membre</div>
               <AvatarSelector v-model="selectedAvatarId" />
             </v-col>
@@ -167,11 +184,12 @@ function copyInvitationLink(link: string) {
             </template>
 
             <v-list-item-title>
-              {{ invitation.email }}
+              {{ invitation.pseudo || invitation.email }}
             </v-list-item-title>
 
             <v-list-item-subtitle>
-              Invitation envoyée le {{ new Date(invitation.createdAt).toLocaleDateString('fr-FR') }}
+              <div v-if="invitation.pseudo">{{ invitation.email }}</div>
+              <div>Invitation envoyée le {{ new Date(invitation.createdAt).toLocaleDateString('fr-FR') }}</div>
             </v-list-item-subtitle>
 
             <template v-slot:append>
@@ -229,11 +247,12 @@ function copyInvitationLink(link: string) {
             </template>
 
             <v-list-item-title>
-              {{ member.email }}
+              {{ authStore.getMemberDisplayName(member) }}
             </v-list-item-title>
 
             <v-list-item-subtitle>
-              Membre depuis {{ new Date(member.createdAt).toLocaleDateString('fr-FR') }}
+              <div v-if="member.pseudo">{{ member.email }}</div>
+              <div>Membre depuis {{ new Date(member.createdAt).toLocaleDateString('fr-FR') }}</div>
             </v-list-item-subtitle>
 
             <template v-slot:append>

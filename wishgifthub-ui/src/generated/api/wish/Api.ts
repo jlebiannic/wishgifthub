@@ -228,11 +228,11 @@ export class Api<
       ...params,
     });
   /**
-   * @description Permet à un utilisateur authentifié de modifier son avatar. L'avatar sélectionné doit être l'un des avatars prédéfinis disponibles.
+   * @description Permet à un utilisateur authentifié de modifier son avatar et/ou son pseudo. Les champs sont optionnels, seuls les champs fournis seront mis à jour.
    *
    * @tags Utilisateurs
    * @name UpdateUserAvatar
-   * @summary Mettre à jour l'avatar de l'utilisateur
+   * @summary Mettre à jour le profil de l'utilisateur
    * @request PUT:/api/users/me/avatar
    * @secure
    */
