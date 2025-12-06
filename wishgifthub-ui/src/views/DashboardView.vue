@@ -18,6 +18,7 @@ const myWishes = ref<WishResponse[]>([])
 const allMembers = computed(() => groupStore.members)
 const groupId = computed(() => route.params.groupId as string)
 const currentGroup = computed(() => groupStore.groups.find(g => g.id === groupId.value))
+const myWishesExpanded = ref(true) // État replié/déplié de "Mes souhaits"
 
 onMounted(async () => {
   try {
@@ -124,30 +125,45 @@ function goToMember(memberId: string) {
 
         <!-- Mes souhaits -->
         <v-card class="mb-6" elevation="2">
-          <v-card-title class="bg-primary pa-4">
-            <v-icon class="mr-2" color="white">mdi-gift</v-icon>
-            <span class="text-white">Mes souhaits ({{ myWishes.length }})</span>
+          <v-card-title
+            class="bg-primary pa-4 d-flex align-center justify-space-between"
+            style="cursor: pointer;"
+            @click="myWishesExpanded = !myWishesExpanded"
+          >
+            <div class="d-flex align-center">
+              <v-icon class="mr-2" color="white">mdi-gift</v-icon>
+              <span class="text-white">Mes souhaits ({{ myWishes.length }})</span>
+            </div>
+            <v-btn
+              icon
+              variant="text"
+              size="small"
+              @click.stop="myWishesExpanded = !myWishesExpanded"
+            >
+              <v-icon color="white">{{ myWishesExpanded ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
+            </v-btn>
           </v-card-title>
 
-          <v-card-text class="pa-0">
-            <!-- Onglets pour filtrer -->
-            <v-tabs v-model="tab" bg-color="grey-lighten-4">
-              <v-tab value="reserved">
-                <v-icon class="mr-2">mdi-check-circle</v-icon>
-                Réservés ({{ myReservedWishes.length }})
-              </v-tab>
-              <v-tab value="unreserved">
-                <v-icon class="mr-2">mdi-circle-outline</v-icon>
-                Non réservés ({{ myUnreservedWishes.length }})
-              </v-tab>
-              <v-tab value="all">
-                <v-icon class="mr-2">mdi-gift-outline</v-icon>
-                Tous ({{ myWishes.length }})
-              </v-tab>
-            </v-tabs>
+          <v-expand-transition>
+            <v-card-text v-show="myWishesExpanded" class="pa-0">
+              <!-- Onglets pour filtrer -->
+              <v-tabs v-model="tab" bg-color="grey-lighten-4">
+                <v-tab value="reserved">
+                  <v-icon class="mr-2">mdi-check-circle</v-icon>
+                  Réservés ({{ myReservedWishes.length }})
+                </v-tab>
+                <v-tab value="unreserved">
+                  <v-icon class="mr-2">mdi-circle-outline</v-icon>
+                  Non réservés ({{ myUnreservedWishes.length }})
+                </v-tab>
+                <v-tab value="all">
+                  <v-icon class="mr-2">mdi-gift-outline</v-icon>
+                  Tous ({{ myWishes.length }})
+                </v-tab>
+              </v-tabs>
 
-            <v-window v-model="tab">
-              <!-- Souhaits réservés -->
+              <v-window v-model="tab">
+                <!-- Souhaits réservés -->
               <v-window-item value="reserved">
                 <div v-if="myReservedWishes.length === 0" class="text-center py-8">
                   <v-icon size="64" color="grey-lighten-1">mdi-gift-outline</v-icon>
@@ -297,7 +313,8 @@ function goToMember(memberId: string) {
                 </v-list>
               </v-window-item>
             </v-window>
-          </v-card-text>
+            </v-card-text>
+          </v-expand-transition>
         </v-card>
 
         <!-- Vue synthétique des autres membres -->
