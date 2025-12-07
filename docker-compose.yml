@@ -3,7 +3,10 @@ version: "3.9"
 services:
   backend:
     container_name: wishgifthub-backend
-    image: jlebiannic/wishgifthub-backend:latest
+    #image: jlebiannic/wishgifthub-backend:latest
+    build:
+      context: .                 # racine du projet, où est le Dockerfile backend
+      dockerfile: Dockerfile
     env_file:
       - /home/debian/config/wishgifthub/.env
     networks:
@@ -14,7 +17,10 @@ services:
 
   frontend:
     container_name: wishgifthub-frontend
-    image: jlebiannic/wishgifthub-frontend:latest
+    #image: jlebiannic/wishgifthub-frontend:latest
+    build:
+      context: ./wishgifthub-ui  # dossier du frontend Vue.js
+      dockerfile: Dockerfile     # Dockerfile du front dans ce dossier
     depends_on:
       - backend
     networks:
