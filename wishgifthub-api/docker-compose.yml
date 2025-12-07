@@ -1,0 +1,35 @@
+version: '3.8'
+
+# Configuration Docker Compose pour le backend uniquement
+# Le frontend doit être déployé séparément (sur Vercel, Netlify, etc.)
+
+services:
+  # API Backend Spring Boot
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: wishgifthub-backend:${VERSION:-latest}
+    container_name: wishgifthub-backend
+    restart: unless-stopped
+    ports:
+      - "${BACKEND_PORT:-8080}:8080"
+    env_file:
+      - .env
+    networks:
+      - wishgifthub-backend-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8080/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+networks:
+  wishgifthub-backend-network:
+    driver: bridge
+
+
