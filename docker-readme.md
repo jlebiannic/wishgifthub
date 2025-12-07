@@ -1,5 +1,11 @@
 # Commandes Docker
 
+## Réseau
+
+Créer le réseau docker
+
+<code>docker network create wishgifthub-net</code>
+
 ## back-end
 
 ### Build image
@@ -34,7 +40,7 @@ Pull image docker
 
 Run
 
-<code>docker run -d --env-file .env -p 8080:8080 --name wishgifthub-backend jlebiannic/wishgifthub-backend:latest
+<code>docker run -d --env-file /home/debian/config/wishgifthub/.env --network wishgifthub-net -p 8080:8080 --name wishgifthub-backend jlebiannic/wishgifthub-backend:latest
 </code>
 
 ## Front
@@ -71,5 +77,5 @@ Pull image docker
 
 Run
 
-<code>docker run -d -p 80:80 --name wishgifthub-frontend jlebiannic/wishgifthub-frontend:latest
+<code>docker run -d --network wishgifthub-net -p 80:80 --name wishgifthub-frontend jlebiannic/wishgifthub-frontend:latest
 </code>

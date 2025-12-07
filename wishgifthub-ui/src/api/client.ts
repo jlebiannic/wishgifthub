@@ -9,11 +9,7 @@ let apiClient: Api | null = null
  * Initialise le client API avec le token d'authentification
  */
 export function initApiClient(token?: string) {
-  // En dev, utilise une chaîne vide pour que le proxy Vite intercepte les requêtes
-  // En prod, utilise l'URL complète depuis les variables d'environnement
-  const baseURL = import.meta.env.DEV
-    ? '/'
-    : (import.meta.env.VITE_API_URL || 'http://localhost:8080')
+  const baseURL =  '/'
 
   apiClient = new Api({
     baseURL,
