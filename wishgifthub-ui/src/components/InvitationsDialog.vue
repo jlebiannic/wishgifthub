@@ -103,7 +103,7 @@ function getInvitationLink(token: string): string {
 
 function copyInvitationLink(link: string) {
   navigator.clipboard.writeText(link)
-  notificationStore.success('Lien d\'invitation copié dans le presse-papier')
+  notificationStore.showSuccess('Lien d\'invitation copié dans le presse-papier')
 }
 </script>
 

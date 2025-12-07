@@ -216,10 +216,13 @@ export const useGroupStore = defineStore('group', () => {
   function updateMemberProfile(userId: string, updates: Partial<UserResponse>) {
     const memberIndex = members.value.findIndex(m => m.id === userId)
     if (memberIndex !== -1) {
+      const currentMember = members.value[memberIndex]
+      if (!currentMember) return
+
       members.value[memberIndex] = {
-        ...members.value[memberIndex],
+        ...currentMember,
         ...updates
-      }
+      } as UserResponse
     }
   }
 
