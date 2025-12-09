@@ -179,14 +179,24 @@ export const useAuthStore = defineStore('auth', () => {
         storedUser !== 'undefined' &&
         storedUser !== 'null'
       ) {
-        token.value = storedToken
-        user.value = JSON.parse(storedUser)
-        // Mettre à jour le client API avec le token restauré
-        updateApiToken(storedToken)
-
-        // Décoder le token pour extraire les groupIds et les récupérer
+        // Décoder le token pour vérifier son expiration
         try {
           const decodedToken = jwtDecode<JwtPayload>(storedToken)
+
+          // Vérifier si le token est expiré
+          const currentTime = Math.floor(Date.now() / 1000)
+          if (decodedToken.exp && decodedToken.exp < currentTime) {
+            // Token expiré - ne pas restaurer la session
+            console.log('Token expiré lors de la restauration de session')
+            logout()
+            return
+          }
+
+          token.value = storedToken
+          user.value = JSON.parse(storedUser)
+          // Mettre à jour le client API avec le token restauré
+          updateApiToken(storedToken)
+
           const groupIds = decodedToken.groupIds || []
 
           // Récupérer les groupes pour tous les utilisateurs (admin ou non)
@@ -200,7 +210,8 @@ export const useAuthStore = defineStore('auth', () => {
           }
         } catch (decodeError) {
           console.error('Erreur lors du décodage du token:', decodeError)
-          // Le token est peut-être expiré ou invalide, on continue sans récupérer les groupes
+          // Le token est peut-être invalide, nettoyer le localStorage
+          logout()
         }
       } else {
         // Nettoyer le localStorage si les données sont invalides

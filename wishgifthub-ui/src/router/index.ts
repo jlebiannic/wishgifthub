@@ -25,6 +25,12 @@ const router = createRouter({
       component: () => import('../views/AcceptInviteView.vue'),
     },
     {
+      path: '/token-expired',
+      name: 'token-expired',
+      component: () => import('../views/TokenExpiredView.vue'),
+      meta: { public: true } // Marquer cette route comme publique
+    },
+    {
       path: '/test-input',
       name: 'test-input',
       component: () => import('../views/TestInputView.vue'),
@@ -38,6 +44,20 @@ const router = createRouter({
       component: () => import('../views/AboutView.vue'),
     },
   ],
+})
+
+// Garde de navigation pour empêcher toute redirection depuis /token-expired
+router.beforeEach((to, from, next) => {
+  console.log('Navigation:', from.path, '->', to.path)
+
+  // Si on essaie d'aller vers /token-expired, toujours autoriser
+  if (to.path === '/token-expired') {
+    console.log('Accès autorisé à /token-expired')
+    next()
+    return
+  }
+
+  next()
 })
 
 export default router

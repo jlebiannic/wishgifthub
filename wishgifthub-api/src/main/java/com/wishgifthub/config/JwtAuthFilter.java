@@ -3,10 +3,12 @@ package com.wishgifthub.config;
 import com.wishgifthub.entity.User;
 import com.wishgifthub.repository.UserRepository;
 import com.wishgifthub.service.JwtService;
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -21,7 +23,9 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Component
+@Slf4j
 public class JwtAuthFilter extends OncePerRequestFilter {
+
     @Autowired
     private JwtService jwtService;
     @Autowired
@@ -63,7 +67,15 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                     authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authentication);
                 }
-            } catch (Exception ignored) {}
+            } catch (ExpiredJwtException e) {
+                // Token expiré - stocker l'erreur dans un attribut de requête
+                // L'AuthenticationEntryPoint se chargera de retourner la réponse 401
+                request.setAttribute("jwt_error", "Token expired: " + e.getMessage());
+            } catch (Exception e) {
+                // Autres exceptions JWT (signature invalide, token malformé, etc.)
+                request.setAttribute("jwt_error", "Invalid token: " + e.getMessage());
+                log.error("Erreur JWT pour la requête {}: {}", request.getRequestURI(), e.getMessage());
+            }
         }
         filterChain.doFilter(request, response);
     }
