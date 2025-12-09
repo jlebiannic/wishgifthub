@@ -4,6 +4,13 @@
 docker compose up -d
 </code> 
 
+ou 
+
+<code>
+docker compose up --build -d
+</code> 
+
+
 <code>
 docker compose down
 </code>

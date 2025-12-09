@@ -6,6 +6,7 @@ import {onMounted, onUnmounted, ref} from 'vue'
 import NotificationManager from '@/components/NotificationManager.vue'
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
 import UserAvatar from '@/components/UserAvatar.vue'
+import VersionInfo from '@/components/VersionInfo.vue'
 import {AVATARS} from '@/utils/avatars'
 
 const theme = useTheme()
@@ -273,6 +274,9 @@ async function handleLogout() {
         </v-card-actions>
       </v-card>
     </v-dialog>
+
+    <!-- Informations de version -->
+    <VersionInfo />
   </v-app>
 </template>
 
