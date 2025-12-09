@@ -1,4 +1,14 @@
-# Commandes Docker
+# Docker compose
+
+<code>
+docker compose up -d
+</code> 
+
+<code>
+docker compose down
+</code>
+
+# Commandes Docker (pas utile si utilisation de docker compose)
 
 ## Réseau
 
