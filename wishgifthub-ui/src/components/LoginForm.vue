@@ -7,6 +7,7 @@ const authStore = useAuthStore()
 const username = ref('')
 const password = ref('')
 const showPassword = ref(false)
+const showRolesDialog = ref(false)
 
 const emit = defineEmits<{
   loginSuccess: []
@@ -40,7 +41,6 @@ async function handleLogin() {
 
       <v-alert type="info" variant="tonal" class="mb-6">
         <div class="text-body-2">
-          <v-icon size="small" class="mr-1">mdi-information</v-icon>
           La connexion est réservée aux administrateurs
         </div>
       </v-alert>
@@ -90,10 +90,64 @@ async function handleLogin() {
         size="small"
         color="info"
         prepend-icon="mdi-information-outline"
+        @click="showRolesDialog = true"
       >
         En savoir plus sur les rôles
       </v-btn>
     </v-card-text>
+
+    <!-- Boîte de dialogue d'information sur les rôles -->
+    <v-dialog v-model="showRolesDialog" max-width="600">
+      <v-card>
+        <v-card-title class="text-h5 bg-primary text-white pa-4">
+          <v-icon class="mr-2">mdi-shield-account</v-icon>
+          Rôles et Permissions
+        </v-card-title>
+
+        <v-card-text class="pa-6">
+          <div class="mb-4">
+            <h3 class="text-h6 mb-2">
+              <v-icon color="error" class="mr-2">mdi-shield-crown</v-icon>
+              Administrateur
+            </h3>
+            <p class="text-body-2 ml-8">
+              Accès complet à l'application. Peut gérer tous les groupes, utilisateurs et souhaits.
+              Seuls les administrateurs peuvent se connecter à cette interface.
+            </p>
+          </div>
+
+          <v-divider class="my-4" />
+
+          <div class="mb-4">
+            <h3 class="text-h6 mb-2">
+              <v-icon color="primary" class="mr-2">mdi-account</v-icon>
+              Utilisateur
+            </h3>
+            <p class="text-body-2 ml-8">
+              Rôle par défaut. Peut gérer ses propres souhaits et participer aux groupes dont il est membre.
+              Il doit se connecter via le lien d'invitation reçu par email
+            </p>
+          </div>
+
+          <v-alert type="info" variant="tonal" class="mt-4">
+            <div class="text-body-2">
+              Pour obtenir un accès administrateur, veuillez contacter votre administrateur système.
+            </div>
+          </v-alert>
+        </v-card-text>
+
+        <v-card-actions class="px-6 pb-4">
+          <v-spacer />
+          <v-btn
+            color="primary"
+            variant="flat"
+            @click="showRolesDialog = false"
+          >
+            Fermer
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-card>
 </template>
 
