@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {computed, onMounted, ref} from 'vue'
-import {useRoute} from 'vue-router'
+import {useRoute, useRouter} from 'vue-router'
 import {useAuthStore} from '@/stores/auth'
 import {useGroupStore} from '@/stores/group'
 import LoginForm from '@/components/LoginForm.vue'
@@ -9,6 +9,7 @@ import GroupCard from '@/components/GroupCard.vue'
 import InvitationsDialog from '@/components/InvitationsDialog.vue'
 
 const route = useRoute()
+const router = useRouter()
 const authStore = useAuthStore()
 const groupStore = useGroupStore()
 
@@ -18,18 +19,18 @@ const showExpiredAlert = ref(false)
 
 const isTokenExpired = computed(() => route.query.expired === 'true')
 
-onMounted(() => {
-  // Afficher l'alerte si le token a expiré
-  if (isTokenExpired.value) {
-    showExpiredAlert.value = true
-  }
-
+onMounted(async () => {
   // Restaurer la session si elle existe
-  authStore.restoreSession()
+  await authStore.restoreSession()
 
-  // Charger les groupes si l'utilisateur est connecté
-  if (authStore.isAuthenticated) {
-    loadGroups()
+  // Si l'utilisateur est authentifié et qu'il n'y a pas de message d'expiration
+  // alors on reste sur cette page qui affiche ses groupes
+  if (authStore.isAuthenticated && !isTokenExpired.value) {
+    // Charger les groupes
+    await loadGroups()
+  } else if (isTokenExpired.value) {
+    // Afficher l'alerte si le token a expiré
+    showExpiredAlert.value = true
   }
 })
 
@@ -39,7 +40,8 @@ async function loadGroups() {
 
 async function handleLoginSuccess() {
   // Les groupes sont déjà chargés automatiquement par le store auth lors du login
-  // Pas besoin de les recharger ici
+  // Recharger les groupes pour afficher le dashboard
+  await loadGroups()
 }
 
 async function handleGroupCreated() {
@@ -73,11 +75,11 @@ function handleLogout() {
 </script>
 
 <template>
-  <v-container fluid class="py-8 px-6">
+  <v-container fluid class="py-8 px-6" style="min-height: 100vh;">
     <!-- Page d'accueil - Non connecté -->
-    <div v-if="!authStore.isAuthenticated" class="text-center">
+    <div v-if="!authStore.isAuthenticated">
       <v-row justify="center">
-        <v-col cols="12" md="8" lg="6">
+        <v-col cols="12" md="8" lg="6" class="text-center">
           <!-- Alerte de session expirée -->
           <v-alert
             v-if="showExpiredAlert"
@@ -106,6 +108,30 @@ function handleLogout() {
 
       <v-row justify="center">
         <v-col cols="12" md="8" lg="6" xl="4">
+          <!-- Information pour les utilisateurs non-admin -->
+          <v-card class="mb-6" variant="outlined">
+            <v-card-text class="pa-6">
+              <div class="d-flex align-start">
+                <v-icon color="info" size="large" class="mr-3 mt-1">
+                  mdi-information-outline
+                </v-icon>
+                <div>
+                  <div class="text-subtitle-1 font-weight-bold mb-2">
+                    Vous êtes un utilisateur invité ?
+                  </div>
+                  <div class="text-body-2 text-medium-emphasis">
+                    Si vous avez reçu une invitation par email, utilisez le lien fourni dans l'email
+                    pour accéder directement à votre groupe.
+                  </div>
+                  <div class="text-body-2 text-medium-emphasis mt-2">
+                    <v-icon size="small" class="mr-1">mdi-lock</v-icon>
+                    Ce formulaire de connexion est réservé aux administrateurs.
+                  </div>
+                </div>
+              </div>
+            </v-card-text>
+          </v-card>
+
           <LoginForm @login-success="handleLoginSuccess" />
         </v-col>
       </v-row>
