@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Background circle - primary color -->
+  <circle cx="32" cy="32" r="32" fill="#6366F1"/>
+
+  <!-- Gift box -->
+  <rect x="18" y="30" width="28" height="20" fill="#FFFFFF" rx="2"/>
+
+  <!-- Gift box top - secondary color -->
+  <rect x="16" y="26" width="32" height="6" fill="#EC4899" rx="1"/>
+
+  <!-- Ribbon vertical - secondary color -->
+  <rect x="30" y="26" width="4" height="24" fill="#EC4899"/>
+
+  <!-- Ribbon horizontal - accent color -->
+  <rect x="16" y="28" width="32" height="3" fill="#8B5CF6"/>
+
+  <!-- Bow - secondary color -->
+  <ellipse cx="26" cy="22" rx="6" ry="4" fill="#EC4899"/>
+  <ellipse cx="38" cy="22" rx="6" ry="4" fill="#EC4899"/>
+  <circle cx="32" cy="22" r="3" fill="#8B5CF6"/>
+
+  <!-- Star accent -->
+  <path d="M 50 14 L 52 18 L 56 18 L 53 21 L 54 25 L 50 23 L 46 25 L 47 21 L 44 18 L 48 18 Z" fill="#FFFFFF" opacity="0.8"/>
+</svg>
+
