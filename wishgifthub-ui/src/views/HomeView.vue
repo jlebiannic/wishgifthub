@@ -147,7 +147,7 @@ function handleLogout() {
               <div>
                 <div class="text-h5 mb-1">
                   <v-icon class="mr-2">mdi-account-circle</v-icon>
-                  Bonjour, {{ authStore.user?.username }}
+                  Bonjour, {{ authStore.getMemberDisplayName(authStore.user) }}
                 </div>
                 <v-chip
                   v-if="authStore.isAdmin"
