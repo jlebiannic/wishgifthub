@@ -32,7 +32,15 @@ const selectedAvatarId = ref<string | null>(null)
 const invitePseudo = ref('')
 
 // Membres acceptés (ceux qui ont un compte)
-const acceptedMembers = computed(() => props.members)
+const acceptedMembers = computed(() => props.members.map(member => {
+  const invitation = props.invitations.find(inv =>
+    inv.accepted && inv.groupId === props.groupId && inv.email === member.email && inv.token
+  )
+  return {
+    ...member,
+    invitationLink: invitation ? getInvitationLink(invitation.token) : null
+  }
+}))
 
 // Invitations en attente (non acceptées)
 const pendingInvitations = computed(() =>
@@ -101,9 +109,13 @@ function getInvitationLink(token: string): string {
   return `${origin}/invite/${token}`
 }
 
-function copyInvitationLink(link: string) {
-  navigator.clipboard.writeText(link)
-  notificationStore.showSuccess('Lien d\'invitation copié dans le presse-papier')
+async function copyInvitationLink(link: string) {
+  try {
+    await navigator.clipboard.writeText(link)
+    notificationStore.showSuccess('Lien d\'invitation copié dans le presse-papier')
+  } catch {
+    notificationStore.showError('Impossible de copier le lien d\'invitation')
+  }
 }
 </script>
 
@@ -271,6 +283,25 @@ function copyInvitationLink(link: string) {
             </v-list-item-subtitle>
 
             <template v-slot:append>
+              <v-tooltip
+                v-if="isAdmin && member.invitationLink"
+                text="Copier le lien d'invitation"
+                location="left"
+              >
+                <template v-slot:activator="{ props: tooltipProps }">
+                  <v-btn
+                    icon
+                    variant="text"
+                    size="small"
+                    class="mr-2"
+                    aria-label="Copier le lien d'invitation"
+                    v-bind="tooltipProps"
+                    @click="copyInvitationLink(member.invitationLink)"
+                  >
+                    <v-icon>mdi-content-copy</v-icon>
+                  </v-btn>
+                </template>
+              </v-tooltip>
               <v-chip
                 v-if="member.isAdmin"
                 color="primary"
@@ -313,4 +344,3 @@ function copyInvitationLink(link: string) {
   padding: 12px 16px !important;
 }
 </style>
-

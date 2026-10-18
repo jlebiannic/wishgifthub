@@ -122,8 +122,8 @@ public class InvitationService {
         resp.setGroupId(invitation.getGroup().getId());
         resp.setToken(invitation.getToken());
         resp.setAccepted(true);
-        resp.setAvatarId(invitation.getAvatarId());
-        resp.setPseudo(invitation.getPseudo());
+        resp.setAvatarId(user.getAvatarId());
+        resp.setPseudo(user.getPseudo());
         resp.setCreatedAt(invitation.getCreatedAt());
         resp.setJwtToken(jwt);
         return resp;
@@ -159,4 +159,3 @@ public class InvitationService {
                 .collect(java.util.stream.Collectors.toList());
     }
 }
-
