@@ -18,7 +18,7 @@ public class JwtService {
     @Value("${wishgifthub.jwt.secret}")
     private String jwtSecret;
 
-    @Value("${wishgifthub.jwt.expiration}")
+    @Value("${wishgifthub.jwt.expiration-ms}")
     private long jwtExpirationMs;
 
     public String generateToken(User user) {
@@ -62,16 +62,6 @@ public class JwtService {
         return UUID.fromString(subject);
     }
 
-    public boolean isAdminFromToken(String token) {
-        SecretKey key = Keys.hmacShaKeyFor(jwtSecret.getBytes());
-        return Boolean.TRUE.equals(Jwts.parserBuilder()
-                .setSigningKey(key)
-                .build()
-                .parseClaimsJws(token)
-                .getBody()
-                .get("isAdmin", Boolean.class));
-    }
-
     public List<UUID> getGroupIdsFromToken(String token) {
         SecretKey key = Keys.hmacShaKeyFor(jwtSecret.getBytes());
         List<String> groupIdsAsString = Jwts.parserBuilder()
@@ -88,4 +78,3 @@ public class JwtService {
                 .collect(Collectors.toList());
     }
 }
-
