@@ -15,6 +15,7 @@ import com.wishgifthub.repository.WishRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.net.URI;
 import java.util.List;
@@ -23,6 +24,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
+@Transactional
 public class WishService {
     @Autowired
     private WishRepository wishRepository;
@@ -63,6 +65,7 @@ public class WishService {
         wish.setUser(user);
         wish.setGroup(group);
         wish.setGiftName(request.getGiftName());
+        configureReservation(wish, request);
         if (request.getDescription() != null) {
             wish.setDescription(request.getDescription());
         }
@@ -77,7 +80,7 @@ public class WishService {
         }
         wish = wishRepository.save(wish);
 
-        return toResponse(wish);
+        return toResponse(wish, userId);
     }
 
     public List<WishResponse> getWishesByGroup(UUID groupId, UUID userId) {
@@ -85,12 +88,12 @@ public class WishService {
                 .orElseThrow(() -> new ResourceNotFoundException("Groupe", groupId));
 
         return wishRepository.findByGroupId(groupId).stream()
-                .map(this::toResponse)
+                .map(wish -> toResponse(wish, userId))
                 .collect(Collectors.toList());
     }
 
     public WishResponse reserveWish(UUID groupId, UUID wishId, UUID userId) {
-        Wish wish = wishRepository.findById(wishId)
+        Wish wish = wishRepository.findByIdForUpdate(wishId)
                 .orElseThrow(() -> new ResourceNotFoundException("Souhait", wishId));
 
         if (!wish.getGroup().getId().equals(groupId)) {
@@ -101,38 +104,53 @@ public class WishService {
             throw new BusinessRuleException("Vous ne pouvez pas réserver votre propre souhait");
         }
 
-        if (wish.getReservedBy() != null) {
+        if (wish.isCollective() && wish.getParticipants().contains(userId)) {
+            throw new BusinessRuleException("Vous participez déjà à ce cadeau commun");
+        }
+        if (wish.isCollective() && wish.getParticipants().size() >= wish.getMaxParticipants()) {
+            throw new BusinessRuleException("Ce cadeau commun est complet");
+        }
+        if (!wish.isCollective() && wish.getReservedBy() != null) {
             throw new BusinessRuleException("Ce souhait est déjà réservé");
         }
 
         User reserver = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Utilisateur", userId));
-        wish.setReservedBy(reserver);
+        if (wish.isCollective()) {
+            wish.getParticipants().add(reserver.getId());
+        } else {
+            wish.setReservedBy(reserver);
+        }
         wish = wishRepository.save(wish);
 
-        return toResponse(wish);
+        return toResponse(wish, userId);
     }
 
     public WishResponse unreserveWish(UUID groupId, UUID wishId, UUID userId) {
-        Wish wish = wishRepository.findById(wishId)
+        Wish wish = wishRepository.findByIdForUpdate(wishId)
                 .orElseThrow(() -> new ResourceNotFoundException("Souhait", wishId));
 
         if (!wish.getGroup().getId().equals(groupId)) {
             throw new BusinessRuleException("Le souhait n'appartient pas à ce groupe");
         }
 
-        if (wish.getReservedBy() == null || !wish.getReservedBy().getId().equals(userId)) {
+        if (wish.isCollective() ? !wish.getParticipants().contains(userId)
+                : wish.getReservedBy() == null || !wish.getReservedBy().getId().equals(userId)) {
             throw new BusinessRuleException("Vous n'avez pas réservé ce souhait");
         }
 
-        wish.setReservedBy(null);
+        if (wish.isCollective()) {
+            wish.getParticipants().remove(userId);
+        } else {
+            wish.setReservedBy(null);
+        }
         wish = wishRepository.save(wish);
 
-        return toResponse(wish);
+        return toResponse(wish, userId);
     }
 
     public void deleteWish(UUID groupId, UUID wishId, UUID userId) {
-        Wish wish = wishRepository.findById(wishId)
+        Wish wish = wishRepository.findByIdForUpdate(wishId)
                 .orElseThrow(() -> new ResourceNotFoundException("Souhait", wishId));
 
         if (!wish.getGroup().getId().equals(groupId)) {
@@ -150,7 +168,7 @@ public class WishService {
      * Modifie un souhait existant
      */
     public WishResponse updateWish(UUID groupId, UUID wishId, WishRequest request, UUID userId) {
-        Wish wish = wishRepository.findById(wishId)
+        Wish wish = wishRepository.findByIdForUpdate(wishId)
                 .orElseThrow(() -> new ResourceNotFoundException("Souhait", wishId));
 
         if (!wish.getGroup().getId().equals(groupId)) {
@@ -161,7 +179,7 @@ public class WishService {
             throw new AccessDeniedException("Vous ne pouvez modifier que vos propres souhaits");
         }
 
-        if (wish.getReservedBy() != null) {
+        if (!wish.isCollective() && wish.getReservedBy() != null) {
             throw new BusinessRuleException("Impossible de modifier un souhait déjà réservé");
         }
 
@@ -185,10 +203,11 @@ public class WishService {
         wish.setUrl(request.getUrl() != null ? request.getUrl().toString() : null);
         wish.setImageUrl(request.getImageUrl() != null ? request.getImageUrl().toString() : null);
         wish.setPrice(request.getPrice());
+        configureReservation(wish, request);
 
         wish = wishRepository.save(wish);
 
-        return toResponse(wish);
+        return toResponse(wish, userId);
     }
 
     public List<WishResponse> getWishesByUserInGroup(UUID groupId, UUID targetUserId, UUID requestingUserId) {
@@ -197,11 +216,31 @@ public class WishService {
         }
 
         return wishRepository.findByGroupIdAndUserId(groupId, targetUserId).stream()
-                .map(this::toResponse)
+                .map(wish -> toResponse(wish, requestingUserId))
                 .collect(Collectors.toList());
     }
 
-    private WishResponse toResponse(Wish wish) {
+    private void configureReservation(Wish wish, WishRequest request) {
+        boolean collective = Boolean.TRUE.equals(request.getCollective());
+        int capacity = collective ? (request.getMaxParticipants() == null ? 2 : request.getMaxParticipants()) : 1;
+        if (collective && capacity < 2) {
+            throw new BusinessRuleException("Un cadeau commun nécessite au moins 2 participants");
+        }
+        int active = participantCount(wish);
+        if (capacity < active) {
+            throw new BusinessRuleException("Cette modification du mode de réservation n'est pas possible");
+        }
+        if (wish.isCollective() && !collective && active == 1) {
+            UUID participant = wish.getParticipants().iterator().next();
+            wish.setReservedBy(userRepository.findById(participant)
+                    .orElseThrow(() -> new ResourceNotFoundException("Utilisateur", participant)));
+            wish.getParticipants().clear();
+        }
+        wish.setCollective(collective);
+        wish.setMaxParticipants(capacity);
+    }
+
+    private WishResponse toResponse(Wish wish, UUID viewerId) {
         WishResponse resp = new WishResponse();
         resp.setId(wish.getId());
         resp.setUserId(wish.getUser().getId());
@@ -227,11 +266,24 @@ public class WishService {
         if (wish.getPrice() != null) {
             resp.setPrice(wish.getPrice());
         }
-        if (wish.getReservedBy() != null) {
+        resp.setCollective(wish.isCollective());
+        resp.setMaxParticipants(wish.getMaxParticipants());
+        // Do not expose collective reservation activity to its recipient, on any endpoint.
+        if (!wish.isCollective() || !wish.getUser().getId().equals(viewerId)) {
+            int count = participantCount(wish);
+            resp.setParticipantCount(count);
+            resp.setFull(count >= wish.getMaxParticipants());
+            resp.setParticipating(wish.isCollective() ? wish.getParticipants().contains(viewerId)
+                    : wish.getReservedBy() != null && wish.getReservedBy().getId().equals(viewerId));
+        }
+        if (!wish.isCollective() && wish.getReservedBy() != null) {
             resp.setReservedBy(wish.getReservedBy().getId());
         }
         resp.setCreatedAt(wish.getCreatedAt());
         return resp;
     }
-}
 
+    private int participantCount(Wish wish) {
+        return wish.isCollective() ? wish.getParticipants().size() : wish.getReservedBy() == null ? 0 : 1;
+    }
+}

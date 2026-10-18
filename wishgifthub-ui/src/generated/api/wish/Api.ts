@@ -247,7 +247,7 @@ export class Api<
       ...params,
     });
   /**
-   * @description Retourne la liste de tous les souhaits du groupe. Affiche qui a réservé chaque cadeau (visible par tous les membres). L'utilisateur doit être membre du groupe.
+   * @description Retourne la liste de tous les souhaits du groupe. Affiche qui a réservé chaque cadeau (visible par tous les membres). Pour un cadeau commun, les identités ne sont jamais exposées et l'activité (participantCount, participating, full) est omise pour son destinataire. L'utilisateur doit être membre du groupe.
    *
    * @tags Souhaits
    * @name GetGroupWishes
@@ -337,7 +337,7 @@ export class Api<
       ...params,
     });
   /**
-   * @description Modifie un souhait existant. Seul le créateur du souhait peut le modifier. Le souhait ne doit pas être réservé pour être modifié.
+   * @description Modifie un souhait existant. Seul le créateur du souhait peut le modifier. Un souhait individuel ne doit pas être réservé pour être modifié. Un cadeau commun peut être modifié si sa capacité reste au moins égale au nombre de participants. Le passage en individuel est interdit au-delà d'un participant; l'unique participation éventuelle devient la réservation individuelle.
    *
    * @tags Souhaits
    * @name UpdateWish
@@ -361,7 +361,7 @@ export class Api<
       ...params,
     });
   /**
-   * @description Annule la réservation d'un cadeau. Seul l'utilisateur qui a réservé le cadeau peut annuler sa réservation.
+   * @description Annule la réservation d'un cadeau. Seul l'utilisateur qui a réservé le cadeau peut annuler sa réservation. Pour un cadeau commun, retire uniquement sa propre participation et libère une place.
    *
    * @tags Souhaits
    * @name UnreserveWish
@@ -382,7 +382,7 @@ export class Api<
       ...params,
     });
   /**
-   * @description Réserve un cadeau pour un autre membre du groupe. **Règles** : - Un utilisateur ne peut pas réserver ses propres souhaits - Un souhait déjà réservé ne peut pas être réservé à nouveau - L'utilisateur doit être membre du groupe
+   * @description Réserve un cadeau pour un autre membre du groupe. **Règles** : - Un utilisateur ne peut pas réserver ses propres souhaits - Un souhait déjà réservé ne peut pas être réservé à nouveau - Pour un cadeau commun, ajoute sa propre participation si une place est disponible - Une seule participation par utilisateur; le destinataire ne peut pas participer - Les réservations et modifications sont sérialisées par verrou de ligne en base - L'utilisateur doit être membre du groupe
    *
    * @tags Souhaits
    * @name ReserveWish

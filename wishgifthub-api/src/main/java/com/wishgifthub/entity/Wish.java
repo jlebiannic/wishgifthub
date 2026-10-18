@@ -1,6 +1,8 @@
 package com.wishgifthub.entity;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -14,6 +16,8 @@ import lombok.NoArgsConstructor;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "wishes")
@@ -51,6 +55,17 @@ public class Wish {
     @ManyToOne
     @JoinColumn(name = "reserved_by")
     private User reservedBy;
+
+    @Column(nullable = false)
+    private boolean collective;
+
+    @Column(name = "max_participants", nullable = false)
+    private int maxParticipants = 1;
+
+    @ElementCollection
+    @CollectionTable(name = "wish_participants", joinColumns = @JoinColumn(name = "wish_id"))
+    @Column(name = "user_id", nullable = false)
+    private Set<UUID> participants = new HashSet<>();
 
     @Column(name = "created_at", nullable = false)
     private OffsetDateTime createdAt = OffsetDateTime.now();

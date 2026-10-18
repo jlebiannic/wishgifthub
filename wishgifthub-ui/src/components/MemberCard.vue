@@ -90,6 +90,9 @@ function canReserve(wish: WishResponse): boolean {
     return false
   }
 
+  if (wish.collective) {
+    return !wish.participating && wish.full === false
+  }
   // Je ne peux pas réserver un souhait déjà réservé (par moi ou quelqu'un d'autre)
   if (wish.reservedBy) {
     return false
@@ -100,6 +103,8 @@ function canReserve(wish: WishResponse): boolean {
 
 // Vérifier si je peux annuler la réservation
 function canUnreserve(wish: WishResponse): boolean {
+  if (wish.userId === authStore.user?.id) return false
+  if (wish.collective) return wish.participating === true
   return wish.reservedBy === authStore.user?.id
 }
 
@@ -108,7 +113,7 @@ async function handleReserve(wish: WishResponse) {
 
   try {
     await wishStore.reserveWish(props.groupId, wish.id)
-    notificationStore.showSuccess('Souhait réservé avec succès !')
+    notificationStore.showSuccess(wish.collective ? 'Participation enregistrée !' : 'Souhait réservé avec succès !')
     emit('wishUpdated')
   } catch (error: any) {
     console.error('Erreur lors de la réservation:', error)
@@ -116,10 +121,12 @@ async function handleReserve(wish: WishResponse) {
     const errorMessage = error.response?.data?.message || error.message || ''
 
     if (errorMessage.includes('déjà réservé') || errorMessage.includes('already reserved') || error.response?.status === 409) {
-      notificationStore.showWarning('Ce souhait a déjà été réservé par quelqu\'un d\'autre')
+      notificationStore.showWarning(wish.collective ? errorMessage || 'Ce cadeau commun a été modifié'
+        : 'Ce souhait a déjà été réservé par quelqu\'un d\'autre')
       emit('wishUpdated')
     } else {
-      notificationStore.showError('Erreur lors de la réservation du souhait')
+      notificationStore.showError(errorMessage || 'Erreur lors de la réservation du souhait')
+      emit('wishUpdated')
     }
   } finally {
     isReserving.value = null
@@ -290,6 +297,14 @@ function toggleExpand() {
                   <div class="text-subtitle-1 font-weight-bold mb-2">
                     {{ wish.giftName }}
                   </div>
+                  <v-chip v-if="wish.collective" color="primary" size="small" class="mb-2">
+                    Cadeau commun
+                  </v-chip>
+                  <div v-if="wish.collective && !isCurrentUser" class="text-body-2 mb-2" aria-live="polite">
+                    {{ wish.participantCount }} / {{ wish.maxParticipants }} participants
+                    <span v-if="wish.full"> — Complet</span>
+                    <div v-if="wish.participating" class="text-success">Vous participez à ce cadeau</div>
+                  </div>
 
                   <!-- Prix (si disponible) -->
                   <div v-if="wish.price" class="text-h6 text-primary mb-2">
@@ -320,9 +335,9 @@ function toggleExpand() {
                 </v-card-text>
 
                 <!-- Statut de réservation et actions -->
-                <v-card-actions class="pt-0">
+                <v-card-actions class="pt-0 flex-wrap ga-2">
                   <v-chip
-                    v-if="wish.reservedBy"
+                    v-if="!wish.collective && wish.reservedBy"
                     :color="wish.reservedBy === authStore.user?.id ? 'success' : 'warning'"
                     size="small"
                     variant="flat"
@@ -340,7 +355,7 @@ function toggleExpand() {
 
                   <!-- Bouton Modifier (uniquement pour mes propres souhaits non réservés) -->
                   <v-btn
-                    v-if="isCurrentUser && !wish.reservedBy"
+                    v-if="isCurrentUser && (wish.collective || !wish.reservedBy)"
                     color="primary"
                     size="small"
                     variant="text"
@@ -380,7 +395,7 @@ function toggleExpand() {
                     @click="handleReserve(wish)"
                     :loading="isReserving === wish.id"
                   >
-                    Réserver
+                    {{ wish.collective ? 'Participer' : 'Réserver' }}
                   </v-btn>
 
                   <!-- Bouton Annuler réservation -->
@@ -393,7 +408,7 @@ function toggleExpand() {
                     @click="handleUnreserve(wish)"
                     :loading="isReserving === wish.id"
                   >
-                    Annuler la réservation
+                    {{ wish.collective ? 'Annuler ma participation' : 'Annuler la réservation' }}
                   </v-btn>
                 </v-card-actions>
               </v-card>
@@ -418,4 +433,3 @@ function toggleExpand() {
   cursor: pointer;
 }
 </style>
-

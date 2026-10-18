@@ -77,6 +77,16 @@ WishRequest:
   required:
     - giftName
   properties:
+    collective:
+      type: boolean
+      default: false
+      description: Autoriser plusieurs participants pour ce cadeau.
+    maxParticipants:
+      type: integer
+      format: int32
+      minimum: 2
+      default: 2
+      description: Capacité du cadeau commun (ignorée pour un cadeau individuel).
     giftName:
       type: string
       minLength: 1
@@ -109,4 +119,3 @@ WishRequest:
       description: Prix estimé du produit (optionnel)
       example: "29.99 €"
       nullable: true
-

@@ -137,6 +137,23 @@ WishResponse:
     - giftName
     - createdAt
   properties:
+    collective:
+      type: boolean
+      description: Ce souhait autorise un cadeau commun.
+    maxParticipants:
+      type: integer
+      format: int32
+      description: Capacité du cadeau (1 pour un cadeau individuel).
+    participantCount:
+      type: integer
+      format: int32
+      description: Nombre de participants. Omis pour le destinataire d'un cadeau commun.
+    participating:
+      type: boolean
+      description: Participation de l'utilisateur connecté. Omise pour le destinataire.
+    full:
+      type: boolean
+      description: Capacité atteinte. Omis pour le destinataire d'un cadeau commun.
     id:
       type: string
       format: uuid
@@ -257,4 +274,3 @@ MetadataResponse:
       description: Message d'erreur si l'extraction a partiellement échoué
       example: null
       nullable: true
-

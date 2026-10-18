@@ -3,6 +3,7 @@ import {ref, watch} from 'vue'
 import {useWishStore} from '@/stores/wish'
 import {useNotificationStore} from '@/stores/notification'
 import {getApiClient} from '@/api/client'
+import CollectiveGiftFields from './CollectiveGiftFields.vue'
 
 const props = defineProps<{
   groupId: string
@@ -26,6 +27,8 @@ const imageUrl = ref('')
 const title = ref('')
 const description = ref('')
 const price = ref('')
+const collective = ref(false)
+const maxParticipants = ref(2)
 
 const isLoadingMetadata = ref(false)
 const isSaving = ref(false)
@@ -176,7 +179,7 @@ async function fetchMetadataFromUrl() {
 }
 
 // Watch l'URL pour déclencher la récupération des métadonnées avec debounce
-let debounceTimer: number | null = null
+let debounceTimer: ReturnType<typeof setTimeout> | null = null
 watch(url, () => {
   // Annuler le timer précédent
   if (debounceTimer) {
@@ -215,6 +218,8 @@ async function handleSubmit() {
 
     await wishStore.addWish(props.groupId, {
       giftName: title.value,
+      collective: collective.value,
+      maxParticipants: collective.value ? Number(maxParticipants.value) : 2,
       description: description.value || null,
       url: cleanedUrl,
       imageUrl: cleanedImageUrl,
@@ -242,6 +247,8 @@ function resetForm() {
   title.value = ''
   description.value = ''
   price.value = ''
+  collective.value = false
+  maxParticipants.value = 2
   imageLoadError.value = false
   if (form.value) {
     form.value.resetValidation()
@@ -289,6 +296,7 @@ function handleImageUrlBlur() {
 
       <v-card-text class="pa-4">
         <v-form ref="form" @submit.prevent="handleSubmit">
+          <CollectiveGiftFields v-model:collective="collective" v-model:max-participants="maxParticipants" />
           <!-- Champ URL -->
           <v-text-field
             v-model="url"
@@ -422,4 +430,3 @@ function handleImageUrlBlur() {
     </v-card>
   </v-dialog>
 </template>
-

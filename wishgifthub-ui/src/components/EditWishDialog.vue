@@ -3,6 +3,7 @@ import {ref, watch} from 'vue'
 import {useWishStore} from '@/stores/wish'
 import {useNotificationStore} from '@/stores/notification'
 import {getApiClient} from '@/api/client'
+import CollectiveGiftFields from './CollectiveGiftFields.vue'
 import type {WishResponse} from '@/generated/api/wish/data-contracts'
 
 const props = defineProps<{
@@ -28,19 +29,23 @@ const imageUrl = ref('')
 const title = ref('')
 const description = ref('')
 const price = ref('')
+const collective = ref(false)
+const maxParticipants = ref(2)
 
 const isLoadingMetadata = ref(false)
 const isSaving = ref(false)
 const imageLoadError = ref(false)
 
 // Charger les données du souhait quand il change
-watch(() => props.wish, (newWish) => {
-  if (newWish) {
+watch(() => [props.wish, props.modelValue] as const, ([newWish, open]) => {
+  if (newWish && open) {
     title.value = newWish.giftName || ''
     description.value = newWish.description || ''
     url.value = newWish.url?.toString() || ''
     imageUrl.value = newWish.imageUrl?.toString() || ''
     price.value = newWish.price || ''
+    collective.value = newWish.collective ?? false
+    maxParticipants.value = newWish.collective ? newWish.maxParticipants ?? 2 : 2
   }
 }, { immediate: true })
 
@@ -163,7 +168,7 @@ async function fetchMetadataFromUrl() {
 }
 
 // Watch l'URL avec debounce
-let debounceTimer: number | null = null
+let debounceTimer: ReturnType<typeof setTimeout> | null = null
 watch(url, () => {
   if (debounceTimer) {
     clearTimeout(debounceTimer)
@@ -199,6 +204,8 @@ async function handleSubmit() {
 
     await wishStore.updateWish(props.groupId, props.wish.id!, {
       giftName: title.value,
+      collective: collective.value,
+      maxParticipants: collective.value ? Number(maxParticipants.value) : 2,
       description: description.value || null,
       url: cleanedUrl,
       imageUrl: cleanedImageUrl,
@@ -253,6 +260,7 @@ function handleImageUrlBlur() {
 
       <v-card-text class="pa-4">
         <v-form ref="form" @submit.prevent="handleSubmit">
+          <CollectiveGiftFields v-model:collective="collective" v-model:max-participants="maxParticipants" />
           <!-- Champ URL -->
           <v-text-field
             v-model="url"
@@ -375,4 +383,3 @@ function handleImageUrlBlur() {
     </v-card>
   </v-dialog>
 </template>
-

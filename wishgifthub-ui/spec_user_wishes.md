@@ -19,3 +19,39 @@
   - Champ Titre
   - Champ Description
   - Champ Prix
+
+### Cadeaux communs
+* Ajout et modification : interrupteur « Autoriser un cadeau commun », désactivé par défaut.
+  Explication : « Permettre à plusieurs personnes de se regrouper pour offrir ce cadeau. »
+* Lorsqu'il est activé, un champ numérique affiche le maximum de participants (2 par défaut,
+  entier minimum 2), avec boutons moins/plus accessibles au clavier et libellés explicites.
+* Une carte collective porte le badge « Cadeau commun ». Les autres membres voient le
+  compteur actuel / maximum, « Participer » tant qu'il reste une place, leur propre état
+  et « Annuler ma participation », y compris quand le cadeau est complet.
+* Le destinataire voit sa configuration, jamais les identités, le compteur ou l'état
+  de participation collective. Cette protection est appliquée par l'API sur toutes ses réponses.
+  Les réservations individuelles gardent leur visibilité et leur comportement existants.
+* Seul le créateur modifie un souhait. La capacité ne peut pas descendre sous le nombre
+  de participants actifs. Le retour en individuel est interdit avec plus d'un participant;
+  avec un seul, sa réservation est conservée. Un individuel déjà réservé reste non modifiable.
+
+### Contrat et stockage
+* `WishRequest` : `collective` (défaut false), `maxParticipants` (défaut 2, ignoré en individuel).
+  `WishResponse` ajoute `collective`, `maxParticipants`, `participantCount`, `participating`, `full`.
+  Les trois derniers champs sont absents pour le destinataire d'un cadeau commun.
+* Les endpoints existants `POST .../reserve` et `DELETE .../reserve` gèrent aussi les
+  participations, avec les mêmes droits de groupe, erreurs métier HTTP 409 et validation HTTP 400.
+* La migration Flyway V6 ajoute le mode et la capacité (anciens souhaits : individuel, capacité 1)
+  et `wish_participants` (clé unique souhait/utilisateur, suppressions en cascade).
+  Les anciennes réservations `reserved_by` sont conservées sans transformation.
+* Réserver, annuler, modifier et supprimer utilisent une transaction et un verrou
+  pessimiste sur la ligne du souhait pour éviter les dépassements concurrents de capacité.
+
+### Vérification
+* Backend : `mvn -q -pl wishgifthub-api -am test`.
+* UI (depuis `wishgifthub-ui`) : `npm run test:unit -- --run`, `npm run type-check`,
+  `npm run build-only`. Régénération du client : `npm run generate-api` après compilation Maven.
+* Les tests de service utilisent H2 PostgreSQL-mode, de vraies transactions/verrous et
+  deux réservations simultanées pour la dernière place. Le test de migration exécute V1–V6
+  (seul l'ordre DEFAULT/PRIMARY KEY de V1 est adapté à H2). Cela ne remplace pas
+  une validation de déploiement sur PostgreSQL.

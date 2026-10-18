@@ -56,3 +56,12 @@ BadRequestError:
         message: "Données de requête invalides"
         timestamp: "2025-11-10T17:30:00Z"
 
+ConflictError:
+  description: Conflit métier (cadeau complet, participation existante ou modification incompatible)
+  content:
+    application/json:
+      schema:
+        $ref: '#/components/schemas/ErrorResponse'
+      example:
+        message: "Ce cadeau commun est complet"
+        timestamp: "2025-11-10T17:30:00Z"

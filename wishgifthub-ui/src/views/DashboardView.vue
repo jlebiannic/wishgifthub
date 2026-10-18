@@ -42,7 +42,7 @@ const myReservedWishes = computed(() => {
 
 // Mes souhaits non réservés
 const myUnreservedWishes = computed(() => {
-  return myWishes.value.filter(wish => !wish.reservedBy)
+  return myWishes.value.filter(wish => !wish.collective && !wish.reservedBy)
 })
 
 // Résumé des autres membres avec leurs souhaits
@@ -51,14 +51,16 @@ const otherMembersSummary = computed(() => {
     .filter(member => member.id !== authStore.user?.id)
     .map(member => {
       const memberWishes = wishStore.wishes.filter(wish => wish.userId === member.id)
-      const reservedWishes = memberWishes.filter(wish => wish.reservedBy)
-      const unreservedWishes = memberWishes.filter(wish => !wish.reservedBy)
+      const reservedWishes = memberWishes.filter(wish => wish.collective ? (wish.participantCount ?? 0) > 0 : wish.reservedBy)
+      const unreservedWishes = memberWishes.filter(wish => wish.collective ? !wish.full : !wish.reservedBy)
 
       // Détail des réservations avec le nom du réserveur
       const reservationDetails = reservedWishes.map(wish => ({
         wish,
-        reservedByName: getReserverName(wish.reservedBy!),
-        reservedByAvatar: getReserverAvatar(wish.reservedBy!)
+        reservedByName: wish.collective
+          ? `Cadeau commun : ${wish.participantCount} / ${wish.maxParticipants}${wish.full ? ' — Complet' : ''}`
+          : getReserverName(wish.reservedBy!),
+        reservedByAvatar: wish.collective ? null : getReserverAvatar(wish.reservedBy!)
       }))
 
       return {
@@ -150,11 +152,11 @@ function goToMember(memberId: string) {
               <v-tabs v-model="tab" bg-color="grey-lighten-4">
                 <v-tab value="reserved">
                   <v-icon class="mr-2">mdi-check-circle</v-icon>
-                  Réservés ({{ myReservedWishes.length }})
+                  Individuels réservés ({{ myReservedWishes.length }})
                 </v-tab>
                 <v-tab value="unreserved">
                   <v-icon class="mr-2">mdi-circle-outline</v-icon>
-                  Non réservés ({{ myUnreservedWishes.length }})
+                  Individuels non réservés ({{ myUnreservedWishes.length }})
                 </v-tab>
                 <v-tab value="all">
                   <v-icon class="mr-2">mdi-gift-outline</v-icon>
@@ -218,7 +220,7 @@ function goToMember(memberId: string) {
               <v-window-item value="unreserved">
                 <div v-if="myUnreservedWishes.length === 0" class="text-center py-8">
                   <v-icon size="64" color="success">mdi-check-all</v-icon>
-                  <div class="text-h6 text-medium-emphasis mt-4">Tous vos souhaits sont réservés !</div>
+                  <div class="text-h6 text-medium-emphasis mt-4">Aucun souhait individuel non réservé</div>
                 </div>
                 <v-list v-else lines="three">
                   <v-list-item
@@ -293,7 +295,10 @@ function goToMember(memberId: string) {
                     </v-list-item-subtitle>
 
                     <template v-slot:append>
-                      <div v-if="wish.reservedBy" class="d-flex align-center">
+                      <v-chip v-if="wish.collective" color="primary" variant="tonal">
+                        Cadeau commun — Surprise préservée
+                      </v-chip>
+                      <div v-else-if="wish.reservedBy" class="d-flex align-center">
                         <UserAvatar
                           :avatar-id="getReserverAvatar(wish.reservedBy)"
                           :size="40"
@@ -459,4 +464,3 @@ export default {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
 }
 </style>
-

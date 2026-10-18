@@ -255,8 +255,24 @@ export interface UpdateAvatarRequest {
   pseudo?: string | null;
 }
 
-/** @example {"createdAt":"2025-11-10T10:00:00Z","giftName":"Livre de cuisine","price":"29.99 €","groupId":"123e4567-e89b-12d3-a456-426614174000","imageUrl":"https://example.com/image.jpg","reservedBy":"456e7890-e12b-12d3-a456-426614174111","description":"Livre de recettes italiennes avec photos","id":"111e2222-e33b-44d5-a666-777888999000","userId":"987e6543-e21b-12d3-a456-426614174999","url":"https://example.com/livre"} */
+/** @example {"giftName":"Livre de cuisine","groupId":"123e4567-e89b-12d3-a456-426614174000","description":"Livre de recettes italiennes avec photos","userId":"987e6543-e21b-12d3-a456-426614174999","url":"https://example.com/livre","maxParticipants":0,"createdAt":"2025-11-10T10:00:00Z","participantCount":6,"price":"29.99 €","imageUrl":"https://example.com/image.jpg","reservedBy":"456e7890-e12b-12d3-a456-426614174111","participating":true,"collective":true,"id":"111e2222-e33b-44d5-a666-777888999000","full":true} */
 export interface WishResponse {
+  /** Ce souhait autorise un cadeau commun. */
+  collective?: boolean;
+  /**
+   * Capacité du cadeau (1 pour un cadeau individuel).
+   * @format int32
+   */
+  maxParticipants?: number;
+  /**
+   * Nombre de participants. Omis pour le destinataire d'un cadeau commun.
+   * @format int32
+   */
+  participantCount?: number;
+  /** Participation de l'utilisateur connecté. Omise pour le destinataire. */
+  participating?: boolean;
+  /** Capacité atteinte. Omis pour le destinataire d'un cadeau commun. */
+  full?: boolean;
   /**
    * Identifiant unique du souhait
    * @format uuid
@@ -316,8 +332,20 @@ export interface WishResponse {
   createdAt: string;
 }
 
-/** @example {"giftName":"Livre de cuisine","price":"29.99 €","imageUrl":"https://example.com/image.jpg","description":"Livre de recettes italiennes avec photos","url":"https://example.com/livre"} */
+/** @example {"giftName":"Livre de cuisine","price":"29.99 €","imageUrl":"https://example.com/image.jpg","description":"Livre de recettes italiennes avec photos","collective":false,"url":"https://example.com/livre","maxParticipants":2} */
 export interface WishRequest {
+  /**
+   * Autoriser plusieurs participants pour ce cadeau.
+   * @default false
+   */
+  collective?: boolean;
+  /**
+   * Capacité du cadeau commun (ignorée pour un cadeau individuel).
+   * @format int32
+   * @min 2
+   * @default 2
+   */
+  maxParticipants?: number;
   /**
    * Nom du cadeau souhaité
    * @minLength 1
