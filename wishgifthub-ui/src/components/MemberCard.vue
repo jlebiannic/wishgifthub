@@ -7,6 +7,7 @@ import {useNotificationStore} from '@/stores/notification'
 import {useConfirmStore} from '@/stores/confirm'
 import EditWishDialog from './EditWishDialog.vue'
 import UserAvatar from './UserAvatar.vue'
+import CollectiveGiftStatus from './CollectiveGiftStatus.vue'
 
 const props = defineProps<{
   member: UserResponse
@@ -300,11 +301,7 @@ function toggleExpand() {
                   <v-chip v-if="wish.collective" color="primary" size="small" class="mb-2">
                     Cadeau commun
                   </v-chip>
-                  <div v-if="wish.collective && !isCurrentUser" class="text-body-2 mb-2" aria-live="polite">
-                    {{ wish.participantCount }} / {{ wish.maxParticipants }} participants
-                    <span v-if="wish.full"> — Complet</span>
-                    <div v-if="wish.participating" class="text-success">Vous participez à ce cadeau</div>
-                  </div>
+                  <CollectiveGiftStatus v-if="wish.collective" :wish="wish" class="mb-2" />
 
                   <!-- Prix (si disponible) -->
                   <div v-if="wish.price" class="text-h6 text-primary mb-2">

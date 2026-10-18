@@ -72,6 +72,8 @@ class CollectiveGiftTest {
     private User user() {
         User user = new User();
         user.setEmail(UUID.randomUUID() + "@test.example");
+        user.setPseudo("Participant " + UUID.randomUUID());
+        user.setAvatarId("avatar-1");
         return users.save(user);
     }
 
@@ -92,11 +94,15 @@ class CollectiveGiftTest {
         WishResponse individual = service.createWish(group.getId(), new WishRequest().giftName("Old client"), owner.getId());
         assertFalse(individual.getCollective());
         assertEquals(1, individual.getMaxParticipants());
+        assertNull(individual.getParticipants());
         WishResponse collective = service.createWish(group.getId(),
                 new WishRequest().giftName("Shared").collective(true), owner.getId());
         assertTrue(collective.getCollective());
         assertEquals(2, collective.getMaxParticipants());
-        assertNull(collective.getParticipantCount());
+        assertEquals(0, collective.getParticipantCount());
+        assertTrue(collective.getParticipants().isEmpty());
+        assertFalse(collective.getParticipating());
+        assertFalse(collective.getFull());
         assertThrows(BusinessRuleException.class, () -> create(1));
         assertThrows(BusinessRuleException.class, () -> create(0));
     }
@@ -118,6 +124,7 @@ class CollectiveGiftTest {
         assertEquals(1, reopened.getParticipantCount());
         assertFalse(reopened.getFull());
         assertFalse(reopened.getParticipating());
+        assertEquals(List.of(second.getId()), reopened.getParticipants().stream().map(p -> p.getId()).toList());
         assertTrue(reserve(id, third).getFull());
     }
 
@@ -141,34 +148,48 @@ class CollectiveGiftTest {
         WishResponse individual = service.getWishesByGroup(group.getId(), first.getId()).getFirst();
         assertFalse(individual.getCollective());
         assertEquals(first.getId(), individual.getReservedBy());
+        assertNull(individual.getParticipants());
         service.unreserveWish(group.getId(), id, first.getId());
         service.updateWish(group.getId(), id, request(true, 2), owner.getId());
         assertEquals(1, reserve(id, second).getParticipantCount());
     }
 
     @Test
-    void recipientCannotSeeCollectiveActivityFromAnyReadOrWriteResponse() {
+    void recipientSeesCollectiveActivityAndIdentitiesFromEveryReadAndUpdateResponse() {
         UUID id = create(2);
         reserve(id, first);
         reserve(id, second);
         for (WishResponse response : List.of(
                 service.getWishesByGroup(group.getId(), owner.getId()).getFirst(),
                 service.getWishesByUserInGroup(group.getId(), owner.getId(), owner.getId()).getFirst(),
-                service.updateWish(group.getId(), id, request(true, 3), owner.getId()))) {
-            assertNull(response.getParticipantCount());
-            assertNull(response.getParticipating());
-            assertNull(response.getFull());
+                service.updateWish(group.getId(), id, request(true, 2), owner.getId()))) {
+            assertEquals(2, response.getParticipantCount());
+            assertFalse(response.getParticipating());
+            assertTrue(response.getFull());
             assertNull(response.getReservedBy());
+            assertEquals(java.util.Set.of(first.getId(), second.getId()),
+                    response.getParticipants().stream().map(p -> p.getId()).collect(java.util.stream.Collectors.toSet()));
+            var participant = response.getParticipants().stream().filter(p -> p.getId().equals(first.getId())).findFirst().orElseThrow();
+            assertEquals(first.getPseudo(), participant.getPseudo());
+            assertEquals(first.getAvatarId(), participant.getAvatarId());
+            assertEquals(first.getEmail(), participant.getEmail());
         }
         WishResponse viewer = service.getWishesByUserInGroup(group.getId(), owner.getId(), third.getId()).getFirst();
         assertEquals(2, viewer.getParticipantCount());
         assertFalse(viewer.getParticipating());
+        assertEquals(2, viewer.getParticipants().size());
     }
 
     @Test
     void individualReservationSemanticsRemainCompatible() {
         UUID id = service.createWish(group.getId(), new WishRequest().giftName("Individual"), owner.getId()).getId();
         assertEquals(first.getId(), reserve(id, first).getReservedBy());
+        WishResponse recipient = service.getWishesByUserInGroup(group.getId(), owner.getId(), owner.getId()).getFirst();
+        assertEquals(first.getId(), recipient.getReservedBy());
+        assertEquals(1, recipient.getParticipantCount());
+        assertTrue(recipient.getFull());
+        assertFalse(recipient.getParticipating());
+        assertNull(recipient.getParticipants());
         assertThrows(BusinessRuleException.class, () -> reserve(id, second));
         assertThrows(BusinessRuleException.class, () ->
                 service.updateWish(group.getId(), id, request(false, 2), owner.getId()));

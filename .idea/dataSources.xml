@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
-    <data-source source="LOCAL" name="postgres@aws-1-eu-north-1.pooler.supabase.com" uuid="95a907f5-a58a-4003-832f-db4a84145641">
+    <data-source source="LOCAL" name="wishgifthub-prod" uuid="95a907f5-a58a-4003-832f-db4a84145641">
       <driver-ref>postgresql</driver-ref>
       <synchronize>true</synchronize>
       <imported>true</imported>

@@ -6,6 +6,7 @@ import {useWishStore} from '@/stores/wish'
 import {useGroupStore} from '@/stores/group'
 import type {WishResponse} from '@/generated/api/wish/data-contracts'
 import UserAvatar from '@/components/UserAvatar.vue'
+import CollectiveGiftStatus from '@/components/CollectiveGiftStatus.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -37,7 +38,7 @@ onMounted(async () => {
 
 // Mes souhaits réservés (par quelqu'un d'autre)
 const myReservedWishes = computed(() => {
-  return myWishes.value.filter(wish => wish.reservedBy && wish.reservedBy !== authStore.user?.id)
+  return myWishes.value.filter(wish => !wish.collective && wish.reservedBy && wish.reservedBy !== authStore.user?.id)
 })
 
 // Mes souhaits non réservés
@@ -295,9 +296,7 @@ function goToMember(memberId: string) {
                     </v-list-item-subtitle>
 
                     <template v-slot:append>
-                      <v-chip v-if="wish.collective" color="primary" variant="tonal">
-                        Cadeau commun — Surprise préservée
-                      </v-chip>
+                      <CollectiveGiftStatus v-if="wish.collective" :wish="wish" />
                       <div v-else-if="wish.reservedBy" class="d-flex align-center">
                         <UserAvatar
                           :avatar-id="getReserverAvatar(wish.reservedBy)"
@@ -407,7 +406,8 @@ function goToMember(memberId: string) {
                           </v-list-item-title>
 
                           <template v-slot:append>
-                            <div class="d-flex align-center">
+                            <CollectiveGiftStatus v-if="detail.wish.collective" :wish="detail.wish" />
+                            <div v-else class="d-flex align-center">
                               <UserAvatar
                                 :avatar-id="detail.reservedByAvatar"
                                 :size="24"

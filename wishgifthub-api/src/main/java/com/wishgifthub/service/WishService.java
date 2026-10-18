@@ -8,6 +8,7 @@ import com.wishgifthub.exception.BusinessRuleException;
 import com.wishgifthub.exception.ResourceNotFoundException;
 import com.wishgifthub.openapi.model.WishRequest;
 import com.wishgifthub.openapi.model.WishResponse;
+import com.wishgifthub.openapi.model.UserResponse;
 import com.wishgifthub.repository.GroupRepository;
 import com.wishgifthub.repository.UserGroupRepository;
 import com.wishgifthub.repository.UserRepository;
@@ -268,19 +269,32 @@ public class WishService {
         }
         resp.setCollective(wish.isCollective());
         resp.setMaxParticipants(wish.getMaxParticipants());
-        // Do not expose collective reservation activity to its recipient, on any endpoint.
-        if (!wish.isCollective() || !wish.getUser().getId().equals(viewerId)) {
-            int count = participantCount(wish);
-            resp.setParticipantCount(count);
-            resp.setFull(count >= wish.getMaxParticipants());
-            resp.setParticipating(wish.isCollective() ? wish.getParticipants().contains(viewerId)
-                    : wish.getReservedBy() != null && wish.getReservedBy().getId().equals(viewerId));
+        int count = participantCount(wish);
+        resp.setParticipantCount(count);
+        resp.setFull(count >= wish.getMaxParticipants());
+        resp.setParticipating(wish.isCollective() ? wish.getParticipants().contains(viewerId)
+                : wish.getReservedBy() != null && wish.getReservedBy().getId().equals(viewerId));
+        if (wish.isCollective()) {
+            resp.setParticipants(userRepository.findAllById(wish.getParticipants()).stream()
+                    .map(this::toParticipantResponse)
+                    .collect(Collectors.toList()));
         }
         if (!wish.isCollective() && wish.getReservedBy() != null) {
             resp.setReservedBy(wish.getReservedBy().getId());
         }
         resp.setCreatedAt(wish.getCreatedAt());
         return resp;
+    }
+
+    private UserResponse toParticipantResponse(User user) {
+        UserResponse response = new UserResponse();
+        response.setId(user.getId());
+        response.setEmail(user.getEmail());
+        response.setIsAdmin(user.isAdmin());
+        response.setAvatarId(user.getAvatarId());
+        response.setPseudo(user.getPseudo());
+        response.setCreatedAt(user.getCreatedAt());
+        return response;
     }
 
     private int participantCount(Wish wish) {

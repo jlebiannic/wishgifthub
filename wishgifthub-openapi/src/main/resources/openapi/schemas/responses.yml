@@ -147,13 +147,19 @@ WishResponse:
     participantCount:
       type: integer
       format: int32
-      description: Nombre de participants. Omis pour le destinataire d'un cadeau commun.
+
+      description: Nombre de participants, visible aussi par le destinataire.
+    participants:
+      type: array
+      description: Participants au cadeau commun, visibles par tous les membres du groupe, y compris le destinataire.
+      items:
+        $ref: '#/UserResponse'
     participating:
       type: boolean
-      description: Participation de l'utilisateur connecté. Omise pour le destinataire.
+      description: Participation de l'utilisateur connecté (false pour le destinataire).
     full:
       type: boolean
-      description: Capacité atteinte. Omis pour le destinataire d'un cadeau commun.
+      description: Capacité atteinte, visible aussi par le destinataire.
     id:
       type: string
       format: uuid

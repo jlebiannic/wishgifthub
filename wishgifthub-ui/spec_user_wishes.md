@@ -25,11 +25,13 @@
   Explication : « Permettre à plusieurs personnes de se regrouper pour offrir ce cadeau. »
 * Lorsqu'il est activé, un champ numérique affiche le maximum de participants (2 par défaut,
   entier minimum 2), avec boutons moins/plus accessibles au clavier et libellés explicites.
-* Une carte collective porte le badge « Cadeau commun ». Les autres membres voient le
-  compteur actuel / maximum, « Participer » tant qu'il reste une place, leur propre état
-  et « Annuler ma participation », y compris quand le cadeau est complet.
-* Le destinataire voit sa configuration, jamais les identités, le compteur ou l'état
-  de participation collective. Cette protection est appliquée par l'API sur toutes ses réponses.
+* Une carte collective porte le badge « Cadeau commun ». Tous les membres, y compris le destinataire, voient le
+  compteur actuel / maximum et les participants. Les autres membres voient « Participer »
+  tant qu'il reste une place, leur propre état et « Annuler ma participation »,
+  y compris quand le cadeau est complet.
+* Le destinataire voit les noms et avatars des participants, le compteur et l'état complet
+  dans ses cartes et son tableau de bord, comme les autres membres. L'API fournit ces
+  informations sur toutes ses réponses collectives. Il ne peut pas participer à son propre souhait.
   Les réservations individuelles gardent leur visibilité et leur comportement existants.
 * Seul le créateur modifie un souhait. La capacité ne peut pas descendre sous le nombre
   de participants actifs. Le retour en individuel est interdit avec plus d'un participant;
@@ -37,8 +39,9 @@
 
 ### Contrat et stockage
 * `WishRequest` : `collective` (défaut false), `maxParticipants` (défaut 2, ignoré en individuel).
-  `WishResponse` ajoute `collective`, `maxParticipants`, `participantCount`, `participating`, `full`.
-  Les trois derniers champs sont absents pour le destinataire d'un cadeau commun.
+  `WishResponse` ajoute `collective`, `maxParticipants`, `participantCount`, `participating`, `full`
+  et `participants` (liste de `UserResponse` pour les cadeaux communs, sans données d'authentification).
+  Ces champs sont visibles aussi par le destinataire ; `participating` vaut alors false.
 * Les endpoints existants `POST .../reserve` et `DELETE .../reserve` gèrent aussi les
   participations, avec les mêmes droits de groupe, erreurs métier HTTP 409 et validation HTTP 400.
 * La migration Flyway V6 ajoute le mode et la capacité (anciens souhaits : individuel, capacité 1)

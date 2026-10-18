@@ -247,7 +247,7 @@ export class Api<
       ...params,
     });
   /**
-   * @description Retourne la liste de tous les souhaits du groupe. Affiche qui a réservé chaque cadeau (visible par tous les membres). Pour un cadeau commun, les identités ne sont jamais exposées et l'activité (participantCount, participating, full) est omise pour son destinataire. L'utilisateur doit être membre du groupe.
+   * @description Retourne la liste de tous les souhaits du groupe. Affiche qui a réservé chaque cadeau (visible par tous les membres). Pour un cadeau commun, les participants et l'activité (participantCount, participating, full) sont visibles par les membres du groupe, y compris le destinataire, qui ne peut pas participer à son propre souhait. L'utilisateur doit être membre du groupe.
    *
    * @tags Souhaits
    * @name GetGroupWishes

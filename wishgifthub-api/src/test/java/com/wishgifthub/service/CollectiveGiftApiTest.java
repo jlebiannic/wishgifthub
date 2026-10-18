@@ -39,7 +39,7 @@ class CollectiveGiftApiTest {
     @Autowired JwtService jwt;
 
     @Test
-    void authenticatedApiLifecycleAndRecipientRedaction() throws Exception {
+    void authenticatedApiLifecycleAndRecipientParticipantVisibility() throws Exception {
         User owner = user();
         User first = user();
         User second = user();
@@ -71,25 +71,37 @@ class CollectiveGiftApiTest {
         var created = mvc.perform(post(root).header("Authorization", ownerToken)
                         .contentType(MediaType.APPLICATION_JSON).content(body))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.collective").value(true))
-                .andExpect(jsonPath("$.participantCount").doesNotExist()).andReturn();
+                .andExpect(jsonPath("$.participantCount").value(0))
+                .andExpect(jsonPath("$.participants").isEmpty()).andReturn();
         String wishId = json.readTree(created.getResponse().getContentAsString()).get("id").asText();
         String wish = root + "/" + wishId;
         mvc.perform(post(wish + "/reserve").header("Authorization", ownerToken))
                 .andExpect(status().isConflict());
         mvc.perform(post(wish + "/reserve").header("Authorization", firstToken))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.participantCount").value(1))
-                .andExpect(jsonPath("$.participating").value(true));
+                .andExpect(jsonPath("$.participating").value(true))
+                .andExpect(jsonPath("$.participants[0].id").value(first.getId().toString()));
         mvc.perform(post(wish + "/reserve").header("Authorization", firstToken))
                 .andExpect(status().isConflict());
         mvc.perform(post(wish + "/reserve").header("Authorization", secondToken))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.full").value(true));
         for (String path : List.of(root, root + "/me", root + "/users/" + owner.getId())) {
             mvc.perform(get(path).header("Authorization", ownerToken)).andExpect(status().isOk())
-                    .andExpect(jsonPath("$[0].participantCount").doesNotExist())
-                    .andExpect(jsonPath("$[0].participating").doesNotExist())
-                    .andExpect(jsonPath("$[0].full").doesNotExist())
+                    .andExpect(jsonPath("$[0].participantCount").value(2))
+                    .andExpect(jsonPath("$[0].participating").value(false))
+                    .andExpect(jsonPath("$[0].full").value(true))
+                    .andExpect(jsonPath("$[0].participants[*].id", org.hamcrest.Matchers.containsInAnyOrder(first.getId().toString(), second.getId().toString())))
+                    .andExpect(jsonPath("$[0].participants[*].pseudo", org.hamcrest.Matchers.everyItem(org.hamcrest.Matchers.is("Participant"))))
+                    .andExpect(jsonPath("$[0].participants[*].avatarId", org.hamcrest.Matchers.everyItem(org.hamcrest.Matchers.is("avatar-1"))))
+                    .andExpect(jsonPath("$[0].participants[*].password").isEmpty())
+                    .andExpect(jsonPath("$[0].participants[*].passwordHash").isEmpty())
                     .andExpect(jsonPath("$[0].reservedBy").doesNotExist());
         }
+        mvc.perform(get(root).header("Authorization", "Bearer " + jwt.generateToken(outsider, List.of())))
+                .andExpect(status().isForbidden());
+        mvc.perform(put(wish).header("Authorization", ownerToken).contentType(MediaType.APPLICATION_JSON).content(body))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.participants[*].id", org.hamcrest.Matchers.containsInAnyOrder(first.getId().toString(), second.getId().toString())));
         mvc.perform(put(wish).header("Authorization", firstToken).contentType(MediaType.APPLICATION_JSON).content(body))
                 .andExpect(status().isForbidden());
         mvc.perform(put(wish).header("Authorization", ownerToken).contentType(MediaType.APPLICATION_JSON)
@@ -98,7 +110,9 @@ class CollectiveGiftApiTest {
                 .andExpect(status().isConflict());
         mvc.perform(delete(wish + "/reserve").header("Authorization", firstToken))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.full").value(false))
-                .andExpect(jsonPath("$.participantCount").value(1));
+                .andExpect(jsonPath("$.participantCount").value(1))
+                .andExpect(jsonPath("$.participants[0].id").value(second.getId().toString()))
+                .andExpect(jsonPath("$.participants.length()").value(1));
         mvc.perform(post(wish + "/reserve").header("Authorization", firstToken))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.full").value(true));
     }
@@ -106,6 +120,8 @@ class CollectiveGiftApiTest {
     private User user() {
         User user = new User();
         user.setEmail(UUID.randomUUID() + "@api-test.example");
+        user.setPseudo("Participant");
+        user.setAvatarId("avatar-1");
         return users.save(user);
     }
 

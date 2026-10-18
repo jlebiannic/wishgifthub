@@ -255,7 +255,7 @@ export interface UpdateAvatarRequest {
   pseudo?: string | null;
 }
 
-/** @example {"giftName":"Livre de cuisine","groupId":"123e4567-e89b-12d3-a456-426614174000","description":"Livre de recettes italiennes avec photos","userId":"987e6543-e21b-12d3-a456-426614174999","url":"https://example.com/livre","maxParticipants":0,"createdAt":"2025-11-10T10:00:00Z","participantCount":6,"price":"29.99 €","imageUrl":"https://example.com/image.jpg","reservedBy":"456e7890-e12b-12d3-a456-426614174111","participating":true,"collective":true,"id":"111e2222-e33b-44d5-a666-777888999000","full":true} */
+/** @example {"giftName":"Livre de cuisine","groupId":"123e4567-e89b-12d3-a456-426614174000","description":"Livre de recettes italiennes avec photos","userId":"987e6543-e21b-12d3-a456-426614174999","url":"https://example.com/livre","maxParticipants":0,"createdAt":"2025-11-10T10:00:00Z","participantCount":6,"price":"29.99 €","imageUrl":"https://example.com/image.jpg","reservedBy":"456e7890-e12b-12d3-a456-426614174111","participating":true,"collective":true,"id":"111e2222-e33b-44d5-a666-777888999000","participants":[{"createdAt":"2025-11-01T10:00:00Z","avatarId":"avatar-1","id":"987e6543-e21b-12d3-a456-426614174999","isAdmin":true,"pseudo":"Jean","email":"admin@example.com"},{"createdAt":"2025-11-01T10:00:00Z","avatarId":"avatar-1","id":"987e6543-e21b-12d3-a456-426614174999","isAdmin":true,"pseudo":"Jean","email":"admin@example.com"}],"full":true} */
 export interface WishResponse {
   /** Ce souhait autorise un cadeau commun. */
   collective?: boolean;
@@ -265,13 +265,15 @@ export interface WishResponse {
    */
   maxParticipants?: number;
   /**
-   * Nombre de participants. Omis pour le destinataire d'un cadeau commun.
+   * Nombre de participants, visible aussi par le destinataire.
    * @format int32
    */
   participantCount?: number;
-  /** Participation de l'utilisateur connecté. Omise pour le destinataire. */
+  /** Participants au cadeau commun, visibles par tous les membres du groupe, y compris le destinataire. */
+  participants?: UserResponse[];
+  /** Participation de l'utilisateur connecté (false pour le destinataire). */
   participating?: boolean;
-  /** Capacité atteinte. Omis pour le destinataire d'un cadeau commun. */
+  /** Capacité atteinte, visible aussi par le destinataire. */
   full?: boolean;
   /**
    * Identifiant unique du souhait
