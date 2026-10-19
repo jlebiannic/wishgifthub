@@ -4,6 +4,7 @@ import {getApiClient} from '@/api/client'
 import {useAuthStore} from './auth'
 import type {
   GroupResponse,
+  GroupRequest,
   InvitationResponse,
   UserResponse
 } from '@/generated/api/wish/data-contracts'
@@ -119,13 +120,13 @@ export const useGroupStore = defineStore('group', () => {
   /**
    * Crée un nouveau groupe
    */
-  async function createGroup(name: string, type: 'noël' = 'noël') {
+  async function createGroup(name: string, type: 'noël' = 'noël', collectiveGiftThreshold?: number) {
     isLoading.value = true
     error.value = null
 
     try {
       const apiClient = getApiClient()
-      const response = await apiClient.createGroup({name, type})
+      const response = await apiClient.createGroup({name, type, collectiveGiftThreshold})
 
       // Ajouter le nouveau groupe à la liste
       if (response.data) {
@@ -145,6 +146,13 @@ export const useGroupStore = defineStore('group', () => {
     } finally {
       isLoading.value = false
     }
+  }
+
+  async function updateGroup(groupId: string, request: GroupRequest) {
+    const response = await getApiClient().updateGroup(groupId, request)
+    const index = groups.value.findIndex(group => group.id === groupId)
+    if (index !== -1) groups.value[index] = response.data
+    return response.data
   }
 
   /**
@@ -238,9 +246,9 @@ export const useGroupStore = defineStore('group', () => {
     fetchGroupMembers,
     fetchGroupInvitations,
     createGroup,
+    updateGroup,
     inviteUser,
     updateMemberProfile,
     reset,
   }
 })
-

@@ -4,10 +4,12 @@ import com.wishgifthub.exception.BusinessRuleException;
 import com.wishgifthub.exception.DuplicateResourceException;
 import com.wishgifthub.exception.InvalidInvitationException;
 import com.wishgifthub.exception.ResourceNotFoundException;
+import jakarta.validation.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -21,6 +23,12 @@ import java.util.stream.Collectors;
 public class GlobalExceptionHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
+    @ExceptionHandler({ConstraintViolationException.class, HttpMessageNotReadableException.class})
+    public ResponseEntity<ErrorResponse> handleInvalidRequest(Exception ex) {
+        return ResponseEntity.badRequest().body(new ErrorResponse(
+                HttpStatus.BAD_REQUEST.value(), "Données de requête invalides", "VALIDATION_ERROR"));
+    }
 
     /**
      * Gère les exceptions ResourceNotFoundException et retourne un code 404.
@@ -189,4 +197,3 @@ public class GlobalExceptionHandler {
         }
     }
 }
-

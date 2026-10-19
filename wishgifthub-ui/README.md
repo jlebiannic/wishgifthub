@@ -30,6 +30,20 @@ du backend. Elle ajoute la clé étrangère nullable `parent_id` et autorise l�
 d’adresse e-mail uniquement pour les profils enfants sans mot de passe et non
 administrateurs. Les utilisateurs, souhaits et réservations existants sont préservés.
 
+## Suggestion de cadeau commun
+
+Chaque groupe dispose d'un seuil de suggestion, fixé à **50 €** par défaut.
+Son administrateur peut le choisir à la création ou le modifier depuis
+**Paramètres du groupe**, dans la page du groupe (montant positif ou nul,
+deux décimales au maximum).
+
+Lors de l'ajout ou de la modification d'un souhait, un prix strictement supérieur
+au seuil déclenche une proposition de cadeau commun. **Oui, cadeau commun**
+active les contrôles existants du nombre de participants ; **Non, garder individuel**
+permet de conserver le mode individuel. Les prix préremplis par l'extraction de
+métadonnées suivent la même règle. Un prix vide, non numérique, une fourchette
+ou une devise autre que l'euro ne déclenche pas de suggestion.
+
 ## Recommended IDE Setup
 
 [VS Code](https://code.visualstudio.com/) + [Vue (Official)](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).

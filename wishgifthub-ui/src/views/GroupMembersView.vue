@@ -7,6 +7,7 @@ import {useWishStore} from '@/stores/wish'
 import MemberCard from '@/components/MemberCard.vue'
 import AddWishDialog from '@/components/AddWishDialog.vue'
 import ChildrenDialog from '@/components/ChildrenDialog.vue'
+import GroupSettingsDialog from '@/components/GroupSettingsDialog.vue'
 import {useChildrenStore} from '@/stores/children'
 import {useNotificationStore} from '@/stores/notification'
 import type {UserResponse} from '@/generated/api/wish/data-contracts'
@@ -26,6 +27,8 @@ const showAddWishDialog = ref(false)
 const isLoading = ref(true)
 const expandedMembers = ref<Map<string, boolean>>(new Map())
 const showChildrenDialog = ref(false)
+const showSettingsDialog = ref(false)
+const currentGroup = computed(() => groupStore.groups.find(group => group.id === groupId.value))
 const refreshing = ref(false)
 const selectedUserId = ref('')
 const managedChildren = computed(() => childrenStore.currentGroupId === groupId.value ? childrenStore.children : [])
@@ -97,6 +100,7 @@ async function loadGroup() {
   isLoading.value = true
   showAddWishDialog.value = false
   showChildrenDialog.value = false
+  showSettingsDialog.value = false
   selectedUserId.value = authStore.user?.id ?? ''
   members.value = []
   expandedMembers.value = new Map()
@@ -118,13 +122,8 @@ async function loadGroup() {
   }
 
   try {
-    // Récupérer les informations du groupe
-    // Utiliser fetchMyGroups() pour les non-admins
-    if (authStore.isAdmin) {
-      await groupStore.fetchGroups()
-    } else {
-      await groupStore.fetchMyGroups()
-    }
+    // Inclure les groupes rejoints par invitation, même pour un administrateur.
+    await groupStore.fetchMyGroups()
 
     const group = groupStore.groups.find(g => g.id === groupId.value)
     if (group) {
@@ -272,6 +271,10 @@ function goBack() {
 
     <v-row v-if="!isLoading">
       <v-col cols="12" class="d-flex flex-wrap align-center ga-3">
+        <v-btn v-if="currentGroup?.adminId === authStore.user?.id"
+               prepend-icon="mdi-cog" variant="tonal" @click="showSettingsDialog = true">
+          Paramètres du groupe
+        </v-btn>
         <v-btn prepend-icon="mdi-account-child" variant="tonal" :disabled="refreshing || showAddWishDialog"
                @click="showChildrenDialog = true">
           Gérer mes enfants
@@ -331,6 +334,8 @@ function goBack() {
     />
     <ChildrenDialog v-model="showChildrenDialog" :group-id="groupId" :refreshing="refreshing"
                     @changed="handleChildrenChanged" />
+    <GroupSettingsDialog v-if="currentGroup && currentGroup.adminId === authStore.user?.id"
+                         v-model="showSettingsDialog" :group="currentGroup" />
   </v-container>
 </template>
 

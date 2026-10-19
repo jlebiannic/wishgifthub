@@ -1,21 +1,31 @@
 <script setup lang="ts">
 import {ref} from 'vue'
 import {useGroupStore} from '@/stores/group'
+import {useNotificationStore} from '@/stores/notification'
+import {DEFAULT_COLLECTIVE_GIFT_THRESHOLD, parseEuroCents, thresholdRule} from '@/utils/price'
 
 const groupStore = useGroupStore()
+const notifications = useNotificationStore()
 
 const dialog = ref(false)
 const groupName = ref('')
+const threshold = ref(String(DEFAULT_COLLECTIVE_GIFT_THRESHOLD))
 
 const emit = defineEmits<{
   groupCreated: []
 }>()
 
 async function handleCreateGroup() {
-  const success = await groupStore.createGroup(groupName.value, 'noël')
+  const cents = parseEuroCents(threshold.value)
+  if (cents === null || thresholdRule(threshold.value) !== true) {
+    notifications.showError(String(thresholdRule(threshold.value)))
+    return
+  }
+  const success = await groupStore.createGroup(groupName.value, 'noël', cents / 100)
   if (success) {
     dialog.value = false
     groupName.value = ''
+    threshold.value = String(DEFAULT_COLLECTIVE_GIFT_THRESHOLD)
     emit('groupCreated')
   }
 }
@@ -23,6 +33,7 @@ async function handleCreateGroup() {
 function closeDialog() {
   dialog.value = false
   groupName.value = ''
+  threshold.value = String(DEFAULT_COLLECTIVE_GIFT_THRESHOLD)
 }
 </script>
 
@@ -71,6 +82,11 @@ function closeDialog() {
               hint="Le type du groupe est automatiquement défini sur 'noël'"
               persistent-hint
             />
+            <v-text-field v-model="threshold" label="Seuil de suggestion d’un cadeau commun (€)"
+                          inputmode="decimal" :rules="[thresholdRule]" variant="outlined"
+                          :disabled="groupStore.isLoading"
+                          hint="Au-dessus de ce montant, proposer un cadeau commun sans l’imposer."
+                          persistent-hint />
           </v-form>
         </v-card-text>
 
@@ -97,4 +113,3 @@ function closeDialog() {
     </v-dialog>
   </div>
 </template>
-

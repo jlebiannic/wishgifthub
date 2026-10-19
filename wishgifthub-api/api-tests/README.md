@@ -16,6 +16,27 @@ créateur, les réservations et la suppression des données de l'enfant. Ils vé
 aussi que la migration V7 conserve les comptes, souhaits et réservations existants.
 La migration est exécutée automatiquement par Flyway au démarrage de l'API.
 
+## Seuil de suggestion de cadeau commun : tests automatisés
+
+Depuis la racine du dépôt :
+
+```powershell
+mvn -pl wishgifthub-api "-Dtest=GroupThresholdApiTest,GroupThresholdMigrationTest" test
+```
+
+Le champ optionnel `collectiveGiftThreshold` configure le seuil en EUR par groupe :
+de `0` à `99999999.99`, avec au plus deux décimales. À la création, son omission
+utilise `50.00` ; à la modification, elle conserve la valeur existante.
+Seul l'administrateur propriétaire peut modifier le groupe. Ce seuil sert uniquement
+à proposer un cadeau commun et ne l'impose jamais aux souhaits.
+
+Flyway applique automatiquement `V8__group_collective_gift_threshold.sql` au démarrage.
+Cette migration ajoute une colonne `NUMERIC(10, 2)` non nulle, avec `50.00` pour les
+groupes existants et par défaut pour les nouveaux, sans modifier les comptes,
+enfants, appartenances, invitations, souhaits, réservations ou participants existants.
+Les tests couvrent ces garanties, les valeurs personnalisées, la conservation du
+seuil à la modification, les autorisations et le rejet des valeurs invalides.
+
 ## 📁 Structure
 
 ```

@@ -70,8 +70,16 @@ export interface ErrorResponse {
   timestamp: string;
 }
 
-/** @example {"createdAt":"2025-11-10T10:00:00Z","name":"Noël en famille 2025","adminId":"987e6543-e21b-12d3-a456-426614174999","jwtToken":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...","id":"123e4567-e89b-12d3-a456-426614174000","type":"noël"} */
+/** @example {"createdAt":"2025-11-10T10:00:00Z","collectiveGiftThreshold":50,"name":"Noël en famille 2025","adminId":"987e6543-e21b-12d3-a456-426614174999","jwtToken":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...","id":"123e4567-e89b-12d3-a456-426614174000","type":"noël"} */
 export interface GroupResponse {
+  /**
+   * Seuil de suggestion d'un cadeau commun en EUR pour ce groupe (50 EUR par défaut). Ne rend jamais le cadeau commun obligatoire.
+   * @min 0
+   * @multipleOf 0.01
+   * @max 99999999.99
+   * @example 50
+   */
+  collectiveGiftThreshold?: number;
   /**
    * Identifiant unique du groupe
    * @format uuid
@@ -107,7 +115,7 @@ export interface GroupResponse {
   jwtToken?: string | null;
 }
 
-/** @example {"name":"Noël en famille 2025","type":"noël"} */
+/** @example {"collectiveGiftThreshold":50,"name":"Noël en famille 2025","type":"noël"} */
 export interface GroupRequest {
   /**
    * Nom du groupe
@@ -121,6 +129,14 @@ export interface GroupRequest {
    * @example "noël"
    */
   type: "noël";
+  /**
+   * Seuil en EUR au-dessus duquel proposer un cadeau commun, sans l'imposer. Par défaut 50 EUR à la création ; inchangé si omis à la modification.
+   * @min 0
+   * @multipleOf 0.01
+   * @max 99999999.99
+   * @example 50
+   */
+  collectiveGiftThreshold?: number;
 }
 
 /** @example {"avatarId":"avatar-1","pseudo":"Jean","email":"user@example.com"} */

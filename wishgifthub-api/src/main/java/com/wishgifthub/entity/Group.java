@@ -15,6 +15,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.OffsetDateTime;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -35,6 +36,9 @@ public class Group {
     @Column(nullable = false)
     private String type;
 
+    @Column(name = "collective_gift_threshold", nullable = false, precision = 10, scale = 2)
+    private BigDecimal collectiveGiftThreshold = new BigDecimal("50.00");
+
     @ManyToOne(optional = false)
     @JoinColumn(name = "admin_id")
     private User admin;
@@ -51,4 +55,3 @@ public class Group {
     @Column(name = "created_at", nullable = false)
     private OffsetDateTime createdAt = OffsetDateTime.now();
 }
-

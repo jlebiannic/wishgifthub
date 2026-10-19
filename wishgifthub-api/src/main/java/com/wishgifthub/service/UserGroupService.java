@@ -1,6 +1,5 @@
 package com.wishgifthub.service;
 
-import com.wishgifthub.entity.Group;
 import com.wishgifthub.entity.User;
 import com.wishgifthub.entity.UserGroup;
 import com.wishgifthub.exception.ResourceNotFoundException;
@@ -34,17 +33,7 @@ public class UserGroupService {
 
     public List<GroupResponse> getGroupsByUser(UUID userId) {
         return userGroupRepository.findByUserId(userId).stream()
-                .map(ug -> {
-                    Group group = ug.getGroup();
-                    GroupResponse response = new GroupResponse();
-                    response.setId(group.getId());
-                    response.setName(group.getName());
-                    response.setType(group.getType());
-                    response.setAdminId(group.getAdmin().getId());
-                    response.setCreatedAt(group.getCreatedAt());
-                    return response;
-                })
+                .map(ug -> GroupMapper.toResponse(ug.getGroup()))
                 .collect(Collectors.toList());
     }
 }
-

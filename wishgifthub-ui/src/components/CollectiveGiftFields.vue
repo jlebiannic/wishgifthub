@@ -1,6 +1,31 @@
 <script setup lang="ts">
+import {computed, ref, watch} from 'vue'
+import {DEFAULT_COLLECTIVE_GIFT_THRESHOLD, parseEuroCents} from '@/utils/price'
+
+const props = withDefaults(defineProps<{
+  price?: string
+  threshold?: number
+  active?: boolean
+}>(), {price: '', threshold: DEFAULT_COLLECTIVE_GIFT_THRESHOLD, active: true})
+
 const collective = defineModel<boolean>('collective', {default: false})
 const maxParticipants = defineModel<number>('maxParticipants', {default: 2})
+const dismissed = ref(false)
+const priceCents = computed(() => parseEuroCents(props.price))
+const suggestCollective = computed(() => props.active && !collective.value && !dismissed.value
+  && priceCents.value !== null && priceCents.value > Math.round(props.threshold * 100))
+const formattedThreshold = computed(() => new Intl.NumberFormat('fr-FR', {
+  style: 'currency', currency: 'EUR'
+}).format(props.threshold))
+
+watch(() => [priceCents.value, props.threshold, props.active], () => {
+  dismissed.value = false
+})
+
+function acceptSuggestion() {
+  collective.value = true
+  dismissed.value = true
+}
 const validCapacity = (value: unknown) =>
   (Number.isInteger(Number(value)) && Number(value) >= 2 && Number(value) <= 2147483647)
   || 'Saisissez un nombre entier de participants, au minimum 2'
@@ -12,6 +37,14 @@ function step(delta: number) {
 </script>
 
 <template>
+  <v-alert v-if="suggestCollective" type="info" variant="tonal" class="mb-4">
+    <p>Ce souhait dépasse {{ formattedThreshold }}. Souhaitez-vous en faire un cadeau commun,
+      réservé par plusieurs membres du groupe ?</p>
+    <div class="d-flex flex-wrap ga-2 mt-3">
+      <v-btn size="small" color="primary" @click="acceptSuggestion">Oui, cadeau commun</v-btn>
+      <v-btn size="small" variant="text" @click="dismissed = true">Non, garder individuel</v-btn>
+    </div>
+  </v-alert>
   <v-switch
     v-model="collective"
     label="Autoriser un cadeau commun"

@@ -1,5 +1,7 @@
 <script setup lang="ts">
-import {ref, watch} from 'vue'
+import {computed, ref, watch} from 'vue'
+import {useGroupStore} from '@/stores/group'
+import {DEFAULT_COLLECTIVE_GIFT_THRESHOLD} from '@/utils/price'
 import {useWishStore} from '@/stores/wish'
 import {useNotificationStore} from '@/stores/notification'
 import {getApiClient} from '@/api/client'
@@ -19,6 +21,9 @@ const emit = defineEmits<{
 
 const wishStore = useWishStore()
 const notificationStore = useNotificationStore()
+const groupStore = useGroupStore()
+const collectiveGiftThreshold = computed(() => groupStore.groups.find(group => group.id === props.groupId)
+  ?.collectiveGiftThreshold ?? DEFAULT_COLLECTIVE_GIFT_THRESHOLD)
 
 // Référence au formulaire
 const form = ref<any>(null)
@@ -283,7 +288,8 @@ function handleImageUrlBlur() {
 
       <v-card-text class="pa-4">
         <v-form ref="form" :disabled="isSaving" @submit.prevent="handleSubmit">
-          <CollectiveGiftFields v-model:collective="collective" v-model:max-participants="maxParticipants" />
+          <CollectiveGiftFields v-model:collective="collective" v-model:max-participants="maxParticipants"
+                                :price="price" :threshold="collectiveGiftThreshold" :active="modelValue" />
           <!-- Champ URL -->
           <v-text-field
             v-model="url"

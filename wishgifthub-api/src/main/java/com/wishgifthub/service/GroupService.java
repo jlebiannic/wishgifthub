@@ -10,6 +10,8 @@ import com.wishgifthub.openapi.model.GroupResponse;
 import com.wishgifthub.repository.GroupRepository;
 import com.wishgifthub.repository.UserGroupRepository;
 import com.wishgifthub.repository.UserRepository;
+import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Validator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,6 +30,8 @@ public class GroupService {
     private UserGroupRepository userGroupRepository;
     @Autowired
     private JwtService jwtService;
+    @Autowired
+    private Validator validator;
 
     @Transactional
     public GroupResponse createGroup(GroupRequest request, UUID adminId) {
@@ -39,9 +43,13 @@ public class GroupService {
             throw new AccessDeniedException("Seuls les administrateurs peuvent créer des groupes");
         }
 
+        validateThreshold(request);
         Group group = new Group();
         group.setName(request.getName());
         group.setType(request.getType().getValue());
+        if (request.getCollectiveGiftThreshold() != null) {
+            group.setCollectiveGiftThreshold(request.getCollectiveGiftThreshold());
+        }
         group.setAdmin(admin);
         groupRepository.save(group);
 
@@ -60,26 +68,14 @@ public class GroupService {
         // Génération du nouveau JWT avec tous les groupes
         String jwt = jwtService.generateToken(admin, groupIds);
 
-        GroupResponse resp = new GroupResponse();
-        resp.setId(group.getId());
-        resp.setName(group.getName());
-        resp.setType(group.getType());
-        resp.setAdminId(admin.getId());
-        resp.setCreatedAt(group.getCreatedAt());
+        GroupResponse resp = GroupMapper.toResponse(group);
         resp.setJwtToken(jwt);
         return resp;
     }
 
     public List<GroupResponse> getGroupsByAdmin(UUID adminId) {
-        return groupRepository.findByAdminId(adminId).stream().map(g -> {
-            GroupResponse resp = new GroupResponse();
-            resp.setId(g.getId());
-            resp.setName(g.getName());
-            resp.setType(g.getType());
-            resp.setAdminId(g.getAdmin().getId());
-            resp.setCreatedAt(g.getCreatedAt());
-            return resp;
-        }).collect(Collectors.toList());
+        return groupRepository.findByAdminId(adminId).stream()
+                .map(GroupMapper::toResponse).collect(Collectors.toList());
     }
 
     @Transactional
@@ -91,17 +87,22 @@ public class GroupService {
             throw new AccessDeniedException("Seul le propriétaire du groupe peut le modifier");
         }
 
+        validateThreshold(request);
         group.setName(request.getName());
         group.setType(request.getType().getValue());
+        if (request.getCollectiveGiftThreshold() != null) {
+            group.setCollectiveGiftThreshold(request.getCollectiveGiftThreshold());
+        }
         groupRepository.save(group);
 
-        GroupResponse resp = new GroupResponse();
-        resp.setId(group.getId());
-        resp.setName(group.getName());
-        resp.setType(group.getType());
-        resp.setAdminId(group.getAdmin().getId());
-        resp.setCreatedAt(group.getCreatedAt());
-        return resp;
+        return GroupMapper.toResponse(group);
+    }
+
+    private void validateThreshold(GroupRequest request) {
+        var violations = validator.validateProperty(request, "collectiveGiftThreshold");
+        if (!violations.isEmpty()) {
+            throw new ConstraintViolationException(violations);
+        }
     }
 
     @Transactional
@@ -116,4 +117,3 @@ public class GroupService {
         groupRepository.delete(group);
     }
 }
-
