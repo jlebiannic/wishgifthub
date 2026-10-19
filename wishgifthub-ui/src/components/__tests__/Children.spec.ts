@@ -192,6 +192,25 @@ describe('child wishes without impersonation', () => {
     expect(remove).toHaveBeenCalledWith('group', 'wish')
   })
 
+  it('places each parent before their indented children without adding a relationship label', async () => {
+    const otherParent: UserResponse = {...parent, id: 'other-parent', pseudo: 'Autre parent'}
+    const sibling: UserResponse = {...child, id: 'sibling', pseudo: 'Deuxieme enfant'}
+    const groups = useGroupStore()
+    groups.groups = [{id: 'group', name: 'Famille', type: 'noël', adminId: 'parent', createdAt: child.createdAt}]
+    vi.spyOn(groups, 'fetchMyGroups').mockResolvedValue(groups.groups)
+    vi.spyOn(groups, 'fetchGroupMembers').mockResolvedValue([otherChild, otherParent, child, parent, sibling])
+    vi.spyOn(useWishStore(), 'fetchGroupWishes').mockResolvedValue([])
+    const wrapper = shallowMount(GroupMembersView, {global})
+    await flushPromises()
+    const cards = wrapper.findAllComponents(MemberCard)
+    expect(cards.map(card => card.props('member').id)).toEqual([
+      'parent', 'child', 'sibling', 'other-parent', 'other-child'
+    ])
+    expect(cards.filter(card => card.classes().includes('child-member')).map(card => card.props('member').id))
+      .toEqual(['child', 'sibling', 'other-child'])
+    expect(wrapper.text()).not.toContain('Enfant de')
+  })
+
   it.each([['USER'], ['ADMIN']])('adds wishes from member cards for %s users, refreshing after deletion', async role => {
     useAuthStore().user!.roles = [role]
     const groups = useGroupStore()

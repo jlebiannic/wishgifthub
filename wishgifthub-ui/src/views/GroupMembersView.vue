@@ -43,16 +43,20 @@ watch(wishOwners, owners => {
   }
 }, {immediate: true})
 
-// Trier les membres : l'utilisateur connecté en premier
 const sortedMembers = computed(() => {
-  const currentUserId = authStore.user?.id
-  if (!currentUserId) return members.value
-
-  return [...members.value].sort((a, b) => {
-    if (a.id === currentUserId) return -1
-    if (b.id === currentUserId) return 1
-    return 0
+  const memberIds = new Set(members.value.map(member => member.id))
+  const childrenByParent = new Map<string, UserResponse[]>()
+  const parents = members.value.filter(member => {
+    if (member.parentId && memberIds.has(member.parentId)) {
+      const children = childrenByParent.get(member.parentId) ?? []
+      children.push(member)
+      childrenByParent.set(member.parentId, children)
+      return false
+    }
+    return true
   })
+  parents.sort((a, b) => Number(b.id === authStore.user?.id) - Number(a.id === authStore.user?.id))
+  return parents.flatMap(parent => [parent, ...(childrenByParent.get(parent.id) ?? [])])
 })
 
 // Récupérer les souhaits d'un membre spécifique
@@ -302,6 +306,7 @@ function goBack() {
           v-for="member in sortedMembers"
           :key="member.id"
           :id="`member-${member.id}`"
+          :class="{'child-member': member.parentId && members.some(parent => parent.id === member.parentId)}"
           :member="member"
           :wishes="getMemberWishes(member.id)"
           :group-id="groupId"
@@ -333,5 +338,15 @@ function goBack() {
 .group-container {
   max-width: 1600px;
   margin: 0 auto;
+}
+
+.child-member {
+  margin-inline-start: 24px;
+}
+
+@media (min-width: 600px) {
+  .child-member {
+    margin-inline-start: 48px;
+  }
 }
 </style>

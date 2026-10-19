@@ -10,6 +10,9 @@ et leur avatar ou de les supprimer. Un enfant rejoint uniquement le groupe coura
 La suppression est définitive et concerne son profil, ses souhaits et ses appartenances
 à **tous** les groupes ; une confirmation explicite est demandée.
 
+Dans le groupe, les fiches enfants apparaissent juste sous celle de leur parent,
+avec un retrait visuel, sans libellé supplémentaire.
+
 Le bouton **Ajouter un souhait** sur sa propre carte ou celle de son enfant ouvre
 le formulaire pour la personne concernée. Les cartes de ses enfants permettent aussi
 de modifier et supprimer leurs souhaits. La connexion reste toujours celle du parent :
