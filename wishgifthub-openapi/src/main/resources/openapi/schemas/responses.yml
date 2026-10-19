@@ -217,10 +217,14 @@ UserResponse:
   type: object
   required:
     - id
-    - email
     - admin
     - createdAt
   properties:
+    parentId:
+      type: string
+      format: uuid
+      nullable: true
+      description: Parent gestionnaire du profil enfant, absent pour un compte autonome.
     id:
       type: string
       format: uuid
@@ -229,6 +233,7 @@ UserResponse:
     email:
       type: string
       format: email
+      nullable: true
       description: Adresse email de l'utilisateur
       example: "admin@example.com"
     isAdmin:

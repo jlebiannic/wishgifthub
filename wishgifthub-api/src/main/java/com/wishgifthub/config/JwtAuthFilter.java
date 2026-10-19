@@ -43,7 +43,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             try {
                 UUID userId = jwtService.getUserIdFromToken(token);
                 Optional<User> userOpt = userRepository.findById(userId);
-                if (userOpt.isPresent()) {
+                if (userOpt.isPresent() && userOpt.get().getParentId() == null) {
                     User user = userOpt.get();
 
                     // Ajoute les authorities basées sur isAdmin et les groupes

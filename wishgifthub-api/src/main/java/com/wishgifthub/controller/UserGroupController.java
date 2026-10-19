@@ -1,6 +1,7 @@
 package com.wishgifthub.controller;
 
 import com.wishgifthub.dto.UserDto;
+import com.wishgifthub.dto.UserResponseMapper;
 import com.wishgifthub.entity.User;
 import com.wishgifthub.openapi.api.UtilisateursApi;
 import com.wishgifthub.openapi.model.GroupResponse;
@@ -32,7 +33,7 @@ public class UserGroupController implements UtilisateursApi {
         List<User> users = userGroupService.getUsersByGroup(groupId, user.getId());
 
         List<UserResponse> apiUsers = users.stream()
-            .map(this::convertToUserResponse)
+            .map(UserResponseMapper::toResponse)
             .collect(Collectors.toList());
 
         return ResponseEntity.ok(apiUsers);
@@ -69,15 +70,4 @@ public class UserGroupController implements UtilisateursApi {
             .getContext().getAuthentication().getPrincipal();
     }
 
-    private UserResponse convertToUserResponse(User user) {
-        UserResponse response = new UserResponse();
-        response.setId(user.getId());
-        response.setEmail(user.getEmail());
-        response.setIsAdmin(user.isAdmin());
-        response.setAvatarId(user.getAvatarId());
-        response.setPseudo(user.getPseudo());
-        response.setCreatedAt(user.getCreatedAt());
-        return response;
-    }
 }
-

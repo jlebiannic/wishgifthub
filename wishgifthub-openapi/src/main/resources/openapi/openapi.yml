@@ -34,6 +34,8 @@ tags:
     description: Création et acceptation d'invitations
   - name: Utilisateurs
     description: Consultation des groupes et membres
+  - name: Enfants
+    description: Profils enfants geres par leur parent depuis un groupe
   - name: Souhaits
     description: Gestion des listes de souhaits et réservations
   - name: Metadata
@@ -70,6 +72,10 @@ paths:
     $ref: './paths/user-group-endpoints.yml#/~1api~1groups~1{groupId}~1users'
 
   # User endpoints
+  /api/groups/{groupId}/children:
+    $ref: './paths/child-endpoints.yml#/~1api~1groups~1{groupId}~1children'
+  /api/groups/{groupId}/children/{childId}:
+    $ref: './paths/child-endpoints.yml#/~1api~1groups~1{groupId}~1children~1{childId}'
   /api/users/me/avatar:
     $ref: './paths/user-endpoints.yml#/~1api~1users~1me~1avatar'
 
@@ -99,5 +105,3 @@ components:
         Token JWT obtenu après inscription/connexion (admin) ou acceptation d'invitation (utilisateur).
         
         Format: `Authorization: Bearer <token>`
-
-

@@ -5,11 +5,11 @@ import InvitationsDialog from '../InvitationsDialog.vue'
 import {useNotificationStore} from '@/stores/notification'
 import type {GroupMember, Invitation} from '@/stores/group'
 
-const member: GroupMember = {
+const member = {
   id: 'member-1',
   email: 'member@example.com',
   createdAt: '2026-10-18T10:00:00Z'
-}
+} satisfies GroupMember
 
 const invitation: Invitation = {
   id: 'invitation-1',

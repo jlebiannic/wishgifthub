@@ -3,12 +3,12 @@ package com.wishgifthub.service;
 import com.wishgifthub.entity.Group;
 import com.wishgifthub.entity.User;
 import com.wishgifthub.entity.Wish;
+import com.wishgifthub.dto.UserResponseMapper;
 import com.wishgifthub.exception.AccessDeniedException;
 import com.wishgifthub.exception.BusinessRuleException;
 import com.wishgifthub.exception.ResourceNotFoundException;
 import com.wishgifthub.openapi.model.WishRequest;
 import com.wishgifthub.openapi.model.WishResponse;
-import com.wishgifthub.openapi.model.UserResponse;
 import com.wishgifthub.repository.GroupRepository;
 import com.wishgifthub.repository.UserGroupRepository;
 import com.wishgifthub.repository.UserRepository;
@@ -43,8 +43,10 @@ public class WishService {
         Group group = groupRepository.findById(groupId)
                 .orElseThrow(() -> new ResourceNotFoundException("Groupe", groupId));
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Utilisateur", userId));
+        UUID ownerId = request.getUserId() == null ? userId : request.getUserId();
+        User user = userRepository.findById(ownerId)
+                .orElseThrow(() -> new ResourceNotFoundException("Utilisateur", ownerId));
+        requireManageWish(groupId, user, userId);
 
         // Validation des champs
         if (request.getGiftName() == null || request.getGiftName().trim().isEmpty()) {
@@ -158,9 +160,7 @@ public class WishService {
             throw new BusinessRuleException("Le souhait n'appartient pas à ce groupe");
         }
 
-        if (!wish.getUser().getId().equals(userId)) {
-            throw new AccessDeniedException("Vous ne pouvez supprimer que vos propres souhaits");
-        }
+        requireManageWish(groupId, wish.getUser(), userId);
 
         wishRepository.delete(wish);
     }
@@ -176,8 +176,9 @@ public class WishService {
             throw new BusinessRuleException("Le souhait n'appartient pas à ce groupe");
         }
 
-        if (!wish.getUser().getId().equals(userId)) {
-            throw new AccessDeniedException("Vous ne pouvez modifier que vos propres souhaits");
+        requireManageWish(groupId, wish.getUser(), userId);
+        if (request.getUserId() != null && !request.getUserId().equals(wish.getUser().getId())) {
+            throw new BusinessRuleException("Le destinataire d'un souhait ne peut pas être modifié");
         }
 
         if (!wish.isCollective() && wish.getReservedBy() != null) {
@@ -276,7 +277,7 @@ public class WishService {
                 : wish.getReservedBy() != null && wish.getReservedBy().getId().equals(viewerId));
         if (wish.isCollective()) {
             resp.setParticipants(userRepository.findAllById(wish.getParticipants()).stream()
-                    .map(this::toParticipantResponse)
+                    .map(UserResponseMapper::toResponse)
                     .collect(Collectors.toList()));
         }
         if (!wish.isCollective() && wish.getReservedBy() != null) {
@@ -286,15 +287,15 @@ public class WishService {
         return resp;
     }
 
-    private UserResponse toParticipantResponse(User user) {
-        UserResponse response = new UserResponse();
-        response.setId(user.getId());
-        response.setEmail(user.getEmail());
-        response.setIsAdmin(user.isAdmin());
-        response.setAvatarId(user.getAvatarId());
-        response.setPseudo(user.getPseudo());
-        response.setCreatedAt(user.getCreatedAt());
-        return response;
+    private void requireManageWish(UUID groupId, User owner, UUID actorId) {
+        if (owner.getId().equals(actorId)) {
+            return;
+        }
+        if (!actorId.equals(owner.getParentId())
+                || !userGroupRepository.existsByUserIdAndGroupId(actorId, groupId)
+                || !userGroupRepository.existsByUserIdAndGroupId(owner.getId(), groupId)) {
+            throw new AccessDeniedException("Vous ne pouvez gérer que vos souhaits et ceux de vos enfants membres du groupe");
+        }
     }
 
     private int participantCount(Wish wish) {

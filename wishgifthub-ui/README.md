@@ -2,6 +2,31 @@
 
 This template should help get you started developing with Vue 3 in Vite.
 
+## Profils enfants
+
+Dans un groupe, **Gérer mes enfants** permet aux administrateurs comme aux invités
+de créer autant de profils enfants que nécessaire, puis de modifier leur pseudo
+et leur avatar ou de les supprimer. Un enfant rejoint uniquement le groupe courant.
+La suppression est définitive et concerne son profil, ses souhaits et ses appartenances
+à **tous** les groupes ; une confirmation explicite est demandée.
+
+Le bouton **Ajouter un souhait** sur sa propre carte ou celle de son enfant ouvre
+le formulaire pour la personne concernée. Les cartes de ses enfants permettent aussi
+de modifier et supprimer leurs souhaits. La connexion reste toujours celle du parent :
+les réservations et participations sont faites en son nom, jamais au nom de l’enfant.
+Les enfants n’ont ni adresse e-mail, ni mot de passe. Les paramètres du profil
+personnel du parent restent inchangés.
+
+Le client API généré doit inclure les endpoints `getChildren`, `createChild`,
+`updateChild`, `deleteChild` et le champ optionnel `WishRequest.userId`.
+
+### Déploiement
+
+La migration Flyway `V7__child_profiles.sql` s’exécute automatiquement au démarrage
+du backend. Elle ajoute la clé étrangère nullable `parent_id` et autorise l’absence
+d’adresse e-mail uniquement pour les profils enfants sans mot de passe et non
+administrateurs. Les utilisateurs, souhaits et réservations existants sont préservés.
+
 ## Recommended IDE Setup
 
 [VS Code](https://code.visualstudio.com/) + [Vue (Official)](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).

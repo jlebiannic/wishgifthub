@@ -24,8 +24,11 @@ public class User {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(nullable = false, unique = true)
+    @Column(unique = true)
     private String email;
+
+    @Column(name = "parent_id")
+    private UUID parentId;
 
     @Column(name = "password_hash")
     private String passwordHash;
@@ -43,4 +46,3 @@ public class User {
     @Column(name = "created_at", nullable = false)
     private OffsetDateTime createdAt = OffsetDateTime.now();
 }
-

@@ -1,0 +1,93 @@
+/api/groups/{groupId}/children:
+  parameters:
+    - $ref: '../schemas/parameters.yml#/GroupIdParam'
+  get:
+    tags: [Enfants]
+    operationId: getChildren
+    summary: Lister mes enfants membres de ce groupe
+    responses:
+      '200':
+        description: Profils enfants du parent connecte dans ce groupe
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '../schemas/responses.yml#/UserResponse'
+      '401':
+        $ref: '../schemas/errors.yml#/UnauthorizedError'
+      '403':
+        $ref: '../schemas/errors.yml#/ForbiddenError'
+  post:
+    tags: [Enfants]
+    operationId: createChild
+    summary: Creer un profil enfant et l'ajouter au groupe courant
+    description: Accessible a tout membre du groupe. Le parent est determine par le JWT, jamais par la requete. Aucun email, mot de passe ou droit administrateur n'est attribue.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/requests.yml#/ChildRequest'
+    responses:
+      '200':
+        description: Enfant cree
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/responses.yml#/UserResponse'
+      '400':
+        $ref: '../schemas/errors.yml#/BadRequestError'
+      '401':
+        $ref: '../schemas/errors.yml#/UnauthorizedError'
+      '403':
+        $ref: '../schemas/errors.yml#/ForbiddenError'
+
+/api/groups/{groupId}/children/{childId}:
+  parameters:
+    - $ref: '../schemas/parameters.yml#/GroupIdParam'
+    - name: childId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+  put:
+    tags: [Enfants]
+    operationId: updateChild
+    summary: Modifier le nom et l'avatar de son enfant
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/requests.yml#/ChildRequest'
+    responses:
+      '200':
+        description: Profil modifie
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/responses.yml#/UserResponse'
+      '400':
+        $ref: '../schemas/errors.yml#/BadRequestError'
+      '401':
+        $ref: '../schemas/errors.yml#/UnauthorizedError'
+      '403':
+        $ref: '../schemas/errors.yml#/ForbiddenError'
+      '404':
+        $ref: '../schemas/errors.yml#/NotFoundError'
+  delete:
+    tags: [Enfants]
+    operationId: deleteChild
+    summary: Supprimer definitivement son enfant et tous ses souhaits
+    description: Supprime le profil et ses appartenances et souhaits dans tous les groupes. Reserve au parent createur, membre du groupe courant.
+    responses:
+      '204':
+        description: Enfant supprime
+      '401':
+        $ref: '../schemas/errors.yml#/UnauthorizedError'
+      '403':
+        $ref: '../schemas/errors.yml#/ForbiddenError'
+      '404':
+        $ref: '../schemas/errors.yml#/NotFoundError'

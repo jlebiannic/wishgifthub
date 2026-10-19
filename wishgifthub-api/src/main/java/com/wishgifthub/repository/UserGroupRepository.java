@@ -8,6 +8,6 @@ import java.util.UUID;
 public interface UserGroupRepository extends JpaRepository<UserGroup, UUID> {
     List<UserGroup> findByUserId(UUID userId);
     List<UserGroup> findByGroupId(UUID groupId);
+    List<UserGroup> findByGroupIdAndUserParentIdOrderByUserCreatedAtAsc(UUID groupId, UUID parentId);
     boolean existsByUserIdAndGroupId(UUID userId, UUID groupId);
 }
-

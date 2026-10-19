@@ -203,8 +203,13 @@ export interface InvitationResponse {
   jwtToken?: string | null;
 }
 
-/** @example {"createdAt":"2025-11-01T10:00:00Z","avatarId":"avatar-1","id":"987e6543-e21b-12d3-a456-426614174999","isAdmin":true,"pseudo":"Jean","email":"admin@example.com"} */
+/** @example {"createdAt":"2025-11-01T10:00:00Z","avatarId":"avatar-1","id":"987e6543-e21b-12d3-a456-426614174999","isAdmin":true,"pseudo":"Jean","parentId":"046b6c7f-0b8a-43b9-b35d-6489e6daee91","email":"admin@example.com"} */
 export interface UserResponse {
+  /**
+   * Parent gestionnaire du profil enfant, absent pour un compte autonome.
+   * @format uuid
+   */
+  parentId?: string | null;
   /**
    * Identifiant unique de l'utilisateur
    * @format uuid
@@ -216,7 +221,7 @@ export interface UserResponse {
    * @format email
    * @example "admin@example.com"
    */
-  email: string;
+  email?: string | null;
   /**
    * Indique si l'utilisateur est administrateur
    * @example true
@@ -240,6 +245,19 @@ export interface UserResponse {
   createdAt: string;
 }
 
+/** @example {"avatarId":"avatarId","pseudo":"pseudo"} */
+export interface ChildRequest {
+  /**
+   * Nom de l'enfant
+   * @minLength 1
+   * @maxLength 100
+   * @pattern .*\S.*
+   */
+  pseudo: string;
+  /** @maxLength 255 */
+  avatarId?: string | null;
+}
+
 /** @example {"avatarId":"avatar-1","pseudo":"Jean"} */
 export interface UpdateAvatarRequest {
   /**
@@ -255,7 +273,7 @@ export interface UpdateAvatarRequest {
   pseudo?: string | null;
 }
 
-/** @example {"giftName":"Livre de cuisine","groupId":"123e4567-e89b-12d3-a456-426614174000","description":"Livre de recettes italiennes avec photos","userId":"987e6543-e21b-12d3-a456-426614174999","url":"https://example.com/livre","maxParticipants":0,"createdAt":"2025-11-10T10:00:00Z","participantCount":6,"price":"29.99 €","imageUrl":"https://example.com/image.jpg","reservedBy":"456e7890-e12b-12d3-a456-426614174111","participating":true,"collective":true,"id":"111e2222-e33b-44d5-a666-777888999000","participants":[{"createdAt":"2025-11-01T10:00:00Z","avatarId":"avatar-1","id":"987e6543-e21b-12d3-a456-426614174999","isAdmin":true,"pseudo":"Jean","email":"admin@example.com"},{"createdAt":"2025-11-01T10:00:00Z","avatarId":"avatar-1","id":"987e6543-e21b-12d3-a456-426614174999","isAdmin":true,"pseudo":"Jean","email":"admin@example.com"}],"full":true} */
+/** @example {"giftName":"Livre de cuisine","groupId":"123e4567-e89b-12d3-a456-426614174000","description":"Livre de recettes italiennes avec photos","userId":"987e6543-e21b-12d3-a456-426614174999","url":"https://example.com/livre","maxParticipants":0,"createdAt":"2025-11-10T10:00:00Z","participantCount":6,"price":"29.99 €","imageUrl":"https://example.com/image.jpg","reservedBy":"456e7890-e12b-12d3-a456-426614174111","participating":true,"collective":true,"id":"111e2222-e33b-44d5-a666-777888999000","participants":[{"createdAt":"2025-11-01T10:00:00Z","avatarId":"avatar-1","id":"987e6543-e21b-12d3-a456-426614174999","isAdmin":true,"pseudo":"Jean","parentId":"046b6c7f-0b8a-43b9-b35d-6489e6daee91","email":"admin@example.com"},{"createdAt":"2025-11-01T10:00:00Z","avatarId":"avatar-1","id":"987e6543-e21b-12d3-a456-426614174999","isAdmin":true,"pseudo":"Jean","parentId":"046b6c7f-0b8a-43b9-b35d-6489e6daee91","email":"admin@example.com"}],"full":true} */
 export interface WishResponse {
   /** Ce souhait autorise un cadeau commun. */
   collective?: boolean;
@@ -334,8 +352,13 @@ export interface WishResponse {
   createdAt: string;
 }
 
-/** @example {"giftName":"Livre de cuisine","price":"29.99 €","imageUrl":"https://example.com/image.jpg","description":"Livre de recettes italiennes avec photos","collective":false,"url":"https://example.com/livre","maxParticipants":2} */
+/** @example {"giftName":"Livre de cuisine","price":"29.99 €","imageUrl":"https://example.com/image.jpg","description":"Livre de recettes italiennes avec photos","collective":false,"userId":"046b6c7f-0b8a-43b9-b35d-6489e6daee91","url":"https://example.com/livre","maxParticipants":2} */
 export interface WishRequest {
+  /**
+   * Destinataire du souhait (soi par defaut, ou son enfant membre du groupe). Ne permet pas de changer le destinataire a la modification.
+   * @format uuid
+   */
+  userId?: string | null;
   /**
    * Autoriser plusieurs participants pour ce cadeau.
    * @default false

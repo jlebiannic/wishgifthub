@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {ref, watch} from 'vue'
+import {computed, ref, watch} from 'vue'
 import type {UserResponse, WishResponse} from '@/generated/api/wish/data-contracts'
 import {useAuthStore} from '@/stores/auth'
 import {useWishStore} from '@/stores/wish'
@@ -14,12 +14,13 @@ const props = defineProps<{
   wishes: WishResponse[]
   groupId: string
   isCurrentUser: boolean
+  isManagedChild?: boolean
   initiallyExpanded?: boolean
   allMembers: UserResponse[]
 }>()
 
 const emit = defineEmits<{
-  addWish: []
+  addWish: [memberId: string]
   wishUpdated: []
   expansionChanged: [memberId: string, expanded: boolean]
 }>()
@@ -34,6 +35,7 @@ const isReserving = ref<string | null>(null)
 const isDeleting = ref<string | null>(null)
 const editingWish = ref<WishResponse | null>(null)
 const showEditDialog = ref(false)
+const canManageWishes = computed(() => props.isCurrentUser || props.isManagedChild)
 
 // Surveiller les changements de la prop initiallyExpanded (pour tout déplier/replier)
 watch(() => props.initiallyExpanded, (newValue) => {
@@ -225,11 +227,11 @@ function toggleExpand() {
       <!-- Bouton Ajouter (seulement pour l'utilisateur connecté) -->
       <!-- Sur mobile : passe en dessous grâce au flex-wrap -->
       <v-btn
-        v-if="isCurrentUser"
+        v-if="canManageWishes"
         color="primary"
         variant="elevated"
         prepend-icon="mdi-plus"
-        @click.stop="emit('addWish')"
+        @click.stop="emit('addWish', member.id)"
         size="small"
         class="mr-2 mt-2 mt-sm-0"
       >
@@ -352,11 +354,12 @@ function toggleExpand() {
 
                   <!-- Bouton Modifier (uniquement pour mes propres souhaits non réservés) -->
                   <v-btn
-                    v-if="isCurrentUser && (wish.collective || !wish.reservedBy)"
+                    v-if="canManageWishes && (wish.collective || !wish.reservedBy)"
                     color="primary"
                     size="small"
                     variant="text"
                     icon="mdi-pencil"
+                    aria-label="Modifier le souhait"
                     @click="handleEdit(wish)"
                     class="mr-2"
                   >
@@ -368,11 +371,12 @@ function toggleExpand() {
 
                   <!-- Bouton Supprimer (uniquement pour mes propres souhaits) -->
                   <v-btn
-                    v-if="isCurrentUser"
+                    v-if="canManageWishes"
                     color="error"
                     size="small"
                     variant="text"
                     icon="mdi-delete"
+                    aria-label="Supprimer le souhait"
                     @click="handleDelete(wish)"
                     :loading="isDeleting === wish.id"
                   >

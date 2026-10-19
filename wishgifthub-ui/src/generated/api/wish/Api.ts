@@ -12,6 +12,7 @@
 import type {
   AuthRequest,
   AuthResponse,
+  ChildRequest,
   ErrorResponse,
   GroupRequest,
   GroupResponse,
@@ -224,6 +225,90 @@ export class Api<
       path: `/api/groups/${groupId}/users`,
       method: "GET",
       secure: true,
+      format: "json",
+      ...params,
+    });
+  /**
+   * No description
+   *
+   * @tags Enfants
+   * @name GetChildren
+   * @summary Lister mes enfants membres de ce groupe
+   * @request GET:/api/groups/{groupId}/children
+   * @secure
+   */
+  getChildren = (groupId: string, params: RequestParams = {}) =>
+    this.request<UserResponse[], ErrorResponse>({
+      path: `/api/groups/${groupId}/children`,
+      method: "GET",
+      secure: true,
+      format: "json",
+      ...params,
+    });
+  /**
+   * @description Accessible a tout membre du groupe. Le parent est determine par le JWT, jamais par la requete. Aucun email, mot de passe ou droit administrateur n'est attribue.
+   *
+   * @tags Enfants
+   * @name CreateChild
+   * @summary Creer un profil enfant et l'ajouter au groupe courant
+   * @request POST:/api/groups/{groupId}/children
+   * @secure
+   */
+  createChild = (
+    groupId: string,
+    data: ChildRequest,
+    params: RequestParams = {},
+  ) =>
+    this.request<UserResponse, ErrorResponse>({
+      path: `/api/groups/${groupId}/children`,
+      method: "POST",
+      body: data,
+      secure: true,
+      type: ContentType.Json,
+      format: "json",
+      ...params,
+    });
+  /**
+   * @description Supprime le profil et ses appartenances et souhaits dans tous les groupes. Reserve au parent createur, membre du groupe courant.
+   *
+   * @tags Enfants
+   * @name DeleteChild
+   * @summary Supprimer definitivement son enfant et tous ses souhaits
+   * @request DELETE:/api/groups/{groupId}/children/{childId}
+   * @secure
+   */
+  deleteChild = (
+    groupId: string,
+    childId: string,
+    params: RequestParams = {},
+  ) =>
+    this.request<void, ErrorResponse>({
+      path: `/api/groups/${groupId}/children/${childId}`,
+      method: "DELETE",
+      secure: true,
+      ...params,
+    });
+  /**
+   * No description
+   *
+   * @tags Enfants
+   * @name UpdateChild
+   * @summary Modifier le nom et l'avatar de son enfant
+   * @request PUT:/api/groups/{groupId}/children/{childId}
+   * @secure
+   */
+  updateChild = (
+    groupId: string,
+    childId: string,
+    data: ChildRequest,
+    params: RequestParams = {},
+  ) =>
+    this.request<UserResponse, ErrorResponse>({
+      path: `/api/groups/${groupId}/children/${childId}`,
+      method: "PUT",
+      body: data,
+      secure: true,
+      type: ContentType.Json,
       format: "json",
       ...params,
     });

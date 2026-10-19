@@ -8,6 +8,8 @@ import CollectiveGiftFields from './CollectiveGiftFields.vue'
 const props = defineProps<{
   groupId: string
   modelValue: boolean
+  targetUserId?: string
+  targetName?: string
 }>()
 
 const emit = defineEmits<{
@@ -195,23 +197,24 @@ watch(url, () => {
 })
 
 async function handleSubmit() {
-  // Valider le formulaire
-  if (form.value) {
-    const { valid } = await form.value.validate()
-    if (!valid) {
-      notificationStore.showError('Veuillez corriger les erreurs dans le formulaire')
-      return
-    }
-  }
-
-  if (!title.value) {
-    notificationStore.showError('Le titre est requis')
-    return
-  }
-
+  if (isSaving.value) return
   isSaving.value = true
 
   try {
+    // Valider le formulaire
+    if (form.value) {
+      const { valid } = await form.value.validate()
+      if (!valid) {
+        notificationStore.showError('Veuillez corriger les erreurs dans le formulaire')
+        return
+      }
+    }
+
+    if (!title.value) {
+      notificationStore.showError('Le titre est requis')
+      return
+    }
+
     // Nettoyer les URLs avant l'envoi
     const cleanedUrl = url.value ? cleanUrl(url.value) : null
     const cleanedImageUrl = imageUrl.value ? cleanUrl(imageUrl.value) : null
@@ -223,7 +226,8 @@ async function handleSubmit() {
       description: description.value || null,
       url: cleanedUrl,
       imageUrl: cleanedImageUrl,
-      price: price.value || null
+      price: price.value || null,
+      ...(props.targetUserId ? {userId: props.targetUserId} : {})
     })
 
     notificationStore.showSuccess('Souhait ajouté avec succès !')
@@ -260,6 +264,10 @@ function handleClose() {
   emit('update:modelValue', false)
 }
 
+watch(() => props.modelValue, open => {
+  if (!open && !isSaving.value) resetForm()
+})
+
 // Nettoyer l'URL principale quand l'utilisateur quitte le champ
 function handleUrlBlur() {
   if (url.value) {
@@ -291,11 +299,11 @@ function handleImageUrlBlur() {
     <v-card>
       <v-card-title class="pa-4 bg-primary">
         <v-icon class="mr-2">mdi-gift-outline</v-icon>
-        Ajouter un souhait
+        Ajouter un souhait{{ targetName ? ` pour ${targetName}` : '' }}
       </v-card-title>
 
       <v-card-text class="pa-4">
-        <v-form ref="form" @submit.prevent="handleSubmit">
+        <v-form ref="form" :disabled="isSaving" @submit.prevent="handleSubmit">
           <CollectiveGiftFields v-model:collective="collective" v-model:max-participants="maxParticipants" />
           <!-- Champ URL -->
           <v-text-field
@@ -422,7 +430,7 @@ function handleImageUrlBlur() {
           variant="elevated"
           @click="handleSubmit"
           :loading="isSaving"
-          :disabled="!title"
+          :disabled="!title || isSaving"
         >
           Ajouter
         </v-btn>

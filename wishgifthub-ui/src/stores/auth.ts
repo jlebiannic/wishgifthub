@@ -3,6 +3,7 @@ import {defineStore} from 'pinia'
 import {jwtDecode} from 'jwt-decode'
 import {getApiClient, updateApiToken} from '@/api/client'
 import {useGroupStore} from './group'
+import {useChildrenStore} from './children'
 import type {UserResponse} from '@/generated/api/wish/data-contracts'
 
 /**
@@ -160,6 +161,7 @@ export const useAuthStore = defineStore('auth', () => {
     // Réinitialiser le store group
     const groupStore = useGroupStore()
     groupStore.reset()
+    useChildrenStore().reset()
   }
 
   /**
@@ -310,11 +312,11 @@ export const useAuthStore = defineStore('auth', () => {
     }
 
     // 2. Sinon, extraire le username de l'email (partie avant le @)
-    const emailParts = member.email.split('@')
+    const emailParts = (member.email ?? '').split('@')
     const username = emailParts[0]
 
     // 3. Fallback sur l'email complet si pas de username
-    return username || member.email
+    return username || member.email || 'Membre'
   }
 
   return {

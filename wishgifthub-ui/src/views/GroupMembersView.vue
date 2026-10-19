@@ -1,11 +1,14 @@
 <script setup lang="ts">
-import {computed, onMounted, ref} from 'vue'
+import {computed, ref, watch} from 'vue'
 import {useRoute, useRouter} from 'vue-router'
 import {useAuthStore} from '@/stores/auth'
 import {useGroupStore} from '@/stores/group'
 import {useWishStore} from '@/stores/wish'
 import MemberCard from '@/components/MemberCard.vue'
 import AddWishDialog from '@/components/AddWishDialog.vue'
+import ChildrenDialog from '@/components/ChildrenDialog.vue'
+import {useChildrenStore} from '@/stores/children'
+import {useNotificationStore} from '@/stores/notification'
 import type {UserResponse} from '@/generated/api/wish/data-contracts'
 
 const route = useRoute()
@@ -13,13 +16,32 @@ const router = useRouter()
 const authStore = useAuthStore()
 const groupStore = useGroupStore()
 const wishStore = useWishStore()
+const childrenStore = useChildrenStore()
+const notifications = useNotificationStore()
 
-const groupId = ref(route.params.groupId as string)
+const groupId = computed(() => route.params.groupId as string)
 const groupName = ref('')
 const members = ref<UserResponse[]>([])
 const showAddWishDialog = ref(false)
 const isLoading = ref(true)
 const expandedMembers = ref<Map<string, boolean>>(new Map())
+const showChildrenDialog = ref(false)
+const refreshing = ref(false)
+const selectedUserId = ref('')
+const managedChildren = computed(() => childrenStore.currentGroupId === groupId.value ? childrenStore.children : [])
+const wishOwners = computed(() => [
+  {title: 'Moi', value: authStore.user?.id ?? ''},
+  ...managedChildren.value.map(child => ({title: authStore.getMemberDisplayName(child), value: child.id}))
+])
+const selectedOwnerName = computed(() => wishOwners.value.find(owner => owner.value === selectedUserId.value)?.title)
+const selectedChildId = computed(() => selectedUserId.value === authStore.user?.id ? undefined : selectedUserId.value)
+
+watch(wishOwners, owners => {
+  if (!owners.some(owner => owner.value === selectedUserId.value)) {
+    selectedUserId.value = authStore.user?.id ?? ''
+    showAddWishDialog.value = false
+  }
+}, {immediate: true})
 
 // Trier les membres : l'utilisateur connecté en premier
 const sortedMembers = computed(() => {
@@ -66,7 +88,15 @@ function collapseAll() {
   expandedMembers.value = new Map(expandedMembers.value)
 }
 
-onMounted(async () => {
+async function loadGroup() {
+  const requestedGroupId = groupId.value
+  isLoading.value = true
+  showAddWishDialog.value = false
+  showChildrenDialog.value = false
+  selectedUserId.value = authStore.user?.id ?? ''
+  members.value = []
+  expandedMembers.value = new Map()
+  childrenStore.reset()
   if (!groupId.value) {
     router.push('/')
     return
@@ -98,11 +128,13 @@ onMounted(async () => {
     }
 
     // Récupérer les membres du groupe
-    await groupStore.fetchGroupMembers(groupId.value)
-    members.value = groupStore.members
-
-    // Récupérer tous les souhaits du groupe
-    await wishStore.fetchGroupWishes(groupId.value)
+    const [loadedMembers] = await Promise.all([
+      groupStore.fetchGroupMembers(requestedGroupId),
+      wishStore.fetchGroupWishes(requestedGroupId),
+      childrenStore.fetchChildren(requestedGroupId)
+    ])
+    if (groupId.value !== requestedGroupId) return
+    members.value = loadedMembers
 
     // Si un hash est présent dans l'URL, déplier le membre correspondant
     if (route.hash) {
@@ -120,24 +152,52 @@ onMounted(async () => {
     }
   } catch (error) {
     console.error('Erreur lors du chargement:', error)
+    notifications.showError('Impossible de charger les membres, les souhaits ou les profils enfants')
     // En cas d'erreur (ex: groupe non accessible), retourner à l'accueil
     router.push('/')
   } finally {
-    isLoading.value = false
+    if (groupId.value === requestedGroupId) isLoading.value = false
   }
-})
+}
+
+watch(groupId, loadGroup, {immediate: true})
+
+async function handleChildrenChanged() {
+  const requestedGroupId = groupId.value
+  refreshing.value = true
+  try {
+    const [loadedMembers] = await Promise.all([
+      groupStore.fetchGroupMembers(requestedGroupId),
+      wishStore.fetchGroupWishes(requestedGroupId),
+      childrenStore.fetchChildren(requestedGroupId)
+    ])
+    if (groupId.value !== requestedGroupId) return
+    members.value = loadedMembers
+    expandedMembers.value = new Map([...expandedMembers.value].filter(([id]) => members.value.some(member => member.id === id)))
+  } catch {
+    notifications.showError('Le profil est enregistré, mais le groupe n’a pas pu être actualisé. Veuillez recharger la page.')
+  } finally {
+    refreshing.value = false
+  }
+}
 
 async function handleWishUpdated() {
   // Recharger les souhaits après une mise à jour
-  await wishStore.fetchGroupWishes(groupId.value)
+  try {
+    await wishStore.fetchGroupWishes(groupId.value)
+  } catch {
+    notifications.showError('Impossible d’actualiser les souhaits du groupe')
+  }
 }
 
 async function handleWishAdded() {
   // Recharger les souhaits après un ajout
-  await wishStore.fetchGroupWishes(groupId.value)
+  await handleWishUpdated()
 }
 
-function handleAddWish() {
+function handleAddWish(memberId: string) {
+  if (!wishOwners.value.some(owner => owner.value === memberId)) return
+  selectedUserId.value = memberId
   showAddWishDialog.value = true
 }
 
@@ -206,6 +266,15 @@ function goBack() {
       </v-col>
     </v-row>
 
+    <v-row v-if="!isLoading">
+      <v-col cols="12" class="d-flex flex-wrap align-center ga-3">
+        <v-btn prepend-icon="mdi-account-child" variant="tonal" :disabled="refreshing || showAddWishDialog"
+               @click="showChildrenDialog = true">
+          Gérer mes enfants
+        </v-btn>
+      </v-col>
+    </v-row>
+
     <!-- Chargement -->
     <v-row v-if="isLoading" justify="center" class="my-8">
       <v-col cols="12" class="text-center">
@@ -237,6 +306,7 @@ function goBack() {
           :wishes="getMemberWishes(member.id)"
           :group-id="groupId"
           :is-current-user="member.id === authStore.user?.id"
+          :is-managed-child="managedChildren.some(child => child.id === member.id)"
           :all-members="members"
           :initially-expanded="isMemberExpanded(member.id)"
           @add-wish="handleAddWish"
@@ -250,8 +320,12 @@ function goBack() {
     <AddWishDialog
       v-model="showAddWishDialog"
       :group-id="groupId"
+      :target-user-id="selectedChildId"
+      :target-name="selectedOwnerName"
       @wish-added="handleWishAdded"
     />
+    <ChildrenDialog v-model="showChildrenDialog" :group-id="groupId" :refreshing="refreshing"
+                    @changed="handleChildrenChanged" />
   </v-container>
 </template>
 

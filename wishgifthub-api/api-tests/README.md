@@ -2,6 +2,20 @@
 
 Cette collection contient tous les tests pour l'API WishGiftHub.
 
+## Profils enfants : tests automatisés
+
+Depuis la racine du dépôt :
+
+```powershell
+mvn -pl wishgifthub-api "-Dtest=ChildApiTest,ChildMigrationTest" test
+```
+
+Ces tests couvrent la création de plusieurs enfants depuis un groupe par un membre
+invité, la modification des profils et de leurs souhaits, les restrictions au parent
+créateur, les réservations et la suppression des données de l'enfant. Ils vérifient
+aussi que la migration V7 conserve les comptes, souhaits et réservations existants.
+La migration est exécutée automatiquement par Flyway au démarrage de l'API.
+
 ## 📁 Structure
 
 ```
@@ -164,4 +178,3 @@ Si une requête échoue :
   "name": "WishGiftHub API",
   "type": "collection"
 }
-

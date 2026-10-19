@@ -72,11 +72,32 @@ UpdateAvatarRequest:
       example: "Jean"
       nullable: true
 
+ChildRequest:
+  type: object
+  required:
+    - pseudo
+  properties:
+    pseudo:
+      type: string
+      minLength: 1
+      maxLength: 100
+      pattern: '.*\S.*'
+      description: Nom de l'enfant
+    avatarId:
+      type: string
+      maxLength: 255
+      nullable: true
+
 WishRequest:
   type: object
   required:
     - giftName
   properties:
+    userId:
+      type: string
+      format: uuid
+      nullable: true
+      description: Destinataire du souhait (soi par defaut, ou son enfant membre du groupe). Ne permet pas de changer le destinataire a la modification.
     collective:
       type: boolean
       default: false

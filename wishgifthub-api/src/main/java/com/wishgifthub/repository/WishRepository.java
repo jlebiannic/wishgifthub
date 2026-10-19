@@ -15,5 +15,6 @@ public interface WishRepository extends JpaRepository<Wish, UUID> {
     Optional<Wish> findByIdForUpdate(UUID id);
 
     List<Wish> findByGroupId(UUID groupId);
+    List<Wish> findByUserId(UUID userId);
     List<Wish> findByGroupIdAndUserId(UUID groupId, UUID userId);
 }
