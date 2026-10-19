@@ -1,12 +1,15 @@
 # A faire
 
 ## Fonc à faire
+- Ajouter un souhait provisoire (non visible par les autres membres du groupe) pour pouvoir le modifier avant de le rendre visible
+- Lorsque le souhait dépasse une valeur par défaut (50 € par défaut mais paramétrable par l'administrateur), demander si le souhait devrait être un souhait commun (réservé par plusieurs membres du groupe)
 - ajout d'un bouton pour rafraichir le groupe
 - formulaire de contact
-- Un membre peu créer un membre enfant ou autre.
-- Réserver à plusieurs (ex: 2 personnes réservent un cadeau commun)
+
 
 ## Tech à faire
+- Pb de token JWT expiré
+
 - Revoir le mode admin car il est conditionné uniquement par un boolean et donc admin=true veut dire admin de n'importe quel groupe (il faut ajouter une colonne id admin à la table groupe plutôt)!
 - ajouter la gestion des erreurs globales
 - refresh auto des souhaits
@@ -18,6 +21,8 @@
 # Fait
 
 ## Fonc fait
+- Un membre peu créer un membre enfant ou autre.
+- Réserver à plusieurs (ex: 2 personnes réservent un cadeau commun)
 - reserrer l'écran pour les grands écrans (largeur max 1600px) avec bouton "Retour en haut" lors du scroll
 - avatars plus jolis et variés (48 avatars thématiques: animaux, nature, objets, etc.)
 - si déjà réservé et possibilité de réserver alors afficher une erreur au moment du clique et mettre à jour le bouton

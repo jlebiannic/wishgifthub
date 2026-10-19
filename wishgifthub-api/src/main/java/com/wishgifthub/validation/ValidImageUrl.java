@@ -11,8 +11,8 @@ import java.lang.annotation.Target;
 
 /**
  * Annotation de validation pour vérifier qu'une URL d'image est valide.
- * L'URL doit utiliser le protocole HTTP ou HTTPS et pointer vers un fichier image
- * (jpg, jpeg, png, gif, webp, svg).
+ * L'URL doit utiliser le protocole HTTP ou HTTPS et ne pas dépasser 2048 caractères.
+ * Une extension de fichier n'est pas nécessaire pour les images servies par un CDN.
  * S'applique aux types String et URI.
  */
 @Target({ElementType.FIELD, ElementType.PARAMETER, ElementType.METHOD})
@@ -27,4 +27,3 @@ public @interface ValidImageUrl {
 
     Class<? extends Payload>[] payload() default {};
 }
-

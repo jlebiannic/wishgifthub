@@ -6,6 +6,7 @@ import org.jsoup.nodes.Element;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -206,7 +207,7 @@ public class MetadataExtractionService {
     }
 
     /**
-     * Vérifie qu'une URL se termine par une extension d'image valide
+     * Vérifie une URL d'image HTTP(S), sans imposer d'extension.
      */
     private boolean isValidImageUrl(String url) {
         if (url == null || url.isEmpty()) {
@@ -225,19 +226,16 @@ public class MetadataExtractionService {
             return false;
         }
 
-        // Enlever les paramètres de requête pour vérifier l'extension
-        String urlWithoutParams = url.split("\\?")[0];
-
-        // Extensions d'images valides
-        String[] validExtensions = {".jpg", ".jpeg", ".png", ".gif", ".webp", ".svg", ".bmp", ".ico", ".avif"};
-
-        for (String ext : validExtensions) {
-            if (urlWithoutParams.toLowerCase().endsWith(ext)) {
-                return true;
-            }
+        if (url.length() > 2048) {
+            return false;
         }
-
-        return false;
+        try {
+            URI uri = URI.create(url);
+            return ("http".equalsIgnoreCase(uri.getScheme()) || "https".equalsIgnoreCase(uri.getScheme()))
+                    && uri.getHost() != null;
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
     }
 
     /**
@@ -357,4 +355,3 @@ public class MetadataExtractionService {
         return cleaned.isEmpty() ? null : cleaned;
     }
 }
-

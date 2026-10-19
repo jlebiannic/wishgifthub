@@ -60,22 +60,6 @@ function isValidUrl(urlString: string): boolean {
   }
 }
 
-// Fonction de validation d'URL d'image
-function isValidImageUrl(urlString: string): boolean {
-  if (!urlString) return true
-  if (!isValidUrl(urlString)) return false
-
-  const validExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg', '.bmp', '.ico']
-
-  try {
-    const url = new URL(urlString)
-    const path = url.pathname.toLowerCase()
-    return validExtensions.some(ext => path.endsWith(ext))
-  } catch {
-    return false
-  }
-}
-
 // Fonction pour nettoyer une URL
 function cleanUrl(urlString: string): string {
   if (!urlString || !urlString.trim()) return urlString
@@ -126,7 +110,7 @@ const rules = {
   ],
   imageUrl: [
     (v: string) => !v || v.length <= 2048 || 'L\'URL de l\'image ne peut pas dépasser 2048 caractères',
-    (v: string) => isValidImageUrl(v) || 'L\'URL doit pointer vers une image valide (extensions acceptées : jpg, jpeg, png, gif, webp, svg, bmp, ico)'
+    (v: string) => isValidUrl(v) || 'L\'URL de l\'image n\'est pas valide (doit commencer par http:// ou https://)'
   ],
   price: [
     (v: string) => !v || v.length <= 100 || 'Le prix ne peut pas dépasser 100 caractères'

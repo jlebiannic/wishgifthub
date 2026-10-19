@@ -5,7 +5,7 @@ Ce dossier contient les tests Bruno pour vérifier que la validation des URLs fo
 ## Vue d'ensemble
 
 La validation des URLs est effectuée à deux niveaux :
-1. **Bean Validation** : Via l'annotation `@ValidUrl` sur les champs `url` et `imageUrl` du `WishRequest`
+1. **Bean Validation** : Via `@ValidUrl` sur `url` et `@ValidImageUrl` sur `imageUrl` du `WishRequest`
 2. **Service** : Validation de la longueur maximale (2048 caractères) dans `WishService`
 
 ## Tests de validation
@@ -44,6 +44,11 @@ Une URL est **invalide** si :
 - ❌ Elle n'a pas de host
 - ❌ Elle dépasse 2048 caractères
 - ❌ Elle est malformée
+
+Les URL d'image n'ont pas besoin d'extension : les images CDN telles que
+`https://assets.katogroup.eu/i/katogroup/KZ1114A1_01_kizer` sont acceptées,
+y compris avec des paramètres de transformation. Le contenu est affiché dans
+l'aperçu du formulaire ; l'extension ne permet pas de déterminer le type réel du contenu.
 
 ## Exécution des tests
 
@@ -100,7 +105,7 @@ public @interface ValidUrl {
 @com.wishgifthub.validation.ValidUrl
 private URI url = null;
 
-@com.wishgifthub.validation.ValidUrl
+@com.wishgifthub.validation.ValidImageUrl
 private URI imageUrl = null;
 ```
 
@@ -147,4 +152,3 @@ Si vous ajoutez de nouveaux cas de validation :
 ### Nettoyage échoue
 - Les souhaits créés lors des tests de succès sont automatiquement supprimés
 - Si le nettoyage échoue, supprimer manuellement via l'API ou la base de données
-
