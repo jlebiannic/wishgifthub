@@ -15,7 +15,7 @@ vi.mock('@/api/client', () => ({getApiClient: () => api, updateApiToken: vi.fn()
 const group = {id: 'group', name: 'Noël', type: 'noël', adminId: 'owner',
   createdAt: '2026-10-19T10:00:00Z', collectiveGiftThreshold: 75}
 const wish = {id: 'wish', userId: 'owner', groupId: 'group', giftName: 'Livre',
-  createdAt: group.createdAt, price: '76 €', collective: false}
+  createdAt: group.createdAt, price: '76 €', collective: false, provisional: false}
 
 beforeEach(() => setActivePinia(createPinia()))
 afterEach(() => vi.useRealTimers())

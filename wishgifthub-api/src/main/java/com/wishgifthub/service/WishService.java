@@ -68,6 +68,7 @@ public class WishService {
         wish.setUser(user);
         wish.setGroup(group);
         wish.setGiftName(request.getGiftName());
+        wish.setProvisional(Boolean.TRUE.equals(request.getProvisional()));
         configureReservation(wish, request);
         if (request.getDescription() != null) {
             wish.setDescription(request.getDescription());
@@ -91,6 +92,7 @@ public class WishService {
                 .orElseThrow(() -> new ResourceNotFoundException("Groupe", groupId));
 
         return wishRepository.findByGroupId(groupId).stream()
+                .filter(wish -> canViewWish(wish, userId))
                 .map(wish -> toResponse(wish, userId))
                 .collect(Collectors.toList());
     }
@@ -102,6 +104,8 @@ public class WishService {
         if (!wish.getGroup().getId().equals(groupId)) {
             throw new BusinessRuleException("Le souhait n'appartient pas à ce groupe");
         }
+
+        requirePublishedWish(wish, userId);
 
         if (wish.getUser().getId().equals(userId)) {
             throw new BusinessRuleException("Vous ne pouvez pas réserver votre propre souhait");
@@ -136,6 +140,8 @@ public class WishService {
         if (!wish.getGroup().getId().equals(groupId)) {
             throw new BusinessRuleException("Le souhait n'appartient pas à ce groupe");
         }
+
+        requirePublishedWish(wish, userId);
 
         if (wish.isCollective() ? !wish.getParticipants().contains(userId)
                 : wish.getReservedBy() == null || !wish.getReservedBy().getId().equals(userId)) {
@@ -181,6 +187,11 @@ public class WishService {
             throw new BusinessRuleException("Le destinataire d'un souhait ne peut pas être modifié");
         }
 
+        if (Boolean.TRUE.equals(request.getProvisional())
+                && (wish.getReservedBy() != null || !wish.getParticipants().isEmpty())) {
+            throw new BusinessRuleException("Impossible de rendre provisoire un souhait avec une réservation ou des participants");
+        }
+
         if (!wish.isCollective() && wish.getReservedBy() != null) {
             throw new BusinessRuleException("Impossible de modifier un souhait déjà réservé");
         }
@@ -206,6 +217,9 @@ public class WishService {
         wish.setImageUrl(request.getImageUrl() != null ? request.getImageUrl().toString() : null);
         wish.setPrice(request.getPrice());
         configureReservation(wish, request);
+        if (request.getProvisional() != null) {
+            wish.setProvisional(request.getProvisional());
+        }
 
         wish = wishRepository.save(wish);
 
@@ -218,6 +232,7 @@ public class WishService {
         }
 
         return wishRepository.findByGroupIdAndUserId(groupId, targetUserId).stream()
+                .filter(wish -> canViewWish(wish, requestingUserId))
                 .map(wish -> toResponse(wish, requestingUserId))
                 .collect(Collectors.toList());
     }
@@ -248,6 +263,7 @@ public class WishService {
         resp.setUserId(wish.getUser().getId());
         resp.setGroupId(wish.getGroup().getId());
         resp.setGiftName(wish.getGiftName());
+        resp.setProvisional(wish.isProvisional());
         if (wish.getDescription() != null) {
             resp.setDescription(wish.getDescription());
         }
@@ -287,13 +303,31 @@ public class WishService {
         return resp;
     }
 
+    private boolean canViewWish(Wish wish, UUID viewerId) {
+        return !wish.isProvisional() || wish.getUser().getId().equals(viewerId)
+                || isManagingParent(wish.getGroup().getId(), wish.getUser(), viewerId);
+    }
+
+    private void requirePublishedWish(Wish wish, UUID viewerId) {
+        if (!canViewWish(wish, viewerId)) {
+            throw new ResourceNotFoundException("Souhait", wish.getId());
+        }
+        if (wish.isProvisional()) {
+            throw new BusinessRuleException("Un souhait provisoire ne peut pas être réservé ou dé-réservé");
+        }
+    }
+
+    private boolean isManagingParent(UUID groupId, User owner, UUID actorId) {
+        return actorId.equals(owner.getParentId())
+                && userGroupRepository.existsByUserIdAndGroupId(actorId, groupId)
+                && userGroupRepository.existsByUserIdAndGroupId(owner.getId(), groupId);
+    }
+
     private void requireManageWish(UUID groupId, User owner, UUID actorId) {
         if (owner.getId().equals(actorId)) {
             return;
         }
-        if (!actorId.equals(owner.getParentId())
-                || !userGroupRepository.existsByUserIdAndGroupId(actorId, groupId)
-                || !userGroupRepository.existsByUserIdAndGroupId(owner.getId(), groupId)) {
+        if (!isManagingParent(groupId, owner, actorId)) {
             throw new AccessDeniedException("Vous ne pouvez gérer que vos souhaits et ceux de vos enfants membres du groupe");
         }
     }

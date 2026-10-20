@@ -88,6 +88,7 @@ function getReservedByNameShort(wish: WishResponse): string {
 
 // Vérifier si je peux réserver ce souhait
 function canReserve(wish: WishResponse): boolean {
+  if (wish.provisional) return false
   // Je ne peux pas réserver mes propres souhaits
   if (wish.userId === authStore.user?.id) {
     return false
@@ -106,6 +107,7 @@ function canReserve(wish: WishResponse): boolean {
 
 // Vérifier si je peux annuler la réservation
 function canUnreserve(wish: WishResponse): boolean {
+  if (wish.provisional) return false
   if (wish.userId === authStore.user?.id) return false
   if (wish.collective) return wish.participating === true
   return wish.reservedBy === authStore.user?.id
@@ -300,6 +302,10 @@ function toggleExpand() {
                   <div class="text-subtitle-1 font-weight-bold mb-2">
                     {{ wish.giftName }}
                   </div>
+                  <v-chip v-if="wish.provisional" color="warning" size="small" class="mb-2"
+                          prepend-icon="mdi-eye-off-outline">
+                    Souhait provisoire
+                  </v-chip>
                   <v-chip v-if="wish.collective" color="primary" size="small" class="mb-2">
                     Cadeau commun
                   </v-chip>

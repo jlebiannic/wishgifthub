@@ -101,6 +101,9 @@ WishRequest:
   required:
     - giftName
   properties:
+    provisional:
+      type: boolean
+      description: Souhait provisoire visible uniquement par son destinataire et son parent gestionnaire membre du groupe, sans réservation possible. Omis à la création, vaut false ; omis à la modification, conserve la valeur existante. Impossible de rendre provisoire un souhait avec une réservation ou des participants.
     userId:
       type: string
       format: uuid

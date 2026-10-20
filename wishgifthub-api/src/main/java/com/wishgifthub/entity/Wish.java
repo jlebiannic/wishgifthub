@@ -59,6 +59,9 @@ public class Wish {
     @Column(nullable = false)
     private boolean collective;
 
+    @Column(nullable = false)
+    private boolean provisional;
+
     @Column(name = "max_participants", nullable = false)
     private int maxParticipants = 1;
 

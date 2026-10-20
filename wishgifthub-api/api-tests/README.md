@@ -37,6 +37,32 @@ enfants, appartenances, invitations, souhaits, réservations ou participants exi
 Les tests couvrent ces garanties, les valeurs personnalisées, la conservation du
 seuil à la modification, les autorisations et le rejet des valeurs invalides.
 
+## Souhaits provisoires : tests automatisés
+
+```powershell
+mvn -pl wishgifthub-api "-Dtest=ProvisionalWishApiTest,ProvisionalWishMigrationTest,ChildApiTest,CollectiveGiftApiTest,CollectiveGiftTest" test
+```
+
+`WishRequest.provisional` est optionnel, sans valeur par défaut dans le contrat :
+omis à la création il vaut `false`, omis à la modification il conserve sa valeur.
+Chaque `WishResponse` retourne ce booléen. Un souhait provisoire n'est visible
+que par son destinataire ou son parent gestionnaire membre du même groupe,
+sur `/wishes`, `/wishes/me` et `/wishes/users/{userId}`. Aucun accès supplémentaire
+n'est accordé aux administrateurs. La gestion reste réservée au destinataire
+et au parent gestionnaire.
+
+Passer `provisional` à `false` publie le souhait et autorise les réservations.
+Réserver ou annuler une réservation sur un souhait provisoire renvoie `404`
+aux autres membres, même avec un UUID connu, et `409` au destinataire/parent.
+Rendre provisoire un souhait avec une réservation individuelle ou des participants
+collectifs renvoie `409` sans modifier les données, même lors d'un changement
+simultané du mode de réservation.
+
+Flyway applique automatiquement `V9__provisional_wishes.sql` : colonne booléenne
+`NOT NULL DEFAULT FALSE`, tous les souhaits existants restent publiés. Les tests
+couvrent les listes, autorisations, parents/enfants, publication, conservation de
+l'état en cas d'omission, conflits et préservation des données lors de la migration.
+
 ## 📁 Structure
 
 ```

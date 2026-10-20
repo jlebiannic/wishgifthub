@@ -31,7 +31,7 @@ const otherChild: UserResponse = {...child, id: 'other-child', parentId: 'other-
 const parent: UserResponse = {...child, id: 'parent', parentId: null, email: 'parent@example.com', pseudo: 'Parent'}
 const wish: WishResponse = {
   id: 'wish', userId: 'child', groupId: 'group', giftName: 'Livre', createdAt: child.createdAt,
-  collective: false
+  collective: false, provisional: false
 }
 const stubs = {
   VDialog: true, VCard: true, VCardText: true, VCardTitle: true, VCardActions: true,

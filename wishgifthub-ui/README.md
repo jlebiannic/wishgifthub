@@ -44,6 +44,19 @@ permet de conserver le mode individuel. Les prix préremplis par l'extraction de
 métadonnées suivent la même règle. Un prix vide, non numérique, une fourchette
 ou une devise autre que l'euro ne déclenche pas de suggestion.
 
+## Souhaits provisoires
+
+Les formulaires d'ajout et de modification proposent **Souhait provisoire
+(non visible par les autres membres)**, désactivé par défaut. Le souhait reste
+visible uniquement par son propriétaire et, pour un enfant, par son parent
+gestionnaire membre du groupe. Les autres membres, y compris l'administrateur
+du groupe, ne reçoivent pas ces souhaits dans les réponses de l'API.
+
+Un badge indique les souhaits provisoires à leur gestionnaire. Ils ne sont pas
+réservables ; décocher l'option les publie et rétablit les actions de réservation.
+Un souhait déjà réservé ou ayant des participants ne peut pas être rendu
+provisoire afin de préserver les engagements en cours.
+
 ## Recommended IDE Setup
 
 [VS Code](https://code.visualstudio.com/) + [Vue (Official)](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).

@@ -6,6 +6,7 @@ import {useWishStore} from '@/stores/wish'
 import {useNotificationStore} from '@/stores/notification'
 import {getApiClient} from '@/api/client'
 import CollectiveGiftFields from './CollectiveGiftFields.vue'
+import ProvisionalWishField from './ProvisionalWishField.vue'
 import type {WishResponse} from '@/generated/api/wish/data-contracts'
 
 const props = defineProps<{
@@ -35,6 +36,9 @@ const title = ref('')
 const description = ref('')
 const price = ref('')
 const collective = ref(false)
+const provisional = ref(false)
+const hasReservations = computed(() => Boolean(props.wish?.reservedBy)
+  || (props.wish?.participantCount ?? 0) > 0 || (props.wish?.participants?.length ?? 0) > 0)
 const maxParticipants = ref(2)
 
 const isLoadingMetadata = ref(false)
@@ -50,6 +54,7 @@ watch(() => [props.wish, props.modelValue] as const, ([newWish, open]) => {
     imageUrl.value = newWish.imageUrl?.toString() || ''
     price.value = newWish.price || ''
     collective.value = newWish.collective ?? false
+    provisional.value = newWish.provisional ?? false
     maxParticipants.value = newWish.collective ? newWish.maxParticipants ?? 2 : 2
   }
 }, { immediate: true })
@@ -194,6 +199,7 @@ async function handleSubmit() {
     await wishStore.updateWish(props.groupId, props.wish.id!, {
       giftName: title.value,
       collective: collective.value,
+      provisional: provisional.value,
       maxParticipants: collective.value ? Number(maxParticipants.value) : 2,
       description: description.value || null,
       url: cleanedUrl,
@@ -249,6 +255,7 @@ function handleImageUrlBlur() {
 
       <v-card-text class="pa-4">
         <v-form ref="form" @submit.prevent="handleSubmit">
+          <ProvisionalWishField v-model="provisional" :disabled="hasReservations" />
           <CollectiveGiftFields v-model:collective="collective" v-model:max-participants="maxParticipants"
                                 :price="price" :threshold="collectiveGiftThreshold" :active="modelValue" />
           <!-- Champ URL -->

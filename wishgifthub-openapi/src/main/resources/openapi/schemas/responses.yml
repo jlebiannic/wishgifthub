@@ -143,7 +143,11 @@ WishResponse:
     - groupId
     - giftName
     - createdAt
+    - provisional
   properties:
+    provisional:
+      type: boolean
+      description: Souhait provisoire, masqué aux autres membres du groupe (administrateur compris) et non réservable.
     collective:
       type: boolean
       description: Ce souhait autorise un cadeau commun.

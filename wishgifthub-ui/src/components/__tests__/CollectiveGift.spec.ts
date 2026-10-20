@@ -18,7 +18,7 @@ import type {WishResponse} from '@/generated/api/wish/data-contracts'
 const wish: WishResponse = {
   id: 'wish', userId: 'owner', groupId: 'group', giftName: 'Shared gift',
   createdAt: '2026-10-18T10:00:00Z', collective: true, maxParticipants: 2,
-  participantCount: 0, participating: false, full: false
+  participantCount: 0, participating: false, full: false, provisional: false
 }
 const member = {id: 'owner', email: 'owner@example.com', createdAt: wish.createdAt}
 const participants = [

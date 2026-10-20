@@ -6,6 +6,7 @@ import {useWishStore} from '@/stores/wish'
 import {useNotificationStore} from '@/stores/notification'
 import {getApiClient} from '@/api/client'
 import CollectiveGiftFields from './CollectiveGiftFields.vue'
+import ProvisionalWishField from './ProvisionalWishField.vue'
 
 const props = defineProps<{
   groupId: string
@@ -35,6 +36,7 @@ const title = ref('')
 const description = ref('')
 const price = ref('')
 const collective = ref(false)
+const provisional = ref(false)
 const maxParticipants = ref(2)
 
 const isLoadingMetadata = ref(false)
@@ -206,6 +208,7 @@ async function handleSubmit() {
     await wishStore.addWish(props.groupId, {
       giftName: title.value,
       collective: collective.value,
+      provisional: provisional.value,
       maxParticipants: collective.value ? Number(maxParticipants.value) : 2,
       description: description.value || null,
       url: cleanedUrl,
@@ -236,6 +239,7 @@ function resetForm() {
   description.value = ''
   price.value = ''
   collective.value = false
+  provisional.value = false
   maxParticipants.value = 2
   imageLoadError.value = false
   if (form.value) {
@@ -288,6 +292,7 @@ function handleImageUrlBlur() {
 
       <v-card-text class="pa-4">
         <v-form ref="form" :disabled="isSaving" @submit.prevent="handleSubmit">
+          <ProvisionalWishField v-model="provisional" />
           <CollectiveGiftFields v-model:collective="collective" v-model:max-participants="maxParticipants"
                                 :price="price" :threshold="collectiveGiftThreshold" :active="modelValue" />
           <!-- Champ URL -->

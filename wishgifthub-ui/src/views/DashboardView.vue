@@ -188,6 +188,9 @@ function goToMember(memberId: string) {
                     <v-list-item-title class="text-h6 mb-1">
                       {{ wish.giftName }}
                     </v-list-item-title>
+                    <v-chip v-if="wish.provisional" size="small" color="warning" prepend-icon="mdi-eye-off-outline">
+                      Souhait provisoire
+                    </v-chip>
 
                     <v-list-item-subtitle v-if="wish.description" class="mb-2">
                       {{ wish.description }}
@@ -239,6 +242,9 @@ function goToMember(memberId: string) {
                     <v-list-item-title class="text-h6 mb-1">
                       {{ wish.giftName }}
                     </v-list-item-title>
+                    <v-chip v-if="wish.provisional" size="small" color="warning" prepend-icon="mdi-eye-off-outline">
+                      Souhait provisoire
+                    </v-chip>
 
                     <v-list-item-subtitle v-if="wish.description" class="mb-2">
                       {{ wish.description }}
@@ -283,6 +289,9 @@ function goToMember(memberId: string) {
                     <v-list-item-title class="text-h6 mb-1">
                       {{ wish.giftName }}
                     </v-list-item-title>
+                    <v-chip v-if="wish.provisional" size="small" color="warning" prepend-icon="mdi-eye-off-outline">
+                      Souhait provisoire
+                    </v-chip>
 
                     <v-list-item-subtitle v-if="wish.description" class="mb-2">
                       {{ wish.description }}
