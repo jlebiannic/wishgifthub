@@ -1,8 +1,6 @@
 # A faire
 
 ## Fonc à faire
-- Ajouter un souhait provisoire (non visible par les autres membres du groupe) pour pouvoir le modifier avant de le rendre visible
-- Lorsque le souhait dépasse une valeur par défaut (50 € par défaut mais paramétrable par l'administrateur), demander si le souhait devrait être un souhait commun (réservé par plusieurs membres du groupe)
 - ajout d'un bouton pour rafraichir le groupe
 - formulaire de contact
 
@@ -21,6 +19,8 @@
 # Fait
 
 ## Fonc fait
+- Ajouter un souhait provisoire (non visible par les autres membres du groupe) pour pouvoir le modifier avant de le rendre visible
+- Lorsque le souhait dépasse une valeur par défaut (50 € par défaut mais paramétrable par l'administrateur), demander si le souhait devrait être un souhait commun (réservé par plusieurs membres du groupe)
 - Un membre peu créer un membre enfant ou autre.
 - Réserver à plusieurs (ex: 2 personnes réservent un cadeau commun)
 - reserrer l'écran pour les grands écrans (largeur max 1600px) avec bouton "Retour en haut" lors du scroll
