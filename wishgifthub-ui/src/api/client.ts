@@ -76,7 +76,7 @@ function setupInterceptor(api: Api) {
  * Initialise le client API avec le token d'authentification
  */
 export function initApiClient(token?: string) {
-  const baseURL =  '/'
+  const baseURL = import.meta.env.BASE_URL
 
   apiClient = new Api({
     baseURL,

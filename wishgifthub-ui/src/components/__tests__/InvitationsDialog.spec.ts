@@ -86,7 +86,7 @@ describe('InvitationsDialog', () => {
     await wrapper.get(copyButton).trigger('click')
     await flushPromises()
 
-    expect(writeText).toHaveBeenCalledWith(`${window.location.origin}/invite/${invitation.token}`)
+    expect(writeText).toHaveBeenCalledWith(`${window.location.origin}${import.meta.env.BASE_URL}invite/${invitation.token}`)
     expect(useNotificationStore().notifications.at(-1)?.type).toBe('success')
   })
 
@@ -102,7 +102,7 @@ describe('InvitationsDialog', () => {
     await button!.trigger('click')
     await flushPromises()
 
-    expect(writeText).toHaveBeenCalledWith(`${window.location.origin}/invite/${invitation.token}`)
+    expect(writeText).toHaveBeenCalledWith(`${window.location.origin}${import.meta.env.BASE_URL}invite/${invitation.token}`)
   })
 
   it.each([
@@ -123,5 +123,21 @@ describe('InvitationsDialog', () => {
     await flushPromises()
 
     expect(useNotificationStore().notifications.map(notification => notification.type)).toEqual(['error'])
+  })
+
+  it('copies on HTTP when Clipboard API is unavailable and removes the temporary field', async () => {
+    vi.stubGlobal('navigator', {})
+    const copy = vi.fn(() => true)
+    Object.defineProperty(document, 'execCommand', {configurable: true, value: copy})
+    const wrapper = mountDialog()
+    try {
+      await wrapper.get(copyButton).trigger('click')
+      await flushPromises()
+      expect(copy).toHaveBeenCalledWith('copy')
+      expect(document.body.querySelector('textarea')).toBeNull()
+      expect(useNotificationStore().notifications.at(-1)?.type).toBe('success')
+    } finally {
+      Reflect.deleteProperty(document, 'execCommand')
+    }
   })
 })

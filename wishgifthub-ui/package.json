@@ -12,6 +12,8 @@
     "preview": "vite preview",
     "test:unit": "vitest",
     "build-only": "vite build",
+    "build:pi": "node scripts/generate-version.js && run-p type-check build:pi-only",
+    "build:pi-only": "vite build --base=/wishgifthub/",
     "type-check": "vue-tsc --build",
     "lint": "eslint . --fix --cache",
     "format": "prettier --write src/",

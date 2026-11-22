@@ -13,7 +13,7 @@ const showVersion = ref(false)
 onMounted(async () => {
   try {
     // Charger le fichier version.json depuis public/
-    const response = await fetch('/version.json')
+    const response = await fetch(`${import.meta.env.BASE_URL}version.json`)
     if (response.ok) {
       versionInfo.value = await response.json()
     }

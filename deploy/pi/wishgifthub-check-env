@@ -1,0 +1,11 @@
+#!/bin/sh
+set -eu
+for name in SPRING_DATASOURCE_URL SPRING_DATASOURCE_USERNAME SPRING_DATASOURCE_PASSWORD WISHGIFTHUB_JWT_SECRET WISHGIFTHUB_JWT_EXPIRATION_MS; do
+    value=$(printenv "$name" || true)
+    case "$value" in
+        ''|*CHANGE_ME*)
+            echo "WishGiftHub: compléter $name dans /etc/wishgifthub/.env avant le démarrage." >&2
+            exit 1
+            ;;
+    esac
+done

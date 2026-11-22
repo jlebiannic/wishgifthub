@@ -5,6 +5,7 @@ import viteConfig from './vite.config'
 export default mergeConfig(
   viteConfig,
   defineConfig({
+    base: '/wishgifthub/',
     test: {
       server: {deps: {inline: ['vuetify']}},
       environment: 'jsdom',

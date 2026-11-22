@@ -11,7 +11,7 @@ import './assets/main.css'
 // Afficher les informations de version dans la console
 async function displayVersionInfo() {
   try {
-    const response = await fetch('/version.json')
+    const response = await fetch(`${import.meta.env.BASE_URL}version.json`)
     if (response.ok) {
       const versionInfo = await response.json()
       console.log('%c🎁 WishGiftHub', 'font-size: 20px; font-weight: bold; color: #1976d2;')

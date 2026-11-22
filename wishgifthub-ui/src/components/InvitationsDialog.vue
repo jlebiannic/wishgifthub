@@ -106,12 +106,27 @@ async function handleSendInvite() {
  */
 function getInvitationLink(token: string): string {
   const origin = window.location.origin
-  return `${origin}/invite/${token}`
+  return `${origin}${import.meta.env.BASE_URL}invite/${encodeURIComponent(token)}`
 }
 
 async function copyInvitationLink(link: string) {
   try {
-    await navigator.clipboard.writeText(link)
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(link)
+    } else {
+      // Les navigateurs limitent Clipboard API sur une adresse IP en HTTP.
+      const input = document.createElement('textarea')
+      input.value = link
+      input.style.position = 'fixed'
+      input.style.opacity = '0'
+      document.body.appendChild(input)
+      try {
+        input.select()
+        if (!document.execCommand('copy')) throw new Error('Copie indisponible')
+      } finally {
+        input.remove()
+      }
+    }
     notificationStore.showSuccess('Lien d\'invitation copié dans le presse-papier')
   } catch {
     notificationStore.showError('Impossible de copier le lien d\'invitation')
