@@ -1,8 +1,11 @@
 <script setup lang="ts">
 import {computed, onMounted, ref} from 'vue'
+import {isAxiosError} from 'axios'
 import {useRoute, useRouter} from 'vue-router'
 import {useAuthStore} from '@/stores/auth'
-import {useGroupStore} from '@/stores/group'
+import {type Group, useGroupStore} from '@/stores/group'
+import {useConfirmStore} from '@/stores/confirm'
+import {useNotificationStore} from '@/stores/notification'
 import LoginForm from '@/components/LoginForm.vue'
 import CreateGroupButton from '@/components/CreateGroupButton.vue'
 import GroupCard from '@/components/GroupCard.vue'
@@ -12,6 +15,9 @@ const route = useRoute()
 const router = useRouter()
 const authStore = useAuthStore()
 const groupStore = useGroupStore()
+const confirmStore = useConfirmStore()
+const notifications = useNotificationStore()
+const deletingGroup = ref(false)
 
 const showMembersDialog = ref(false)
 const selectedGroupId = ref<string | null>(null)
@@ -46,6 +52,32 @@ async function handleLoginSuccess() {
 
 async function handleGroupCreated() {
   await loadGroups()
+}
+
+async function handleDeleteGroup(group: Group) {
+  if (deletingGroup.value || !authStore.isAdmin || group.adminId !== authStore.user?.id) return
+
+  deletingGroup.value = true
+  try {
+    const confirmed = await confirmStore.confirm({
+      title: 'Supprimer le groupe',
+      message: `Supprimer définitivement « ${group.name} » ? Ses invitations, ses souhaits, ses réservations et les accès à ce groupe seront supprimés.`,
+      confirmText: 'Supprimer',
+      confirmColor: 'error',
+      icon: 'mdi-delete-alert',
+      iconColor: 'error'
+    })
+    if (!confirmed) return
+
+    await groupStore.deleteGroup(group.id)
+    if (selectedGroupId.value === group.id) handleCloseMembers()
+    notifications.showSuccess('Groupe supprimé')
+  } catch (error: unknown) {
+    const message = isAxiosError(error) ? error.response?.data?.message : undefined
+    notifications.showError(message || 'Impossible de supprimer le groupe')
+  } finally {
+    deletingGroup.value = false
+  }
 }
 
 async function handleShowMembers(groupId: string) {
@@ -222,7 +254,10 @@ function handleLogout() {
                   :key="group.id"
                   :group="group"
                   :is-admin="authStore.isAdmin"
+                  :can-delete="authStore.isAdmin && group.adminId === authStore.user?.id"
+                  :deleting="deletingGroup"
                   @show-members="handleShowMembers"
+                  @delete-group="handleDeleteGroup(group)"
                 />
               </div>
             </v-card-text>

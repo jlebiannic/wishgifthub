@@ -155,6 +155,17 @@ export const useGroupStore = defineStore('group', () => {
     return response.data
   }
 
+  async function deleteGroup(groupId: string) {
+    await getApiClient().deleteGroup(groupId)
+    groups.value = groups.value.filter(group => group.id !== groupId)
+
+    if (currentGroupId.value === groupId) {
+      currentGroupId.value = null
+      members.value = []
+      invitations.value = []
+    }
+  }
+
   /**
    * Invite un utilisateur à rejoindre un groupe par email
    */
@@ -247,6 +258,7 @@ export const useGroupStore = defineStore('group', () => {
     fetchGroupInvitations,
     createGroup,
     updateGroup,
+    deleteGroup,
     inviteUser,
     updateMemberProfile,
     reset,

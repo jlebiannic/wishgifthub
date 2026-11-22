@@ -7,10 +7,13 @@ const router = useRouter()
 const props = defineProps<{
   group: Group
   isAdmin: boolean
+  canDelete?: boolean
+  deleting?: boolean
 }>()
 
 const emit = defineEmits<{
   showMembers: [groupId: string]
+  deleteGroup: []
 }>()
 
 function handleCardClick() {
@@ -60,6 +63,19 @@ function formatDate(dateString: string) {
           >
             <v-icon>mdi-account-multiple</v-icon>
           </v-btn>
+        </template>
+      </v-tooltip>
+      <v-tooltip v-if="canDelete" text="Supprimer le groupe" location="top">
+        <template v-slot:activator="{ props: tooltipProps }">
+          <v-btn
+            icon="mdi-delete-outline"
+            variant="text"
+            color="error"
+            :disabled="deleting"
+            :aria-label="`Supprimer le groupe ${group.name}`"
+            v-bind="tooltipProps"
+            @click.stop="emit('deleteGroup')"
+          />
         </template>
       </v-tooltip>
     </v-card-text>

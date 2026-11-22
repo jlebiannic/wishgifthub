@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
@@ -40,6 +41,7 @@ class GroupThresholdApiTest {
     @Autowired GroupRepository groups;
     @Autowired GroupService service;
     @Autowired JwtService jwt;
+    @Autowired JdbcTemplate jdbc;
 
     @Test
     void defaultsCustomUpdatesAndOmittedUpdatesRemainScopedToGroup() throws Exception {
@@ -107,6 +109,44 @@ class GroupThresholdApiTest {
                 .andExpect(status().isBadRequest());
         assertEquals(1, groups.findByAdminId(owner.getId()).size());
         assertEquals(new BigDecimal("50.00"), groups.findById(group).orElseThrow().getCollectiveGiftThreshold());
+    }
+
+    @Test
+    void ownerCanDeleteGroupAndItsDataWithoutDeletingAccountsOrOtherGroups() throws Exception {
+        User owner = user(true);
+        User otherAdmin = user(true);
+        User member = user(false);
+        UUID group = create(owner, "", 50);
+        UUID retained = create(owner, "", 50);
+
+        mvc.perform(post("/api/groups/" + group + "/invite").header("Authorization", token(owner))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json.writeValueAsString(java.util.Map.of("email", member.getEmail()))))
+                .andExpect(status().isOk());
+        var wish = mvc.perform(post("/api/groups/" + group + "/wishes")
+                        .header("Authorization", "Bearer " + jwt.generateToken(owner, List.of(group)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"giftName\":\"Collective gift\",\"collective\":true,\"maxParticipants\":2}"))
+                .andExpect(status().isOk()).andReturn();
+        UUID wishId = UUID.fromString(json.readTree(wish.getResponse().getContentAsString()).get("id").asText());
+        jdbc.update("INSERT INTO wish_participants(wish_id, user_id) VALUES (?, ?)", wishId, member.getId());
+
+        for (User unauthorized : List.of(otherAdmin, member)) {
+            mvc.perform(delete("/api/groups/" + group).header("Authorization", token(unauthorized)))
+                    .andExpect(status().isForbidden());
+        }
+        assertTrue(groups.existsById(group));
+
+        mvc.perform(delete("/api/groups/" + group).header("Authorization", token(owner)))
+                .andExpect(status().isNoContent());
+        assertFalse(groups.existsById(group));
+        for (String table : List.of("user_groups", "invitations", "wishes")) {
+            assertEquals(0, jdbc.queryForObject("SELECT count(*) FROM " + table + " WHERE group_id = ?", Integer.class, group));
+        }
+        assertEquals(0, jdbc.queryForObject("SELECT count(*) FROM wish_participants WHERE wish_id = ?", Integer.class, wishId));
+        assertTrue(groups.existsById(retained));
+        assertTrue(users.existsById(owner.getId()));
+        assertTrue(users.existsById(member.getId()));
     }
 
     @ParameterizedTest
