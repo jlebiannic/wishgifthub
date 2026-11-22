@@ -43,7 +43,7 @@ const acceptedMembers = computed(() => props.members.map(member => {
   )
   return {
     ...member,
-    invitationLink: invitation ? getInvitationLink(invitation.token) : null
+    invitationToken: invitation?.token ?? null
   }
 }))
 
@@ -131,7 +131,8 @@ async function openWhatsApp() {
     }
 
     const message = messageTemplate.split('{{lien_invitation}}').join(getInvitationLink(pendingToken.value))
-    const url = `https://wa.me/${phone.slice(1)}?text=${encodeURIComponent(message)}`
+    const recipient = phone ? `phone=${phone.slice(1)}&` : ''
+    const url = `https://api.whatsapp.com/send?${recipient}text=${encodeURIComponent(message)}`
     window.location.assign(url)
     whatsappDialog.value = false
   } catch (err: unknown) {
@@ -144,11 +145,10 @@ async function openWhatsApp() {
 }
 
 /**
- * Génère le lien d'invitation complet avec le domaine actuel
+ * Utilise l’adresse publique, même si l’administrateur ouvre le site depuis le réseau local.
  */
 function getInvitationLink(token: string): string {
-  const origin = window.location.origin
-  return `${origin}${import.meta.env.BASE_URL}invite/${encodeURIComponent(token)}`
+  return `https://wishgifthub.com/wishgifthub/invite/${encodeURIComponent(token)}`
 }
 
 async function copyInvitationLink(link: string) {
@@ -348,8 +348,16 @@ async function copyInvitationLink(link: string) {
             </v-list-item-subtitle>
 
             <template v-slot:append>
+              <v-btn
+                v-if="isAdmin && member.invitationToken"
+                icon="mdi-whatsapp"
+                variant="text"
+                size="small"
+                aria-label="Renvoyer l’invitation sur WhatsApp"
+                @click="openWhatsAppDialog(member.invitationToken)"
+              />
               <v-tooltip
-                v-if="isAdmin && member.invitationLink"
+                v-if="isAdmin && member.invitationToken"
                 text="Copier le lien d'invitation"
                 location="left"
               >
@@ -361,7 +369,7 @@ async function copyInvitationLink(link: string) {
                     class="mr-2"
                     aria-label="Copier le lien d'invitation"
                     v-bind="tooltipProps"
-                    @click="copyInvitationLink(member.invitationLink)"
+                    @click="copyInvitationLink(getInvitationLink(member.invitationToken))"
                   >
                     <v-icon>mdi-content-copy</v-icon>
                   </v-btn>

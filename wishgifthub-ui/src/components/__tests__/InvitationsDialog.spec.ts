@@ -64,6 +64,8 @@ function mountDialog(isAdmin = true, invitations: Invitation[] = [invitation]) {
 }
 
 const copyButton = '[aria-label="Copier le lien d\'invitation"]'
+const resendButton = '[aria-label="Renvoyer l’invitation sur WhatsApp"]'
+const publicInvitationLink = `https://wishgifthub.com/wishgifthub/invite/${invitation.token}`
 
 describe('InvitationsDialog', () => {
   const writeText = vi.fn()
@@ -87,12 +89,26 @@ describe('InvitationsDialog', () => {
     await wrapper.get(copyButton).trigger('click')
     await flushPromises()
 
-    expect(writeText).toHaveBeenCalledWith(`${window.location.origin}${import.meta.env.BASE_URL}invite/${invitation.token}`)
+    expect(writeText).toHaveBeenCalledWith(publicInvitationLink)
     expect(useNotificationStore().notifications.at(-1)?.type).toBe('success')
   })
 
   it('does not expose the copy action to non-admins', () => {
     expect(mountDialog(false).find(copyButton).exists()).toBe(false)
+  })
+
+  it('opens the WhatsApp dialog for an accepted invitation', async () => {
+    const wrapper = mountDialog()
+    const dialog = wrapper.get('v-dialog-stub')
+
+    expect(dialog.attributes('modelvalue')).toBe('false')
+    await wrapper.get(resendButton).trigger('click')
+    expect(dialog.attributes('modelvalue')).toBe('true')
+  })
+
+  it('only offers WhatsApp resending for admins with a matching accepted invitation', () => {
+    expect(mountDialog(false).find(resendButton).exists()).toBe(false)
+    expect(mountDialog(true, [{...invitation, token: ''}]).find(resendButton).exists()).toBe(false)
   })
 
   it('still allows copying a pending invitation', async () => {
@@ -103,7 +119,7 @@ describe('InvitationsDialog', () => {
     await button!.trigger('click')
     await flushPromises()
 
-    expect(writeText).toHaveBeenCalledWith(`${window.location.origin}${import.meta.env.BASE_URL}invite/${invitation.token}`)
+    expect(writeText).toHaveBeenCalledWith(publicInvitationLink)
   })
 
   it.each([

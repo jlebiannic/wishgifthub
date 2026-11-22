@@ -372,3 +372,8 @@ Le journal est synchronisé vers le Pi avec `python deploy/pi/pi_remote.py --upl
 - Frontend compilé avec `npm run build:pi` et publié dans `/opt/wishgifthub/releases/whatsapp-20261122-142655-6b8d1e6e/frontend`. Le lien symbolique `/opt/wishgifthub/frontend` a été basculé après vérification de l’archive SHA-256. Le frontend précédent reste disponible dans la release `20261108-180558`.
 - Le service WishGiftHub a été redémarré avec son JAR et son fichier d’environnement existants. Flyway a validé le schéma et n’a appliqué aucune migration. Le service est actif, le contrôle de santé répond `UP` et la version de l’API est accessible via Nginx.
 - La page, le bundle contenant la fonctionnalité WhatsApp et le modèle `invitation-whatsapp.txt` répondent en HTTP 200 depuis le réseau local.
+
+### Mise à jour du parcours WhatsApp
+
+- Frontend publié dans `/opt/wishgifthub/releases/whatsapp-20261122-151318-18b98027/frontend`. Le champ téléphone est facultatif. Le modèle servi contient le smiley encodé en UTF-8.
+- Après redémarrage du service WishGiftHub, le contrôle de santé répond `UP` et l’API répond via Nginx. Flyway n’a appliqué aucune migration.
