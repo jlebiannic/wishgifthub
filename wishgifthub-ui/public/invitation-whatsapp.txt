@@ -1,0 +1,8 @@
+Salut ! Voici un lien pour nous aider à organiser les cadeaux de Noël.
+Il n’y a aucune obligation, c’est juste pour nous simplifier la vie 😊
+Il y a des fonctionnalités supplémentaires cette année:
+- possibilité d'ajouter un enfant à son compte (cliquer sur le bouton "gérer mes enfants")
+- possibilité de participer à plusieurs sur un souhait (cliquer sur "Autoriser un cadeau commun" lors de la création du souhait)
+- possibilité d'ajouter un souhait provisoir (cliquer sur "Souhait provisoire" lors de la création du souhait)
+
+{{lien_invitation}}

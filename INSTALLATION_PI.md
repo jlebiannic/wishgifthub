@@ -366,3 +366,9 @@ Flyway a émis un avertissement de compatibilité : PostgreSQL 17.6 est plus ré
 Le journal est synchronisé vers le Pi avec `python deploy/pi/pi_remote.py --upload INSTALLATION_PI.md --remote /home/pi/INSTALLATION_PI.md --timeout 60`, puis installé par le script `rssh/install-journal.sh` (`sudo -n install -m 644 /home/pi/INSTALLATION_PI.md /opt/wishgifthub/INSTALLATION_PI.md`).
 
 **État final : frontend et backend opérationnels sur `http://192.168.0.50/wishgifthub/`, connexion Supabase vérifiée.** Aucun compte de test ni donnée métier n'a été créé pour ces vérifications.
+
+## 2026-11-22 — Déploiement des invitations WhatsApp
+
+- Frontend compilé avec `npm run build:pi` et publié dans `/opt/wishgifthub/releases/whatsapp-20261122-142655-6b8d1e6e/frontend`. Le lien symbolique `/opt/wishgifthub/frontend` a été basculé après vérification de l’archive SHA-256. Le frontend précédent reste disponible dans la release `20261108-180558`.
+- Le service WishGiftHub a été redémarré avec son JAR et son fichier d’environnement existants. Flyway a validé le schéma et n’a appliqué aucune migration. Le service est actif, le contrôle de santé répond `UP` et la version de l’API est accessible via Nginx.
+- La page, le bundle contenant la fonctionnalité WhatsApp et le modèle `invitation-whatsapp.txt` répondent en HTTP 200 depuis le réseau local.

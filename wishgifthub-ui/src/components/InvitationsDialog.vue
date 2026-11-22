@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import {computed, ref} from 'vue'
+import {isAxiosError} from 'axios'
 import type {GroupMember, Invitation} from '@/stores/group'
 import {useGroupStore} from '@/stores/group'
 import {useAuthStore} from '@/stores/auth'
@@ -30,6 +31,10 @@ const inviteEmailError = ref('')
 const isSendingInvite = ref(false)
 const selectedAvatarId = ref<string | null>(null)
 const invitePseudo = ref('')
+const whatsappDialog = ref(false)
+const whatsappPhone = ref('')
+const whatsappError = ref('')
+const pendingToken = ref<string | null>(null)
 
 // Membres acceptés (ceux qui ont un compte)
 const acceptedMembers = computed(() => props.members.map(member => {
@@ -54,7 +59,14 @@ function validateEmail(email: string): boolean {
 }
 
 // Envoi d'une invitation
-async function handleSendInvite() {
+function openWhatsAppDialog(token: string | null = null) {
+  pendingToken.value = token
+  whatsappPhone.value = ''
+  whatsappError.value = ''
+  whatsappDialog.value = true
+}
+
+function handleSendInvite() {
   inviteEmailError.value = ''
 
   if (!inviteEmail.value) {
@@ -83,19 +95,49 @@ async function handleSendInvite() {
     return
   }
 
+  openWhatsAppDialog()
+}
+
+async function openWhatsApp() {
+  if (isSendingInvite.value) return
+
+  whatsappError.value = ''
+  const enteredPhone = whatsappPhone.value.trim()
+  const input = enteredPhone.replace(/[\s().-]/g, '')
+  const phone = /^0[1-9]\d{8}$/.test(input) ? `+33${input.slice(1)}` : input
+  if (enteredPhone && !/^\+[1-9]\d{6,14}$/.test(phone)) {
+    whatsappError.value = 'Saisissez un numéro français ou un numéro avec son indicatif (ex. +33).'
+    return
+  }
+
   isSendingInvite.value = true
 
   try {
-    const invitation = await groupStore.inviteUser(props.groupId, inviteEmail.value, selectedAvatarId.value, invitePseudo.value || null)
+    const response = await fetch(`${import.meta.env.BASE_URL}invitation-whatsapp.txt`, {cache: 'no-cache'})
+    if (!response.ok) throw new Error('Le modèle du message WhatsApp est indisponible.')
+    const messageTemplate = (await response.text()).replace(/\r\n?/g, '\n').trim()
+    if (!messageTemplate.includes('{{lien_invitation}}')) {
+      throw new Error('Le modèle WhatsApp doit contenir {{lien_invitation}}.')
+    }
 
-    if (invitation) {
+    if (!pendingToken.value) {
+      const invitation = await groupStore.inviteUser(props.groupId, inviteEmail.value, selectedAvatarId.value, invitePseudo.value || null)
+      if (!invitation?.token) throw new Error('Le lien d’invitation est indisponible.')
+      pendingToken.value = invitation.token
       inviteEmail.value = ''
       selectedAvatarId.value = null
       invitePseudo.value = ''
       emit('invitationSent')
     }
-  } catch (err: any) {
-    inviteEmailError.value = err.response?.data?.message || 'Erreur lors de l\'envoi de l\'invitation'
+
+    const message = messageTemplate.split('{{lien_invitation}}').join(getInvitationLink(pendingToken.value))
+    const url = `https://wa.me/${phone.slice(1)}?text=${encodeURIComponent(message)}`
+    window.location.assign(url)
+    whatsappDialog.value = false
+  } catch (err: unknown) {
+    whatsappError.value = isAxiosError(err)
+      ? err.response?.data?.message || 'Impossible de créer l’invitation.'
+      : err instanceof Error ? err.message : 'Impossible de préparer l’invitation.'
   } finally {
     isSendingInvite.value = false
   }
@@ -227,7 +269,7 @@ async function copyInvitationLink(link: string) {
 
             <v-list-item-subtitle>
               <div v-if="invitation.pseudo">{{ invitation.email }}</div>
-              <div>Invitation envoyée le {{ new Date(invitation.createdAt).toLocaleDateString('fr-FR') }}</div>
+              <div>Invitation créée le {{ new Date(invitation.createdAt).toLocaleDateString('fr-FR') }}</div>
               <div class="text-caption text-primary mt-1">
                 <v-icon size="x-small" class="mr-1">mdi-link</v-icon>
                 {{ getInvitationLink(invitation.token) }}
@@ -235,6 +277,14 @@ async function copyInvitationLink(link: string) {
             </v-list-item-subtitle>
 
             <template v-slot:append>
+              <v-btn
+                v-if="invitation.token"
+                icon="mdi-whatsapp"
+                variant="text"
+                size="small"
+                aria-label="Partager l’invitation sur WhatsApp"
+                @click="openWhatsAppDialog(invitation.token)"
+              />
               <v-tooltip text="Copier le lien d'invitation" location="left">
                 <template v-slot:activator="{ props: tooltipProps }">
                   <v-btn
@@ -347,6 +397,32 @@ async function copyInvitationLink(link: string) {
         Fermer
       </v-btn>
     </v-card-actions>
+    <v-dialog v-model="whatsappDialog" max-width="440" :persistent="isSendingInvite">
+      <v-card title="Inviter sur WhatsApp">
+        <v-form @submit.prevent="openWhatsApp">
+          <v-card-text>
+            <v-text-field
+              v-model="whatsappPhone"
+              label="Numéro de téléphone (facultatif)"
+              placeholder="06 12 34 56 78 ou +33 6 12 34 56 78"
+              type="tel"
+              autocomplete="off"
+              autofocus
+              :disabled="isSendingInvite"
+              :error-messages="whatsappError"
+            />
+            <p>Laisse le numéro vide pour choisir un contact dans WhatsApp. Le message y sera prérempli.</p>
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer />
+            <v-btn :disabled="isSendingInvite" @click="whatsappDialog = false">Annuler</v-btn>
+            <v-btn type="submit" color="primary" :loading="isSendingInvite" :disabled="isSendingInvite">
+              Ouvrir WhatsApp
+            </v-btn>
+          </v-card-actions>
+        </v-form>
+      </v-card>
+    </v-dialog>
   </v-card>
 </template>
 

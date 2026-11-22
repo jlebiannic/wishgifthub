@@ -38,6 +38,7 @@ function mountDialog(isAdmin = true, invitations: Invitation[] = [invitation]) {
         VCardActions: true,
         VIcon: true,
         VDivider: true,
+        VDialog: true,
         VForm: true,
         VRow: true,
         VCol: true,
