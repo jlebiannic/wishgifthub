@@ -110,6 +110,13 @@ async function openWhatsApp() {
     return
   }
 
+  // Ouvrir l’onglet pendant le clic pour que le navigateur l’autorise.
+  const whatsappTab = window.open('about:blank', '_blank')
+  if (!whatsappTab) {
+    whatsappError.value = 'Autorise l’ouverture des pop-ups pour WishGiftHub, puis réessaie.'
+    return
+  }
+  whatsappTab.opener = null
   isSendingInvite.value = true
 
   try {
@@ -133,9 +140,11 @@ async function openWhatsApp() {
     const message = messageTemplate.split('{{lien_invitation}}').join(getInvitationLink(pendingToken.value))
     const recipient = phone ? `phone=${phone.slice(1)}&` : ''
     const url = `https://api.whatsapp.com/send?${recipient}text=${encodeURIComponent(message)}`
-    window.location.assign(url)
+    if (whatsappTab.closed) throw new Error('L’onglet WhatsApp a été fermé. Réessaie pour le rouvrir.')
+    whatsappTab.location.replace(url)
     whatsappDialog.value = false
   } catch (err: unknown) {
+    if (!whatsappTab.closed) whatsappTab.close()
     whatsappError.value = isAxiosError(err)
       ? err.response?.data?.message || 'Impossible de créer l’invitation.'
       : err instanceof Error ? err.message : 'Impossible de préparer l’invitation.'

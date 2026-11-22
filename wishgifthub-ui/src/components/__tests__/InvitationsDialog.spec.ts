@@ -78,6 +78,7 @@ describe('InvitationsDialog', () => {
   })
 
   afterEach(() => {
+    vi.restoreAllMocks()
     vi.unstubAllGlobals()
     vi.clearAllTimers()
     vi.useRealTimers()
@@ -109,6 +110,28 @@ describe('InvitationsDialog', () => {
   it('only offers WhatsApp resending for admins with a matching accepted invitation', () => {
     expect(mountDialog(false).find(resendButton).exists()).toBe(false)
     expect(mountDialog(true, [{...invitation, token: ''}]).find(resendButton).exists()).toBe(false)
+  })
+
+  it('opens WhatsApp in a new tab with the original invitation link', async () => {
+    const replace = vi.fn()
+    const tab = {location: {replace}, opener: window}
+    const open = vi.spyOn(window, 'open').mockReturnValue(tab as unknown as Window)
+    vi.stubGlobal('fetch', vi.fn(async () => {
+      expect(open).toHaveBeenCalledWith('about:blank', '_blank')
+      return new Response('Salut ! 😊\n\n{{lien_invitation}}')
+    }))
+    const wrapper = mountDialog()
+    const originalLocation = window.location.href
+
+    await wrapper.get(resendButton).trigger('click')
+    await wrapper.get('v-dialog-stub').get('v-form-stub').trigger('submit')
+    await flushPromises()
+
+    expect(tab.opener).toBeNull()
+    expect(replace).toHaveBeenCalledWith(
+      `https://api.whatsapp.com/send?text=${encodeURIComponent(`Salut ! 😊\n\n${publicInvitationLink}`)}`
+    )
+    expect(window.location.href).toBe(originalLocation)
   })
 
   it('still allows copying a pending invitation', async () => {
